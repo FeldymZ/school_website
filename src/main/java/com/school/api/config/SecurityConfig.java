@@ -11,7 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableMethodSecurity   // ✅ OBLIGATOIRE
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -27,15 +27,30 @@ public class SecurityConfig {
       )
 
       .authorizeHttpRequests(auth -> auth
+
+        // ===============================
+        // SWAGGER / OPENAPI (OBLIGATOIRE)
+        // ===============================
+        .requestMatchers(
+          "/swagger-ui.html",
+          "/swagger-ui/**",
+          "/v3/api-docs",
+          "/v3/api-docs/**"
+        ).permitAll()
+
+        // ===============================
+        // PUBLIC API
+        // ===============================
         .requestMatchers(
           "/api/auth/**",
           "/api/public/**",
-          "/swagger-ui/**",
-          "/v3/api-docs/**"
+          "/files/**"
         ).permitAll()
-        .requestMatchers("/files/**").permitAll()
 
-        .anyRequest().authenticated() // 🔐 tout le reste protégé
+        // ===============================
+        // TOUT LE RESTE PROTÉGÉ
+        // ===============================
+        .anyRequest().authenticated()
       )
 
       .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
