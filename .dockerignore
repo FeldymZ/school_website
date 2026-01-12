@@ -1,0 +1,9 @@
+.git
+.gitignore
+.gradle
+build
+uploads
+.env
+application-dev.properties
+application-prod.properties
+node_modules
