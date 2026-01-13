@@ -23,9 +23,9 @@ public class BannerService {
   private final BannerRepository repository;
   private final FileStorageService fileStorageService;
 
-  /* ============================
+  /* =====================================================
      🌍 PUBLIC
-     ============================ */
+     ===================================================== */
 
   public List<BannerResponse> getPublicBanners() {
     return repository.findPublic(LocalDateTime.now())
@@ -34,9 +34,9 @@ public class BannerService {
       .toList();
   }
 
-  /* ============================
+  /* =====================================================
      🔐 ADMIN
-     ============================ */
+     ===================================================== */
 
   public List<BannerResponse> getAll() {
     return repository.findAllByOrderByDisplayOrderAsc()
@@ -52,9 +52,9 @@ public class BannerService {
       .toList();
   }
 
-  /* ============================
-     ➕ CREATE
-     ============================ */
+  /* =====================================================
+     ➕ CREATE (MULTIPART + BOUTON)
+     ===================================================== */
 
   @Transactional
   public BannerResponse create(
@@ -65,18 +65,22 @@ public class BannerService {
     Integer displayOrder,
     Boolean enabled,
     String startAt,
-    String endAt
+    String endAt,
+    String buttonLabel,
+    String buttonUrl
   ) {
 
     if (media == null || media.isEmpty()) {
       throw new IllegalArgumentException("Fichier média requis");
     }
 
+    validateButtonUrl(buttonUrl);
+
     LocalDateTime start = parseDate(startAt);
     LocalDateTime end = parseDate(endAt);
 
     if (start != null && end != null && start.isAfter(end)) {
-      throw new IllegalArgumentException("Date début > date fin");
+      throw new IllegalArgumentException("Dates invalides");
     }
 
     if (repository.existsByDisplayOrder(displayOrder)) {
@@ -96,19 +100,32 @@ public class BannerService {
       .enabled(enabled != null ? enabled : true)
       .startAt(start)
       .endAt(end)
+
+      // bouton optionnel
+      .buttonUrl(buttonUrl)
+      .buttonLabel(
+        buttonUrl != null
+          ? (buttonLabel != null ? buttonLabel : "En savoir plus")
+          : null
+      )
+
       .build();
 
     return toDto(repository.save(banner));
   }
 
-  /* ============================
+  /* =====================================================
      ✏️ UPDATE
-     ============================ */
+     ===================================================== */
 
   @Transactional
   public BannerResponse update(Long id, BannerUpdateRequest request) {
 
     Banner banner = get(id);
+
+    if (request.buttonUrl() != null) {
+      validateButtonUrl(request.buttonUrl());
+    }
 
     Integer oldOrder = banner.getDisplayOrder();
     Integer newOrder = request.displayOrder();
@@ -129,12 +146,27 @@ public class BannerService {
     if (request.startAt() != null) banner.setStartAt(request.startAt());
     if (request.endAt() != null) banner.setEndAt(request.endAt());
 
+    // bouton
+    if (request.buttonUrl() != null) {
+      banner.setButtonUrl(request.buttonUrl());
+      banner.setButtonLabel(
+        request.buttonLabel() != null
+          ? request.buttonLabel()
+          : "En savoir plus"
+      );
+    }
+
+    if (request.buttonUrl() == null && request.buttonLabel() == null) {
+      banner.setButtonUrl(null);
+      banner.setButtonLabel(null);
+    }
+
     return toDto(repository.save(banner));
   }
 
-  /* ============================
+  /* =====================================================
      ✅ ENABLE / DISABLE
-     ============================ */
+     ===================================================== */
 
   @Transactional
   public BannerResponse enable(Long id) {
@@ -150,9 +182,9 @@ public class BannerService {
     return toDto(repository.save(banner));
   }
 
-  /* ============================
+  /* =====================================================
      🗑️ DELETE
-     ============================ */
+     ===================================================== */
 
   @Transactional
   public void delete(Long id) {
@@ -161,9 +193,9 @@ public class BannerService {
     repository.compactAfterDelete(banner.getDisplayOrder());
   }
 
-  /* ============================
+  /* =====================================================
      🔀 REORDER
-     ============================ */
+     ===================================================== */
 
   @Transactional
   public void reorder(List<BannerOrderRequest> orders) {
@@ -182,9 +214,9 @@ public class BannerService {
     );
   }
 
-  /* ============================
+  /* =====================================================
      🧠 STATUS
-     ============================ */
+     ===================================================== */
 
   private BannerStatus resolveStatus(Banner banner) {
 
@@ -205,13 +237,33 @@ public class BannerService {
     return BannerStatus.ACTIVE;
   }
 
-  /* ============================
+  /* =====================================================
+     🔐 VALIDATION URL
+     ===================================================== */
+
+  private void validateButtonUrl(String url) {
+    if (url == null || url.isBlank()) return;
+
+    if (
+      url.startsWith("/") ||
+        url.startsWith("http://") ||
+        url.startsWith("https://")
+    ) {
+      return;
+    }
+
+    throw new IllegalArgumentException("URL de redirection invalide");
+  }
+
+  /* =====================================================
      🧩 UTILS
-     ============================ */
+     ===================================================== */
 
   private Banner get(Long id) {
     return repository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Banner introuvable"));
+      .orElseThrow(() ->
+        new IllegalArgumentException("Banner introuvable")
+      );
   }
 
   private LocalDateTime parseDate(String value) {
@@ -220,7 +272,7 @@ public class BannerService {
 
   private MediaType resolveMediaType(String contentType) {
     if (contentType == null) {
-      throw new IllegalArgumentException("Type inconnu");
+      throw new IllegalArgumentException("Type de fichier inconnu");
     }
     if (contentType.startsWith("image/")) return MediaType.IMAGE;
     if (contentType.startsWith("video/")) return MediaType.VIDEO;
@@ -239,6 +291,8 @@ public class BannerService {
       .enabled(banner.getEnabled())
       .startAt(banner.getStartAt())
       .endAt(banner.getEndAt())
+      .buttonLabel(banner.getButtonLabel())
+      .buttonUrl(banner.getButtonUrl())
       .status(resolveStatus(banner))
       .build();
   }

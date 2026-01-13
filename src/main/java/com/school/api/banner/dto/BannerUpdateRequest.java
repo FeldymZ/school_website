@@ -9,5 +9,9 @@ public record BannerUpdateRequest(
   Integer displayOrder,
   Boolean enabled,
   LocalDateTime startAt,
-  LocalDateTime endAt
+  LocalDateTime endAt,
+
+  // 🆕 bouton optionnel
+  String buttonLabel,
+  String buttonUrl
 ) {}

@@ -10,11 +10,6 @@ import java.time.LocalDateTime;
   name = "banners",
   uniqueConstraints = {
     @UniqueConstraint(columnNames = "displayOrder")
-  },
-  indexes = {
-    @Index(columnList = "enabled"),
-    @Index(columnList = "startAt"),
-    @Index(columnList = "endAt")
   }
 )
 @Getter
@@ -44,4 +39,8 @@ public class Banner {
 
   private LocalDateTime startAt;
   private LocalDateTime endAt;
+
+  // 🆕 BOUTON OPTIONNEL
+  private String buttonLabel;
+  private String buttonUrl;
 }

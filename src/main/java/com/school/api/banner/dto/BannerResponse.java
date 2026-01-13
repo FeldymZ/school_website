@@ -18,5 +18,10 @@ public record BannerResponse(
   Boolean enabled,
   LocalDateTime startAt,
   LocalDateTime endAt,
+
+  // 🆕 bouton
+  String buttonLabel,
+  String buttonUrl,
+
   BannerStatus status
 ) {}
