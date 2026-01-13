@@ -18,7 +18,5 @@ public record BannerResponse(
   Boolean enabled,
   LocalDateTime startAt,
   LocalDateTime endAt,
-
-  // 🆕 STATUT CALCULÉ
   BannerStatus status
 ) {}

@@ -2,15 +2,17 @@ package com.school.api.common.mail;
 
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Year;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailService {
@@ -21,11 +23,8 @@ public class MailService {
      EMAIL HTML SANS PJ
      ============================ */
 
-  public void sendHtml(
-    String to,
-    String subject,
-    String htmlContent
-  ) {
+  @Async   // ✅ ASYNCHRONE
+  public void sendHtml(String to, String subject, String htmlContent) {
 
     try {
       MimeMessage message = mailSender.createMimeMessage();
@@ -38,8 +37,11 @@ public class MailService {
 
       mailSender.send(message);
 
+      log.info(" Email HTML envoyé à {}", to);
+
     } catch (Exception e) {
-      throw new RuntimeException("Erreur envoi email HTML", e);
+      // ❌ NE PAS throw
+      log.error(" Erreur envoi email HTML vers {}", to, e);
     }
   }
 
@@ -47,6 +49,7 @@ public class MailService {
      EMAIL HTML AVEC PJ
      ============================ */
 
+  @Async   // ✅ ASYNCHRONE
   public void sendHtmlWithAttachment(
     String to,
     String subject,
@@ -70,8 +73,10 @@ public class MailService {
 
       mailSender.send(message);
 
+      log.info("📧 Email HTML + PJ envoyé à {}", to);
+
     } catch (Exception e) {
-      throw new RuntimeException("Erreur email HTML + PJ", e);
+      log.error(" Erreur email HTML + PJ vers {}", to, e);
     }
   }
 }

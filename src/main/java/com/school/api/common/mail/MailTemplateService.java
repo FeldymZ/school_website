@@ -1,29 +1,25 @@
 package com.school.api.common.mail;
 
-import org.springframework.core.io.ClassPathResource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
-import java.nio.file.Files;
 import java.time.Year;
 
 @Service
+@RequiredArgsConstructor
 public class MailTemplateService {
+
+  private final TemplateEngine templateEngine;
 
   public String buildContactReply(String name, String replyMessage) {
 
-    try {
-      String template = Files.readString(
-        new ClassPathResource("templates/mail/contact-reply.html")
-          .getFile().toPath()
-      );
+    Context context = new Context();
+    context.setVariable("name", name);
+    context.setVariable("replyMessage", replyMessage);
+    context.setVariable("year", Year.now().getValue());
 
-      return template
-        .replace("{{name}}", name)
-        .replace("{{replyMessage}}", replyMessage.replace("\n", "<br>"))
-        .replace("{{year}}", String.valueOf(Year.now().getValue()));
-
-    } catch (Exception e) {
-      throw new RuntimeException("Erreur template email", e);
-    }
+    return templateEngine.process("mail/contact-reply", context);
   }
 }

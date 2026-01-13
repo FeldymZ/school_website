@@ -1,10 +1,10 @@
 package com.school.api.banner.service;
 
 import com.school.api.banner.dto.BannerOrderRequest;
-import com.school.api.banner.dto.BannerRequest;
 import com.school.api.banner.dto.BannerResponse;
 import com.school.api.banner.dto.BannerUpdateRequest;
 import com.school.api.banner.entity.Banner;
+import com.school.api.banner.entity.BannerStatus;
 import com.school.api.banner.entity.MediaType;
 import com.school.api.banner.repository.BannerRepository;
 import com.school.api.common.storage.FileStorageService;
@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import com.school.api.banner.entity.BannerStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +23,168 @@ public class BannerService {
   private final BannerRepository repository;
   private final FileStorageService fileStorageService;
 
+  /* ============================
+     🌍 PUBLIC
+     ============================ */
+
+  public List<BannerResponse> getPublicBanners() {
+    return repository.findPublic(LocalDateTime.now())
+      .stream()
+      .map(this::toDto)
+      .toList();
+  }
+
+  /* ============================
+     🔐 ADMIN
+     ============================ */
+
+  public List<BannerResponse> getAll() {
+    return repository.findAllByOrderByDisplayOrderAsc()
+      .stream()
+      .map(this::toDto)
+      .toList();
+  }
+
+  public List<BannerResponse> getAllClassified() {
+    return repository.findAllByOrderByDisplayOrderAsc()
+      .stream()
+      .map(this::toDto)
+      .toList();
+  }
+
+  /* ============================
+     ➕ CREATE
+     ============================ */
+
+  @Transactional
+  public BannerResponse create(
+    String title,
+    String subtitle,
+    String subtitleAlt,
+    MultipartFile media,
+    Integer displayOrder,
+    Boolean enabled,
+    String startAt,
+    String endAt
+  ) {
+
+    if (media == null || media.isEmpty()) {
+      throw new IllegalArgumentException("Fichier média requis");
+    }
+
+    LocalDateTime start = parseDate(startAt);
+    LocalDateTime end = parseDate(endAt);
+
+    if (start != null && end != null && start.isAfter(end)) {
+      throw new IllegalArgumentException("Date début > date fin");
+    }
+
+    if (repository.existsByDisplayOrder(displayOrder)) {
+      repository.shiftDownFrom(displayOrder);
+    }
+
+    MediaType mediaType = resolveMediaType(media.getContentType());
+    String mediaUrl = fileStorageService.storeBannerMedia(media, mediaType);
+
+    Banner banner = Banner.builder()
+      .title(title)
+      .subtitle(subtitle)
+      .subtitleAlt(subtitleAlt)
+      .mediaUrl(mediaUrl)
+      .mediaType(mediaType)
+      .displayOrder(displayOrder)
+      .enabled(enabled != null ? enabled : true)
+      .startAt(start)
+      .endAt(end)
+      .build();
+
+    return toDto(repository.save(banner));
+  }
+
+  /* ============================
+     ✏️ UPDATE
+     ============================ */
+
+  @Transactional
+  public BannerResponse update(Long id, BannerUpdateRequest request) {
+
+    Banner banner = get(id);
+
+    Integer oldOrder = banner.getDisplayOrder();
+    Integer newOrder = request.displayOrder();
+
+    if (newOrder != null && !newOrder.equals(oldOrder)) {
+      if (newOrder < oldOrder) {
+        repository.shiftDownFrom(newOrder);
+      } else {
+        repository.shiftUpBetween(oldOrder, newOrder);
+      }
+      banner.setDisplayOrder(newOrder);
+    }
+
+    if (request.title() != null) banner.setTitle(request.title());
+    if (request.subtitle() != null) banner.setSubtitle(request.subtitle());
+    if (request.subtitleAlt() != null) banner.setSubtitleAlt(request.subtitleAlt());
+    if (request.enabled() != null) banner.setEnabled(request.enabled());
+    if (request.startAt() != null) banner.setStartAt(request.startAt());
+    if (request.endAt() != null) banner.setEndAt(request.endAt());
+
+    return toDto(repository.save(banner));
+  }
+
+  /* ============================
+     ✅ ENABLE / DISABLE
+     ============================ */
+
+  @Transactional
+  public BannerResponse enable(Long id) {
+    Banner banner = get(id);
+    banner.setEnabled(true);
+    return toDto(repository.save(banner));
+  }
+
+  @Transactional
+  public BannerResponse disable(Long id) {
+    Banner banner = get(id);
+    banner.setEnabled(false);
+    return toDto(repository.save(banner));
+  }
+
+  /* ============================
+     🗑️ DELETE
+     ============================ */
+
+  @Transactional
+  public void delete(Long id) {
+    Banner banner = get(id);
+    repository.delete(banner);
+    repository.compactAfterDelete(banner.getDisplayOrder());
+  }
+
+  /* ============================
+     🔀 REORDER
+     ============================ */
+
+  @Transactional
+  public void reorder(List<BannerOrderRequest> orders) {
+
+    long distinct = orders.stream()
+      .map(BannerOrderRequest::displayOrder)
+      .distinct()
+      .count();
+
+    if (distinct != orders.size()) {
+      throw new IllegalArgumentException("Positions en doublon");
+    }
+
+    orders.forEach(o ->
+      get(o.id()).setDisplayOrder(o.displayOrder())
+    );
+  }
+
+  /* ============================
+     🧠 STATUS
+     ============================ */
 
   private BannerStatus resolveStatus(Banner banner) {
 
@@ -44,187 +205,27 @@ public class BannerService {
     return BannerStatus.ACTIVE;
   }
 
-
-  /* ============================
-     🌍 PUBLIC
-     ============================ */
-
-  public List<BannerResponse> getPublicBanners() {
-    return repository.findActiveBanners(LocalDateTime.now())
-      .stream()
-      .map(this::toDto)
-      .toList();
-  }
-
-  /* ============================
-     🔐 ADMIN
-     ============================ */
-
-  public List<BannerResponse> getAll() {
-    return repository.findAllByOrderByDisplayOrderAsc()
-      .stream()
-      .map(this::toDto)
-      .toList();
-  }
-
-  public BannerResponse create(
-    String title,
-    String subtitle,
-    String subtitleAlt,
-    MultipartFile media,
-    Integer displayOrder,
-    Boolean enabled,
-    LocalDateTime startAt,
-    LocalDateTime endAt
-  ) {
-
-    if (media == null || media.isEmpty()) {
-      throw new IllegalArgumentException("Fichier média requis");
-    }
-
-    if (repository.existsByDisplayOrder(displayOrder)) {
-      throw new IllegalArgumentException(
-        "La position " + displayOrder + " est déjà utilisée"
-      );
-    }
-
-    // 🆕 Validation dates (OPTIONNELLES)
-    if (
-      startAt != null &&
-        endAt != null &&
-        startAt.isAfter(endAt)
-    ) {
-      throw new IllegalArgumentException(
-        "La date de début doit être antérieure à la date de fin"
-      );
-    }
-
-    MediaType mediaType = resolveMediaType(media.getContentType());
-    String mediaUrl = fileStorageService.storeBannerMedia(media, mediaType);
-
-    Banner banner = Banner.builder()
-      .title(title)
-      .subtitle(subtitle)
-      .subtitleAlt(subtitleAlt)
-      .mediaUrl(mediaUrl)
-      .mediaType(mediaType)
-      .displayOrder(displayOrder)
-      .enabled(enabled != null ? enabled : true)
-      // 🆕 dates à la création
-      .startAt(startAt)
-      .endAt(endAt)
-      .build();
-
-    return toDto(repository.save(banner));
-  }
-
-
-  public BannerResponse update(Long id, BannerUpdateRequest request)
-  {
-
-    Banner banner = get(id);
-
-    if (request.title() != null) banner.setTitle(request.title());
-    if (request.subtitle() != null) banner.setSubtitle(request.subtitle());
-    if (request.subtitleAlt() != null) banner.setSubtitleAlt(request.subtitleAlt());
-
-    if (
-      request.displayOrder() != null &&
-        !request.displayOrder().equals(banner.getDisplayOrder()) &&
-        repository.existsByDisplayOrder(request.displayOrder())
-    ) {
-      throw new IllegalArgumentException(
-        "La position " + request.displayOrder() + " est déjà utilisée"
-      );
-    }
-
-    if (request.displayOrder() != null) {
-      banner.setDisplayOrder(request.displayOrder());
-    }
-
-    if (request.enabled() != null) {
-      banner.setEnabled(request.enabled());
-    }
-
-    // 🆕 Dates OPTIONNELLES
-    if (request.startAt() != null) banner.setStartAt(request.startAt());
-    if (request.endAt() != null) banner.setEndAt(request.endAt());
-
-    // Validation simple
-    if (
-      banner.getStartAt() != null &&
-        banner.getEndAt() != null &&
-        banner.getStartAt().isAfter(banner.getEndAt())
-    ) {
-      throw new IllegalArgumentException(
-        "La date de début doit être antérieure à la date de fin"
-      );
-    }
-
-    return toDto(repository.save(banner));
-  }
-
-  public BannerResponse enable(Long id) {
-    Banner banner = get(id);
-    banner.setEnabled(true);
-    return toDto(repository.save(banner));
-  }
-
-  public BannerResponse disable(Long id) {
-    Banner banner = get(id);
-    banner.setEnabled(false);
-    return toDto(repository.save(banner));
-  }
-
-  public void delete(Long id) {
-    repository.delete(get(id));
-  }
-
-  /* ============================
-     🔀 DRAG & DROP
-     ============================ */
-
-  @Transactional
-  public void reorder(List<BannerOrderRequest> orders) {
-
-    long distinctCount = orders.stream()
-      .map(BannerOrderRequest::displayOrder)
-      .distinct()
-      .count();
-
-    if (distinctCount != orders.size()) {
-      throw new IllegalArgumentException(
-        "Deux bannières ne peuvent pas avoir la même position"
-      );
-    }
-
-    for (BannerOrderRequest item : orders) {
-      get(item.id()).setDisplayOrder(item.displayOrder());
-    }
-  }
-
   /* ============================
      🧩 UTILS
      ============================ */
 
   private Banner get(Long id) {
     return repository.findById(id)
-      .orElseThrow(() -> new RuntimeException("Banner introuvable"));
+      .orElseThrow(() -> new IllegalArgumentException("Banner introuvable"));
+  }
+
+  private LocalDateTime parseDate(String value) {
+    return value != null ? LocalDateTime.parse(value) : null;
   }
 
   private MediaType resolveMediaType(String contentType) {
+    if (contentType == null) {
+      throw new IllegalArgumentException("Type inconnu");
+    }
     if (contentType.startsWith("image/")) return MediaType.IMAGE;
     if (contentType.startsWith("video/")) return MediaType.VIDEO;
-    throw new IllegalArgumentException("Type de fichier non supporté");
+    throw new IllegalArgumentException("Type non supporté");
   }
-
-  public List<BannerResponse> getAllClassified() {
-    return repository.findAllByOrderByDisplayOrderAsc()
-      .stream()
-      .map(this::toDto)
-      .toList();
-  }
-
 
   private BannerResponse toDto(Banner banner) {
     return BannerResponse.builder()
@@ -241,6 +242,4 @@ public class BannerService {
       .status(resolveStatus(banner))
       .build();
   }
-
-
 }

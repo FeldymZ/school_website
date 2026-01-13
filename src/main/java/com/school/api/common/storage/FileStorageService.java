@@ -7,12 +7,27 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class FileStorageService {
 
   private static final String BASE_DIR = "uploads";
+
+  /* ============================
+     LIMITES
+     ============================ */
+
+  private static final long MAX_IMAGE_SIZE = 5_000_000;   // 5 Mo
+  private static final long MAX_VIDEO_SIZE = 30_000_000;  // 30 Mo
+  private static final long MAX_PDF_SIZE   = 10_000_000;  // 10 Mo
+
+  private static final Set<String> IMAGE_EXTENSIONS =
+    Set.of("jpg", "jpeg", "png", "webp");
+
+  private static final Set<String> VIDEO_EXTENSIONS =
+    Set.of("mp4", "webm");
 
   /* ============================
      🖼️ BANNERS
@@ -22,11 +37,19 @@ public class FileStorageService {
 
     validateFile(file);
 
-    String folder = type == MediaType.IMAGE
-      ? "banners/images"
-      : "banners/videos";
+    if (type == MediaType.IMAGE) {
+      validateImage(file);
+      validateSize(file, MAX_IMAGE_SIZE);
+      return store(file, "banners/images");
+    }
 
-    return store(file, folder);
+    if (type == MediaType.VIDEO) {
+      validateVideo(file);
+      validateSize(file, MAX_VIDEO_SIZE);
+      return store(file, "banners/videos");
+    }
+
+    throw new IllegalArgumentException("Type média non supporté");
   }
 
   /* ============================
@@ -35,33 +58,66 @@ public class FileStorageService {
 
   public String storeFormationCover(MultipartFile file) {
     validateImage(file);
+    validateSize(file, MAX_IMAGE_SIZE);
     return store(file, "formations/initiale/covers");
   }
 
   public String storeFormationGalleryImage(MultipartFile file) {
     validateImage(file);
+    validateSize(file, MAX_IMAGE_SIZE);
     return store(file, "formations/initiale/gallery");
   }
 
   public String storeFormationPdf(MultipartFile file) {
     validatePdf(file);
+    validateSize(file, MAX_PDF_SIZE);
     return store(file, "formations/initiale/pdfs");
   }
 
   /* ============================
-     📰 ACTUALITÉS (AJOUTÉ)
+     📰 ACTUALITÉS
      ============================ */
 
-  /** Image principale (cover) d’une actualité */
   public String storeActualiteCover(MultipartFile file) {
     validateImage(file);
+    validateSize(file, MAX_IMAGE_SIZE);
     return store(file, "actualites/covers");
   }
 
-  /** Images galerie d’une actualité */
   public String storeActualiteGalleryImage(MultipartFile file) {
     validateImage(file);
+    validateSize(file, MAX_IMAGE_SIZE);
     return store(file, "actualites/gallery");
+  }
+
+  /* ============================
+     💬 COMMENTAIRES
+     ============================ */
+
+  public String storeCommentaireAvatar(MultipartFile file) {
+    validateImage(file);
+    validateSize(file, MAX_IMAGE_SIZE);
+    return store(file, "commentaires/authors");
+  }
+
+  /* ============================
+     🤝 PARTENAIRES
+     ============================ */
+
+  public String storePartenaireLogo(MultipartFile file) {
+    validateImage(file);
+    validateSize(file, MAX_IMAGE_SIZE);
+    return store(file, "partenaires/logos");
+  }
+
+  /* ============================
+     ✉️ CONTACT
+     ============================ */
+
+  public String storeContactReplyAttachment(MultipartFile file) {
+    validateFile(file);
+    validateSize(file, 7_000_000);
+    return store(file, "contact/replies");
   }
 
   /* ============================
@@ -78,7 +134,6 @@ public class FileStorageService {
       Files.createDirectories(path.getParent());
       Files.write(path, file.getBytes());
 
-      // URL publique
       return "/files/" + subDir + "/" + filename;
 
     } catch (IOException e) {
@@ -98,16 +153,36 @@ public class FileStorageService {
 
   private void validateImage(MultipartFile file) {
     validateFile(file);
-    if (file.getContentType() == null ||
-      !file.getContentType().startsWith("image/")) {
-      throw new IllegalArgumentException("Le fichier doit être une image");
+
+    String ext = getExtension(file.getOriginalFilename());
+    if (!IMAGE_EXTENSIONS.contains(ext)) {
+      throw new IllegalArgumentException("Image non supportée");
+    }
+  }
+
+  private void validateVideo(MultipartFile file) {
+    validateFile(file);
+
+    String ext = getExtension(file.getOriginalFilename());
+    if (!VIDEO_EXTENSIONS.contains(ext)) {
+      throw new IllegalArgumentException("Vidéo non supportée");
     }
   }
 
   private void validatePdf(MultipartFile file) {
     validateFile(file);
-    if (!"application/pdf".equals(file.getContentType())) {
+
+    String ext = getExtension(file.getOriginalFilename());
+    if (!"pdf".equals(ext)) {
       throw new IllegalArgumentException("Le fichier doit être un PDF");
+    }
+  }
+
+  private void validateSize(MultipartFile file, long max) {
+    if (file.getSize() > max) {
+      throw new IllegalArgumentException(
+        "Fichier trop volumineux (max " + (max / 1_000_000) + " Mo)"
+      );
     }
   }
 
@@ -115,38 +190,6 @@ public class FileStorageService {
     if (filename == null || !filename.contains(".")) {
       throw new IllegalArgumentException("Nom de fichier invalide");
     }
-    return filename.substring(filename.lastIndexOf('.') + 1);
+    return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
   }
-
-  /* ============================
-   COMMENTAIRES
-   ============================ */
-
-  public String storeCommentaireAvatar(MultipartFile file) {
-    validateImage(file);
-    return store(file, "commentaires/authors");
-  }
-
-  /* ============================
-   PARTENAIRES
-   ============================ */
-
-  public String storePartenaireLogo(MultipartFile file) {
-    validateImage(file);
-    return store(file, "partenaires/logos");
-  }
-
-  public String storeContactReplyAttachment(MultipartFile file) {
-
-    validateFile(file);
-
-    if (file.getSize() > 7_000_000) {
-      throw new IllegalArgumentException("Fichier trop volumineux (7Mo max)");
-    }
-
-    return store(file, "contact/replies");
-  }
-
-
-
 }

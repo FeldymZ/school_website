@@ -52,6 +52,12 @@ dependencies {
   // 🧪 Tests
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.springframework.security:spring-security-test'
+
+  // Thymeleaf (OBLIGATOIRE pour templates email)
+  implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+
+
 }
 
 tasks.named('test') {

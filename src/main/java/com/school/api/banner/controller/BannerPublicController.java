@@ -19,4 +19,3 @@ public class BannerPublicController {
     return service.getPublicBanners();
   }
 }
-

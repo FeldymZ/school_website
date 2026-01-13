@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>Réponse à votre message</title>
@@ -18,7 +18,7 @@
         <tr>
           <td style="padding:20px 30px; border-bottom:3px solid #00AEEF;">
             <img
-              src="https://TON-DOMAINE/uploads/logo-esiitech.png"
+              src="https://api-test.esiitech-gabon.com/assets/logos/esiitech.png"
               alt="ESIITECH"
               height="50"
               style="display:block;"
@@ -31,7 +31,7 @@
           <td style="padding:30px; color:#333333;">
 
             <h2 style="margin-top:0; color:#00AEEF;">
-              Bonjour {{name}},
+              Bonjour <span th:text="${name}">Nom</span>,
             </h2>
 
             <p style="font-size:15px; line-height:1.7;">
@@ -50,8 +50,9 @@
               margin:25px 0;
               font-size:15px;
               line-height:1.6;
-            ">
-              {{replyMessage}}
+            "
+                 th:text="${replyMessage}">
+              Réponse
             </div>
 
             <p style="font-size:14px; margin-top:25px;">
@@ -69,7 +70,7 @@
         <!-- FOOTER -->
         <tr>
           <td style="background:#f4f6f8; padding:18px; text-align:center; font-size:12px; color:#777;">
-            © {{year}} ESIITECH — École Supérieure d’Ingénierie et d’Innovations Technologiques<br>
+            © <span th:text="${year}">2026</span> ESIITECH — École Supérieure d’Ingénierie et d’Innovations Technologiques<br>
             Cet email a été envoyé automatiquement, merci de ne pas y répondre.
           </td>
         </tr>

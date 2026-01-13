@@ -2,14 +2,14 @@ package com.school.api.banner.controller;
 
 import com.school.api.banner.dto.BannerOrderRequest;
 import com.school.api.banner.dto.BannerResponse;
+import com.school.api.banner.dto.BannerUpdateRequest;
 import com.school.api.banner.service.BannerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -23,7 +23,6 @@ public class BannerAdminController {
   /* ============================
      📋 LISTE
      ============================ */
-
   @GetMapping
   public List<BannerResponse> all() {
     return service.getAll();
@@ -32,7 +31,6 @@ public class BannerAdminController {
   /* ============================
      ➕ CRÉATION (MULTIPART)
      ============================ */
-
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public BannerResponse create(
     @RequestParam String title,
@@ -41,9 +39,9 @@ public class BannerAdminController {
     @RequestParam Integer displayOrder,
     @RequestParam(required = false) Boolean enabled,
 
-    // 🆕 DATES OPTIONNELLES
-    @RequestParam(required = false) LocalDateTime startAt,
-    @RequestParam(required = false) LocalDateTime endAt,
+    // Dates en STRING (SAFE)
+    @RequestParam(required = false) String startAt,
+    @RequestParam(required = false) String endAt,
 
     @RequestParam MultipartFile media
   ) {
@@ -62,19 +60,17 @@ public class BannerAdminController {
   /* ============================
      ✏️ UPDATE
      ============================ */
-
   @PutMapping("/{id}")
   public BannerResponse update(
     @PathVariable Long id,
-    @RequestBody com.school.api.banner.dto.BannerUpdateRequest request
+    @RequestBody BannerUpdateRequest request
   ) {
     return service.update(id, request);
   }
 
   /* ============================
-     ✅ ACTIVER / DÉSACTIVER
+     ✅ ENABLE / DISABLE
      ============================ */
-
   @PutMapping("/{id}/enable")
   public BannerResponse enable(@PathVariable Long id) {
     return service.enable(id);
@@ -88,25 +84,25 @@ public class BannerAdminController {
   /* ============================
      🔀 REORDER
      ============================ */
-
   @PutMapping("/reorder")
   public void reorder(@RequestBody List<BannerOrderRequest> orders) {
     service.reorder(orders);
   }
 
   /* ============================
-     🗑️ SUPPRESSION
+     🗑️ DELETE
      ============================ */
-
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('SUPERADMIN')")
   public void delete(@PathVariable Long id) {
     service.delete(id);
   }
 
+  /* ============================
+     📊 CLASSIFIED (ADMIN)
+     ============================ */
   @GetMapping("/classified")
   public List<BannerResponse> classified() {
     return service.getAllClassified();
   }
-
 }
