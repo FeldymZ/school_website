@@ -13,13 +13,14 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-  private static final String BASE_DIR = "uploads";
+  // 🔑 DOSSIER PARTAGÉ AVEC NGINX VIA DOCKER
+  private static final String BASE_DIR = "/files";
 
   /* ============================
      LIMITES
      ============================ */
 
-  private static final long MAX_IMAGE_SIZE = 5_000_000;   // 5 Mo
+  private static final long MAX_IMAGE_SIZE = 10_000_000;   // 10 Mo
   private static final long MAX_VIDEO_SIZE = 30_000_000;  // 30 Mo
   private static final long MAX_PDF_SIZE   = 10_000_000;  // 10 Mo
 
@@ -130,10 +131,13 @@ public class FileStorageService {
       String extension = getExtension(file.getOriginalFilename());
       String filename = UUID.randomUUID() + "." + extension;
 
-      Path path = Path.of(BASE_DIR, subDir, filename);
-      Files.createDirectories(path.getParent());
-      Files.write(path, file.getBytes());
+      Path directory = Path.of(BASE_DIR, subDir);
+      Files.createDirectories(directory);
 
+      Path target = directory.resolve(filename);
+      file.transferTo(target.toFile());
+
+      // URL publique NGINX
       return "/files/" + subDir + "/" + filename;
 
     } catch (IOException e) {

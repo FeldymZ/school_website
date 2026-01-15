@@ -17,10 +17,17 @@ public class FormationInitialePublicController {
   private final FormationInitialeService service;
 
   /* ============================
-     📋 LISTE (LICENCE / MASTER)
+     📋 TOUTES LES FORMATIONS
      ============================ */
+  @GetMapping
+  public List<FormationInitialeResponse> getAll() {
+    return service.getAllPublic();
+  }
 
-  @GetMapping("/{level}")
+  /* ============================
+     📋 LISTE PAR NIVEAU
+     ============================ */
+  @GetMapping("/level/{level}")
   public List<FormationInitialeResponse> getByLevel(
     @PathVariable FormationInitialeLevel level
   ) {
@@ -30,9 +37,10 @@ public class FormationInitialePublicController {
   /* ============================
      🔎 DÉTAILS
      ============================ */
-
-  @GetMapping("/{id}/details")
-  public FormationInitialeDetailsResponse details(@PathVariable Long id) {
+  @GetMapping("/{id}")
+  public FormationInitialeDetailsResponse details(
+    @PathVariable Long id
+  ) {
     return service.getDetails(id);
   }
 }

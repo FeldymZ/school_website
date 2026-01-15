@@ -13,7 +13,11 @@ public interface FormationInitialeRepository
      🌍 PUBLIC
      ============================ */
 
-  // Liste publique par niveau (LICENCE / MASTER)
+  // Toutes les formations activées
+  List<FormationInitiale>
+  findByEnabledTrueOrderByDisplayOrderAsc();
+
+  // Par niveau (LICENCE / MASTER)
   List<FormationInitiale>
   findByEnabledTrueAndLevelOrderByDisplayOrderAsc(
     FormationInitialeLevel level
@@ -23,6 +27,6 @@ public interface FormationInitialeRepository
      🔐 ADMIN
      ============================ */
 
-  // Liste complète admin
-  List<FormationInitiale> findAllByOrderByDisplayOrderAsc();
+  List<FormationInitiale>
+  findAllByOrderByDisplayOrderAsc();
 }

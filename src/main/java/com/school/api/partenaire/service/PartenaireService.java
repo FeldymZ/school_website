@@ -1,7 +1,9 @@
 package com.school.api.partenaire.service;
 
 import com.school.api.common.storage.FileStorageService;
+import com.school.api.partenaire.dto.PartenaireResponse;
 import com.school.api.partenaire.entity.Partenaire;
+import com.school.api.partenaire.mapper.PartenaireMapper;
 import com.school.api.partenaire.repository.PartenaireRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,8 +22,11 @@ public class PartenaireService {
      🌍 PUBLIC
      ============================ */
 
-  public List<Partenaire> getPublic() {
-    return repository.findByEnabledTrueOrderByDisplayOrderAsc();
+  public List<PartenaireResponse> getPublic() {
+    return repository.findByEnabledTrueOrderByDisplayOrderAsc()
+      .stream()
+      .map(PartenaireMapper::toResponse)
+      .toList();
   }
 
   /* ============================
@@ -113,7 +118,6 @@ public class PartenaireService {
     int order = 1;
 
     for (Long id : orderedIds) {
-
       Partenaire partenaire = repository.findById(id)
         .orElseThrow(() ->
           new RuntimeException("Partenaire introuvable : " + id)
@@ -123,6 +127,4 @@ public class PartenaireService {
       repository.save(partenaire);
     }
   }
-
-
 }

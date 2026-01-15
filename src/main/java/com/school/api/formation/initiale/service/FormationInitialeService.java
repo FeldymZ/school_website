@@ -29,6 +29,16 @@ public class FormationInitialeService {
      🌍 PUBLIC
      ============================ */
 
+  /** 🔥 TOUTES LES FORMATIONS PUBLIQUES */
+  public List<FormationInitialeResponse> getAllPublic() {
+    return repository
+      .findByEnabledTrueOrderByDisplayOrderAsc()
+      .stream()
+      .map(this::toListDto)
+      .toList();
+  }
+
+  /** Par niveau */
   public List<FormationInitialeResponse> getPublic(FormationInitialeLevel level) {
     return repository
       .findByEnabledTrueAndLevelOrderByDisplayOrderAsc(level)
@@ -37,6 +47,7 @@ public class FormationInitialeService {
       .toList();
   }
 
+  /** Détails */
   public FormationInitialeDetailsResponse getDetails(Long id) {
 
     FormationInitiale formation = get(id);
@@ -63,7 +74,8 @@ public class FormationInitialeService {
      ============================ */
 
   public List<FormationInitialeResponse> getAll() {
-    return repository.findAllByOrderByDisplayOrderAsc()
+    return repository
+      .findAllByOrderByDisplayOrderAsc()
       .stream()
       .map(this::toListDto)
       .toList();
