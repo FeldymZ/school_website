@@ -3,8 +3,8 @@ package com.school.api.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -12,13 +12,14 @@ import java.util.List;
 public class CorsConfig {
 
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        // 🔓 ORIGINS AUTORISÉS
+        // 🌍 ORIGINS AUTORISÉS
         config.setAllowedOrigins(List.of(
             "http://localhost:5173",
+            "https://test.esiitech-gabon.com",
             "https://esiitech-gabon.com"
         ));
 
@@ -34,14 +35,21 @@ public class CorsConfig {
         // 🔓 HEADERS AUTORISÉS
         config.setAllowedHeaders(List.of("*"));
 
-        // 🔑 AUTHORIZATION (JWT)
+        // 🔑 JWT / AUTH HEADER
         config.setAllowCredentials(true);
+
+        // (optionnel mais propre)
+        config.setExposedHeaders(List.of(
+            "Authorization",
+            "Content-Type"
+        ));
 
         UrlBasedCorsConfigurationSource source =
             new UrlBasedCorsConfigurationSource();
 
+        // ⚠️ IMPORTANT
         source.registerCorsConfiguration("/**", config);
 
-        return new CorsFilter(source);
+        return source;
     }
 }

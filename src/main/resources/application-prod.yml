@@ -37,7 +37,7 @@ storage:
   upload-dir: uploads
 
 # =========================
-# APP (URL ABSOLUE API)
+# APP (URL PUBLIQUE ABSOLUE)
 # =========================
 app:
-  base-url: https://api-test.esiitech-gabon.com
+  public-url: https://api-test.esiitech-gabon.com

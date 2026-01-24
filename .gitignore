@@ -73,4 +73,15 @@ application-prod.properties
 ################################
 # Storage / Uploads
 ################################
+files/
 uploads/
+
+# Media files
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.mp4
+*.pdf
+*.docx
+
