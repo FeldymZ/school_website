@@ -3,6 +3,7 @@ package com.school.api.formation.preinscription.service;
 import com.school.api.common.mail.MailService;
 import com.school.api.formation.initiale.entity.FormationInitiale;
 import com.school.api.formation.initiale.repository.FormationInitialeRepository;
+import com.school.api.formation.preinscription.dto.FormationPreinscriptionAdminResponse;
 import com.school.api.formation.preinscription.dto.FormationPreinscriptionRequest;
 import com.school.api.formation.preinscription.entity.FormationPreinscription;
 import com.school.api.formation.preinscription.entity.enums.StatutPreinscription;
@@ -29,9 +30,9 @@ public class FormationPreinscriptionService {
   private final FormationPreinscriptionRepository repository;
   private final MailService mailService;
 
-  /* =====================================================
+  /* =========================
      PUBLIC : PRÉINSCRIPTION
-     ===================================================== */
+     ========================= */
 
   public void preinscrire(FormationPreinscriptionRequest request) {
 
@@ -70,23 +71,29 @@ public class FormationPreinscriptionService {
     sendConfirmationEmail(p, formation, fiche);
   }
 
-  /* =====================================================
-     ADMIN : LISTE
-     ===================================================== */
+  /* =========================
+     ADMIN : LISTES (DTO)
+     ========================= */
 
-  public List<FormationPreinscription> getAll() {
-    return repository.findAll();
+  public List<FormationPreinscriptionAdminResponse> getAll() {
+    return repository.findAll()
+      .stream()
+      .map(this::toAdminResponse)
+      .toList();
   }
 
-  public List<FormationPreinscription> getByStatut(
+  public List<FormationPreinscriptionAdminResponse> getByStatut(
     StatutPreinscription statut
   ) {
-    return repository.findByStatut(statut);
+    return repository.findByStatut(statut)
+      .stream()
+      .map(this::toAdminResponse)
+      .toList();
   }
 
-  /* =====================================================
+  /* =========================
      ADMIN : DÉCISION
-     ===================================================== */
+     ========================= */
 
   public void decide(Long id, boolean accepted, String commentaire) {
 
@@ -100,7 +107,7 @@ public class FormationPreinscriptionService {
     p.setStatut(
       accepted
         ? StatutPreinscription.VALIDEE
-        : StatutPreinscription.REJETEE
+        : StatutPreinscription.REFUSEE
     );
 
     p.setCommentaireAdmin(commentaire);
@@ -111,14 +118,18 @@ public class FormationPreinscriptionService {
     sendDecisionEmail(p, accepted);
   }
 
-  /* =====================================================
-     ADMIN : TÉLÉCHARGEMENT WORD
-     ===================================================== */
+  /* =========================
+     ADMIN : WORD
+     ========================= */
 
   public File downloadWord(Long id) {
 
     FormationPreinscription p = repository.findById(id)
       .orElseThrow(() -> new RuntimeException("Préinscription introuvable"));
+
+    if (p.getStatut() == StatutPreinscription.EN_ATTENTE) {
+      throw new IllegalStateException("Téléchargement non autorisé");
+    }
 
     FormationInitiale formation = p.getFormation();
 
@@ -150,36 +161,47 @@ public class FormationPreinscriptionService {
     return generatePreinscriptionWord(r, formation);
   }
 
-  /* =====================================================
-     WORD : GÉNÉRATION
-     ===================================================== */
+  /* =========================
+     MAPPER ADMIN
+     ========================= */
+
+  private FormationPreinscriptionAdminResponse toAdminResponse(
+    FormationPreinscription p
+  ) {
+    return new FormationPreinscriptionAdminResponse(
+      p.getId(),
+      p.getNom(),
+      p.getPrenom(),
+      p.getDateNaissance(),
+      p.getEmail(),
+      p.getTelephone(),
+      p.getFormation().getId(),
+      p.getFormation().getName(),
+      p.getNiveau(),
+      p.getStatut(),
+      p.getCreatedAt(),
+      p.getDecisionAt()
+    );
+  }
+
+  /* =========================
+     WORD + EMAILS
+     ========================= */
 
   private File generatePreinscriptionWord(
     FormationPreinscriptionRequest r,
     FormationInitiale formation
   ) {
-
     try {
       ClassPathResource template =
-        new ClassPathResource(
-          "templates/preinscription/fiche-preinscription-master.docx"
-        );
+        new ClassPathResource("templates/preinscription/fiche-preinscription-master.docx");
 
       XWPFDocument document =
         new XWPFDocument(template.getInputStream());
 
       Map<String, String> values = new HashMap<>();
-
       values.put("nom", r.nom());
       values.put("prenom", r.prenom());
-      values.put("dateNaissance", r.dateNaissance().toString());
-      values.put("lieuNaissance", r.lieuNaissance());
-      values.put("nationalite", r.nationalite());
-      values.put("adresse", r.adresse());
-      values.put("telephone", r.telephone());
-      values.put("email", r.email());
-      values.put("profession", r.profession());
-      values.put("anneeObtention", String.valueOf(r.anneeObtention()));
       values.put("formation", formation.getName());
 
       for (XWPFParagraph p : document.getParagraphs()) {
@@ -206,23 +228,15 @@ public class FormationPreinscriptionService {
       return output;
 
     } catch (Exception e) {
-      throw new RuntimeException(
-        "Erreur génération fiche de préinscription",
-        e
-      );
+      throw new RuntimeException("Erreur génération fiche de préinscription", e);
     }
   }
-
-  /* =====================================================
-     EMAILS
-     ===================================================== */
 
   private void sendConfirmationEmail(
     FormationPreinscription p,
     FormationInitiale formation,
     File fiche
   ) {
-
     try {
       ByteArrayResource attachment =
         new ByteArrayResource(Files.readAllBytes(fiche.toPath()));
@@ -230,17 +244,8 @@ public class FormationPreinscriptionService {
       mailService.sendHtmlWithAttachment(
         p.getEmail(),
         "Préinscription enregistrée – ESIITECH",
-        """
-        <p>Bonjour <strong>%s %s</strong>,</p>
-        <p>Votre demande de préinscription à la formation
-        <strong>%s</strong> a bien été enregistrée.</p>
-        <p>Veuillez trouver en pièce jointe votre fiche de préinscription.</p>
-        <p>Cordialement,<br/><strong>ESIITECH</strong></p>
-        """.formatted(
-          p.getPrenom(),
-          p.getNom(),
-          formation.getName()
-        ),
+        "<p>Bonjour <strong>%s %s</strong>,</p>"
+          .formatted(p.getPrenom(), p.getNom()),
         fiche.getName(),
         attachment
       );
@@ -250,34 +255,15 @@ public class FormationPreinscriptionService {
     }
   }
 
-  private void sendDecisionEmail(
-    FormationPreinscription p,
-    boolean accepted
-  ) {
+  private void sendDecisionEmail(FormationPreinscription p, boolean accepted) {
 
     mailService.sendHtml(
       p.getEmail(),
       accepted
         ? "Préinscription validée – ESIITECH"
-        : "Préinscription rejetée – ESIITECH",
-      accepted
-        ? """
-          <p>Bonjour <strong>%s %s</strong>,</p>
-          <p>Votre préinscription a été <strong>validée</strong>.</p>
-          <p>Cordialement,<br/><strong>ESIITECH</strong></p>
-          """.formatted(p.getPrenom(), p.getNom())
-        : """
-          <p>Bonjour <strong>%s %s</strong>,</p>
-          <p>Votre demande de préinscription n’a pas été retenue.</p>
-          %s
-          <p>Cordialement,<br/><strong>ESIITECH</strong></p>
-          """.formatted(
-            p.getPrenom(),
-            p.getNom(),
-            p.getCommentaireAdmin() != null
-              ? "<p>Motif : " + p.getCommentaireAdmin() + "</p>"
-              : ""
-          )
+        : "Préinscription refusée – ESIITECH",
+      "<p>Bonjour <strong>%s %s</strong>,</p>"
+        .formatted(p.getPrenom(), p.getNom())
     );
   }
 }

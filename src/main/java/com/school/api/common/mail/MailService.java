@@ -23,6 +23,7 @@ public class MailService {
 
   private final JavaMailSender mailSender;
   private final SpringTemplateEngine templateEngine;
+  private final MailProperties mailProperties;
 
   /* ============================
      EMAIL HTML SIMPLE
@@ -36,6 +37,7 @@ public class MailService {
       MimeMessageHelper helper =
         new MimeMessageHelper(message, false, StandardCharsets.UTF_8.name());
 
+      helper.setFrom(mailProperties.getFrom());
       helper.setTo(to);
       helper.setSubject(subject);
       helper.setText(htmlContent, true);
@@ -44,13 +46,44 @@ public class MailService {
       log.info("Email HTML envoyé à {}", to);
 
     } catch (Exception e) {
-      log.error("Erreur envoi email HTML vers {}", to, e);
+      log.error("Erreur envoi email HTML", e);
+    }
+  }
+
+  /* ============================
+     EMAIL HTML SIMPLE AVEC REPLY-TO
+     (POUR CONTACT PUBLIC)
+     ============================ */
+
+  @Async
+  public void sendHtml(
+    String to,
+    String subject,
+    String htmlContent,
+    String replyTo
+  ) {
+
+    try {
+      MimeMessage message = mailSender.createMimeMessage();
+      MimeMessageHelper helper =
+        new MimeMessageHelper(message, false, StandardCharsets.UTF_8.name());
+
+      helper.setFrom(mailProperties.getFrom());
+      helper.setTo(to);
+      helper.setReplyTo(replyTo);
+      helper.setSubject(subject);
+      helper.setText(htmlContent, true);
+
+      mailSender.send(message);
+      log.info("Email HTML envoyé à {} (reply-to {})", to, replyTo);
+
+    } catch (Exception e) {
+      log.error("Erreur envoi email HTML avec Reply-To", e);
     }
   }
 
   /* ============================
      EMAIL HTML AVEC PJ (LEGACY)
-     → UTILISÉ PAR ContactService
      ============================ */
 
   @Async
@@ -66,6 +99,7 @@ public class MailService {
       MimeMessageHelper helper =
         new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
 
+      helper.setFrom(mailProperties.getFrom());
       helper.setTo(to);
       helper.setSubject(subject);
       helper.setText(htmlContent, true);
@@ -85,7 +119,6 @@ public class MailService {
 
   /* ============================
      EMAIL HTML AVEC PJ (NOUVEAU)
-     → POUR USAGE MÉTIER / FUTUR
      ============================ */
 
   @Async
@@ -102,6 +135,7 @@ public class MailService {
       MimeMessageHelper helper =
         new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
 
+      helper.setFrom(mailProperties.getFrom());
       helper.setTo(to);
       helper.setSubject(subject);
       helper.setText(htmlContent, true);
@@ -135,6 +169,7 @@ public class MailService {
       MimeMessageHelper helper =
         new MimeMessageHelper(message, false, StandardCharsets.UTF_8.name());
 
+      helper.setFrom(mailProperties.getFrom());
       helper.setTo(to);
       helper.setSubject(subject);
       helper.setText(html, true);
@@ -143,7 +178,7 @@ public class MailService {
       log.info("Email template envoyé à {}", to);
 
     } catch (Exception e) {
-      log.error("Erreur email template vers {}", to, e);
+      log.error("Erreur email template", e);
     }
   }
 

@@ -22,12 +22,18 @@ spring:
     port: ${SPRING_MAIL_PORT}
     username: ${SPRING_MAIL_USERNAME}
     password: ${SPRING_MAIL_PASSWORD}
+    protocol: smtp
+    default-encoding: UTF-8
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 spring.servlet.multipart:
   max-file-size: 50MB
@@ -36,8 +42,9 @@ spring.servlet.multipart:
 storage:
   upload-dir: uploads
 
-# =========================
-# APP (URL PUBLIQUE ABSOLUE)
-# =========================
 app:
   public-url: https://api-test.esiitech-gabon.com
+  mail:
+    from: "ESIITech Gabon <noreply@esiitech-gabon.com>"
+  notifications:
+    slack-webhook: ${SLACK_WEBHOOK_URL}

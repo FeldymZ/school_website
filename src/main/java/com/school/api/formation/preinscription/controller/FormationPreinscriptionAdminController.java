@@ -1,7 +1,7 @@
 package com.school.api.formation.preinscription.controller;
 
+import com.school.api.formation.preinscription.dto.FormationPreinscriptionAdminResponse;
 import com.school.api.formation.preinscription.dto.PreinscriptionDecisionRequest;
-import com.school.api.formation.preinscription.entity.FormationPreinscription;
 import com.school.api.formation.preinscription.entity.enums.StatutPreinscription;
 import com.school.api.formation.preinscription.service.FormationPreinscriptionService;
 import lombok.RequiredArgsConstructor;
@@ -21,25 +21,17 @@ public class FormationPreinscriptionAdminController {
 
   private final FormationPreinscriptionService service;
 
-  /* =====================================================
-     LISTE DES PRÉINSCRIPTIONS
-     ===================================================== */
-
   @GetMapping
-  public List<FormationPreinscription> getAll() {
+  public List<FormationPreinscriptionAdminResponse> getAll() {
     return service.getAll();
   }
 
   @GetMapping("/statut/{statut}")
-  public List<FormationPreinscription> getByStatut(
+  public List<FormationPreinscriptionAdminResponse> getByStatut(
     @PathVariable StatutPreinscription statut
   ) {
     return service.getByStatut(statut);
   }
-
-  /* =====================================================
-     DÉCISION : VALIDER / REJETER
-     ===================================================== */
 
   @PostMapping("/{id}/decision")
   public ResponseEntity<Void> decide(
@@ -50,22 +42,17 @@ public class FormationPreinscriptionAdminController {
     return ResponseEntity.ok().build();
   }
 
-  /* =====================================================
-     TÉLÉCHARGEMENT WORD
-     ===================================================== */
-
   @GetMapping("/{id}/download")
   public ResponseEntity<byte[]> download(@PathVariable Long id) throws Exception {
 
     File file = service.downloadWord(id);
-
-    byte[] content = Files.readAllBytes(file.toPath());
 
     return ResponseEntity.ok()
       .header(
         "Content-Disposition",
         "attachment; filename=preinscription-" + id + ".docx"
       )
-      .body(content);
+      .body(Files.readAllBytes(file.toPath()));
   }
 }
+

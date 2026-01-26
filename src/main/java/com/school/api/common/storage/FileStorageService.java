@@ -122,6 +122,16 @@ public class FileStorageService {
   }
 
   /* ============================
+     🏭 VIE ÉTUDIANTE – VISITES ENTREPRISE
+     ============================ */
+
+  public String storeVisiteEntrepriseImage(MultipartFile file) {
+    validateImage(file);
+    validateSize(file, MAX_IMAGE_SIZE);
+    return store(file, "vie-etudiante/visites-entreprise");
+  }
+
+  /* ============================
      ⚙️ CORE COMMUN
      ============================ */
 
@@ -137,7 +147,7 @@ public class FileStorageService {
       Path target = directory.resolve(filename);
       file.transferTo(target.toFile());
 
-      // URL publique NGINX
+      // 🌍 URL publique exposée par NGINX
       return "/files/" + subDir + "/" + filename;
 
     } catch (IOException e) {
