@@ -1,9 +1,8 @@
+
 package com.school.api.auth.controller;
 
-import com.school.api.auth.dto.UserResponse;
-import com.school.api.auth.entity.AuditLog;
-import com.school.api.auth.repository.AuditLogRepository;
-import com.school.api.auth.service.UserService;
+import com.school.api.auth.entity.AdminAuditLog;
+import com.school.api.auth.repository.AdminAuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,20 +14,31 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuditController {
 
-  private final AuditLogRepository auditRepository;
+  private final AdminAuditLogRepository auditRepository;
 
+  /**
+   * 📜 Tous les logs d’audit
+   */
   @GetMapping
-  public List<AuditLog> all() {
+  public List<AdminAuditLog> all() {
     return auditRepository.findAll();
   }
 
+  /**
+   * 👤 Logs par administrateur (email)
+   */
   @GetMapping("/by-admin")
-  public List<AuditLog> byAdmin(@RequestParam String email) {
+  public List<AdminAuditLog> byAdmin(
+    @RequestParam String email
+  ) {
     return auditRepository.findByActorEmail(email);
   }
 
+  /**
+   * 📅 Logs par période
+   */
   @GetMapping("/by-date")
-  public List<AuditLog> byDate(
+  public List<AdminAuditLog> byDate(
     @RequestParam LocalDate start,
     @RequestParam LocalDate end
   ) {

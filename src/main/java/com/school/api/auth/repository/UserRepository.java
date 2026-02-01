@@ -17,6 +17,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   List<User> findByRoleAndEnabled(Role role, Boolean enabled);
 
-  //  Recherche LIKE
+  // 🔍 Recherche LIKE
   List<User> findByEmailContainingIgnoreCase(String email);
+
+  // 🔒 COMPTE DES UTILISATEURS PAR RÔLE (OBLIGATOIRE)
+  long countByRole(Role role);
 }

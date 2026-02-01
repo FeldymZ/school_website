@@ -18,13 +18,15 @@ public class AdminUserController {
 
   private final UserService userService;
 
-  // 📋 Liste des utilisateurs
+  /* ===================== LISTE ===================== */
+
   @GetMapping
   public List<UserResponse> all() {
     return userService.getAll();
   }
 
-  // 🔴 Désactiver
+  /* ===================== DESACTIVER ===================== */
+
   @PatchMapping("/{id}/desactiver")
   public ResponseEntity<Void> disable(
     @PathVariable Long id,
@@ -34,7 +36,8 @@ public class AdminUserController {
     return ResponseEntity.noContent().build();
   }
 
-  // 🟢 Activer
+  /* ===================== ACTIVER ===================== */
+
   @PatchMapping("/{id}/activer")
   public ResponseEntity<Void> enable(
     @PathVariable Long id,
@@ -44,7 +47,19 @@ public class AdminUserController {
     return ResponseEntity.noContent().build();
   }
 
-  // 🔁 Changer le rôle
+  /* ===================== SUPPRIMER ===================== */
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> delete(
+    @PathVariable Long id,
+    Authentication auth
+  ) {
+    userService.delete(id, auth.getName());
+    return ResponseEntity.noContent().build();
+  }
+
+  /* ===================== CHANGER ROLE ===================== */
+
   @PatchMapping("/{id}/role")
   public ResponseEntity<Void> changeRole(
     @PathVariable Long id,
@@ -55,6 +70,8 @@ public class AdminUserController {
     return ResponseEntity.noContent().build();
   }
 
+  /* ===================== FILTRES ===================== */
+
   @GetMapping("/filter")
   public List<UserResponse> filter(
     @RequestParam(required = false) Role role,
@@ -63,10 +80,10 @@ public class AdminUserController {
     return userService.filter(role, enabled);
   }
 
+  /* ===================== RECHERCHE ===================== */
+
   @GetMapping("/search")
   public List<UserResponse> search(@RequestParam String email) {
     return userService.searchByEmail(email);
   }
-
-
 }

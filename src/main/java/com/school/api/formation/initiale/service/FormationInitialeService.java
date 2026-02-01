@@ -29,7 +29,6 @@ public class FormationInitialeService {
      🌍 PUBLIC
      ============================ */
 
-  /** 🔥 TOUTES LES FORMATIONS PUBLIQUES */
   public List<FormationInitialeResponse> getAllPublic() {
     return repository
       .findByEnabledTrueOrderByDisplayOrderAsc()
@@ -38,7 +37,6 @@ public class FormationInitialeService {
       .toList();
   }
 
-  /** Par niveau */
   public List<FormationInitialeResponse> getPublic(FormationInitialeLevel level) {
     return repository
       .findByEnabledTrueAndLevelOrderByDisplayOrderAsc(level)
@@ -47,7 +45,6 @@ public class FormationInitialeService {
       .toList();
   }
 
-  /** Détails */
   public FormationInitialeDetailsResponse getDetails(Long id) {
 
     FormationInitiale formation = get(id);
@@ -126,6 +123,17 @@ public class FormationInitialeService {
     return toListDto(repository.save(formation));
   }
 
+  public void updateCover(Long id, MultipartFile cover) {
+
+    if (cover == null || cover.isEmpty()) {
+      throw new IllegalArgumentException("Cover invalide");
+    }
+
+    FormationInitiale formation = get(id);
+    formation.setCoverImageUrl(fileStorageService.storeFormationCover(cover));
+    repository.save(formation);
+  }
+
   public void addGalleryImages(Long formationId, List<MultipartFile> images) {
 
     if (images == null || images.isEmpty()) return;
@@ -149,24 +157,6 @@ public class FormationInitialeService {
           .build()
       );
     }
-  }
-
-  public void updateCover(Long id, MultipartFile cover) {
-
-    if (cover == null || cover.isEmpty()) {
-      throw new IllegalArgumentException("Cover invalide");
-    }
-
-    FormationInitiale formation = get(id);
-    formation.setCoverImageUrl(fileStorageService.storeFormationCover(cover));
-
-    repository.save(formation);
-  }
-
-  public void removePdf(Long id) {
-    FormationInitiale formation = get(id);
-    formation.setPdfUrl(null);
-    repository.save(formation);
   }
 
   public void deleteGalleryImage(Long imageId) {
@@ -196,6 +186,17 @@ public class FormationInitialeService {
     }
   }
 
+  public void removePdf(Long id) {
+    FormationInitiale formation = get(id);
+    formation.setPdfUrl(null);
+    repository.save(formation);
+  }
+
+  /* ============================
+     🗑️ SUPPRESSION (CORRIGÉ)
+     ============================ */
+
+  @Transactional
   public void delete(Long id) {
     imageRepository.deleteByFormationId(id);
     repository.delete(get(id));

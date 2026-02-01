@@ -17,7 +17,7 @@ public class AgendaEventService {
   private final AgendaEventRepository repository;
 
   /* ============================
-     🌍 À VENIR
+     🌍 PUBLIC – À VENIR
      ============================ */
 
   public List<AgendaEventResponse> getUpcomingEvents() {
@@ -29,7 +29,7 @@ public class AgendaEventService {
   }
 
   /* ============================
-     🌍 PASSÉS
+     🌍 PUBLIC – PASSÉS
      ============================ */
 
   public List<AgendaEventResponse> getPastEvents() {
@@ -41,7 +41,7 @@ public class AgendaEventService {
   }
 
   /* ============================
-     🌍 AGENDA MENSUEL
+     🌍 PUBLIC – MOIS
      ============================ */
 
   public List<AgendaEventResponse> getByMonth(int year, int month) {
@@ -57,7 +57,7 @@ public class AgendaEventService {
   }
 
   /* ============================
-     🌍 JOURS AVEC ÉVÉNEMENTS
+     🌍 PUBLIC – JOURS AVEC ÉVÉNEMENTS
      ============================ */
 
   public List<AgendaDayResponse> getDaysWithEvents(int year, int month) {
@@ -84,7 +84,25 @@ public class AgendaEventService {
   }
 
   /* ============================
-     🔐 ADMIN
+     🌍 PUBLIC – CALENDRIER
+     ============================ */
+
+  public AgendaCalendarResponse getCalendarByMonth(int year, int month) {
+
+    LocalDate monthStart = LocalDate.of(year, month, 1);
+    LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
+
+    List<AgendaEvent> events = repository
+      .findByEnabledTrueAndEventDateBetweenOrderByEventDateAsc(
+        monthStart.minusDays(31),
+        monthEnd
+      );
+
+    return buildCalendar(events, year, month);
+  }
+
+  /* ============================
+     🔐 ADMIN – LISTE COMPLÈTE
      ============================ */
 
   public List<AgendaEventResponse> getAll() {
@@ -94,6 +112,10 @@ public class AgendaEventService {
       .map(this::toDto)
       .toList();
   }
+
+  /* ============================
+     🔐 ADMIN – CREATE
+     ============================ */
 
   public AgendaEventResponse create(
     String title,
@@ -120,6 +142,10 @@ public class AgendaEventService {
     return toDto(repository.save(event));
   }
 
+  /* ============================
+     🔐 ADMIN – UPDATE
+     ============================ */
+
   public AgendaEventResponse update(Long id, AgendaEventUpdateRequest request) {
 
     AgendaEvent event = repository.findById(id)
@@ -137,37 +163,44 @@ public class AgendaEventService {
     return toDto(repository.save(event));
   }
 
+  /* ============================
+     🔐 ADMIN – DELETE
+     ============================ */
+
   public void delete(Long id) {
     repository.deleteById(id);
   }
 
   /* ============================
-     🧩 MAPPER
+     🔐 ADMIN – CALENDRIER COMPLET
      ============================ */
 
-  private AgendaEventResponse toDto(AgendaEvent e) {
-    return AgendaEventResponse.builder()
-      .id(e.getId())
-      .title(e.getTitle())
-      .description(e.getDescription())
-      .eventDate(e.getEventDate())
-      .endDate(e.getEndDate())
-      .startTime(e.getStartTime())
-      .endTime(e.getEndTime())
-      .location(e.getLocation())
-      .build();
-  }
-
-  public AgendaCalendarResponse getCalendarByMonth(int year, int month) {
+  public AgendaCalendarResponse getCalendarByMonthAdmin(int year, int month) {
 
     LocalDate monthStart = LocalDate.of(year, month, 1);
     LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
 
     List<AgendaEvent> events = repository
-      .findByEnabledTrueAndEventDateBetweenOrderByEventDateAsc(
-        monthStart.minusDays(31), // marge multi-jours
+      .findByEventDateBetweenOrderByEventDateAsc(
+        monthStart.minusDays(31),
         monthEnd
       );
+
+    return buildCalendar(events, year, month);
+  }
+
+  /* ============================
+     🧩 CALENDAR BUILDER
+     ============================ */
+
+  private AgendaCalendarResponse buildCalendar(
+    List<AgendaEvent> events,
+    int year,
+    int month
+  ) {
+
+    LocalDate monthStart = LocalDate.of(year, month, 1);
+    LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
 
     Map<LocalDate, List<AgendaCalendarEventResponse>> daysMap = new HashMap<>();
 
@@ -195,6 +228,7 @@ public class AgendaEventService {
                 .startTime(event.getStartTime())
                 .endTime(event.getEndTime())
                 .location(event.getLocation())
+                .enabled(event.getEnabled())
                 .multiDay(!start.equals(end))
                 .build()
             );
@@ -220,4 +254,21 @@ public class AgendaEventService {
       .build();
   }
 
+  /* ============================
+     🧩 MAPPER (FIX FINAL)
+     ============================ */
+
+  private AgendaEventResponse toDto(AgendaEvent e) {
+    return AgendaEventResponse.builder()
+      .id(e.getId())
+      .title(e.getTitle())
+      .description(e.getDescription())
+      .eventDate(e.getEventDate())
+      .endDate(e.getEndDate())
+      .startTime(e.getStartTime())
+      .endTime(e.getEndTime())
+      .location(e.getLocation())
+      .enabled(e.getEnabled()) // ✅ LIGNE QUI MANQUAIT
+      .build();
+  }
 }

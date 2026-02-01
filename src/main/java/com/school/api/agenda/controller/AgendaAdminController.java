@@ -1,5 +1,6 @@
 package com.school.api.agenda.controller;
 
+import com.school.api.agenda.dto.AgendaCalendarResponse;
 import com.school.api.agenda.dto.AgendaEventResponse;
 import com.school.api.agenda.dto.AgendaEventUpdateRequest;
 import com.school.api.agenda.service.AgendaEventService;
@@ -59,4 +60,13 @@ public class AgendaAdminController {
   public void delete(@PathVariable Long id) {
     service.delete(id);
   }
+
+  @GetMapping("/calendar")
+  public AgendaCalendarResponse calendar(
+    @RequestParam int year,
+    @RequestParam int month
+  ) {
+    return service.getCalendarByMonthAdmin(year, month);
+  }
 }
+

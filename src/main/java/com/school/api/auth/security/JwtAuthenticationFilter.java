@@ -2,8 +2,10 @@ package com.school.api.auth.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,6 +29,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     FilterChain filterChain
   ) throws ServletException, IOException {
 
+    String path = request.getServletPath();
+
+    // ✅ NE PAS FILTRER LOGIN / REFRESH
+    if (
+      path.startsWith("/api/auth/login") ||
+      path.startsWith("/api/auth/refresh")
+    ) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     String header = request.getHeader("Authorization");
 
     if (header == null || !header.startsWith("Bearer ")) {
@@ -34,24 +47,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
-    String token = header.substring(7);
+    try {
+      String token = header.substring(7);
 
-    Claims claims = Jwts.parserBuilder()
-      .setSigningKey(jwtService.getKey())
-      .build()
-      .parseClaimsJws(token)
-      .getBody();
+      Claims claims = Jwts.parserBuilder()
+        .setSigningKey(jwtService.getKey())
+        .build()
+        .parseClaimsJws(token)
+        .getBody();
 
-    String email = claims.getSubject();
-    String role = claims.get("role", String.class);
+      String email = claims.getSubject();
+      String role = claims.get("role", String.class);
 
-    var auth = new UsernamePasswordAuthenticationToken(
-      email,
-      null,
-      List.of(new SimpleGrantedAuthority("ROLE_" + role))
-    );
+      var auth = new UsernamePasswordAuthenticationToken(
+        email,
+        null,
+        List.of(new SimpleGrantedAuthority("ROLE_" + role))
+      );
 
-    SecurityContextHolder.getContext().setAuthentication(auth);
+      SecurityContextHolder.getContext().setAuthentication(auth);
+
+    } catch (Exception e) {
+      // ❌ Token expiré ou invalide → on laisse passer (401 sera géré par Spring)
+      SecurityContextHolder.clearContext();
+    }
+
     filterChain.doFilter(request, response);
   }
 }

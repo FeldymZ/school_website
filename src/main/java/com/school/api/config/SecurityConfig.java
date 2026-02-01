@@ -4,6 +4,7 @@ import com.school.api.auth.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,53 +23,48 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
     http
-      // ❌ pas de session
       .csrf(csrf -> csrf.disable())
-
-      // ✅ ACTIVER CORS (OBLIGATOIRE)
       .cors(Customizer.withDefaults())
-
       .sessionManagement(session ->
         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
       )
-
       .authorizeHttpRequests(auth -> auth
 
-        // ===============================
-        // SWAGGER / OPENAPI
-        // ===============================
+        // 🔓 AUTH
+        .requestMatchers(
+          "/api/auth/login",
+          "/api/auth/refresh",
+          "/api/auth/logout"
+        ).permitAll()
+
+        // Swagger
         .requestMatchers(
           "/swagger-ui.html",
           "/swagger-ui/**",
-          "/v3/api-docs",
           "/v3/api-docs/**"
         ).permitAll()
 
-        // ===============================
-        // API PUBLIQUE
-        // ===============================
+        // Public
         .requestMatchers(
-          "/api/auth/**",
           "/api/public/**",
           "/files/**",
           "/assets/**"
         ).permitAll()
 
-        // ===============================
-        // TOUT LE RESTE PROTÉGÉ
-        // ===============================
+        // Preflight
+        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+        // 🔐 RESTE
         .anyRequest().authenticated()
       )
-
-      // 🔐 JWT
       .addFilterBefore(
         jwtAuthenticationFilter,
         UsernamePasswordAuthenticationFilter.class
       )
-
       .formLogin(form -> form.disable())
       .httpBasic(basic -> basic.disable());
 
     return http.build();
   }
 }
+

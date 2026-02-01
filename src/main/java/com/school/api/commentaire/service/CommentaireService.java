@@ -98,8 +98,13 @@ public class CommentaireService {
       .orElseThrow(() -> new RuntimeException("Commentaire introuvable"));
 
     // ❗ contrôle unicité de l’ordre (hors soi-même)
-    if (request.displayOrder() != null &&
-      repository.existsByDisplayOrderAndIdNot(request.displayOrder(), id)) {
+    if (
+      request.displayOrder() != null &&
+      repository.existsByDisplayOrderAndIdNot(
+        request.displayOrder(),
+        id
+      )
+    ) {
       throw new IllegalArgumentException(
         "Un commentaire avec cet ordre existe déjà"
       );
@@ -146,9 +151,13 @@ public class CommentaireService {
       .content(c.getContent())
       .displayDate(c.getDisplayDate())
       .authorImageUrl(c.getAuthorImageUrl())
+      .enabled(c.getEnabled())
       .build();
   }
 
+  /**
+   * Réorganisation (drag & drop)
+   */
   public void reorder(CommentaireReorderRequest request) {
 
     List<Long> ids = request.orderedIds();
@@ -157,7 +166,7 @@ public class CommentaireService {
       throw new IllegalArgumentException("Liste d’IDs vide");
     }
 
-    int order = 1; // on commence à 1 (plus lisible côté admin)
+    int order = 1;
 
     for (Long id : ids) {
 
@@ -170,5 +179,4 @@ public class CommentaireService {
       repository.save(commentaire);
     }
   }
-
 }

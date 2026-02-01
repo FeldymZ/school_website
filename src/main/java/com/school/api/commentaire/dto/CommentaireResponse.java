@@ -8,5 +8,6 @@ public record CommentaireResponse(
   String authorName,
   String content,
   String displayDate,
-  String authorImageUrl
+  String authorImageUrl,
+  Boolean enabled
 ) {}

@@ -8,18 +8,22 @@ import java.util.List;
 
 public interface AgendaEventRepository extends JpaRepository<AgendaEvent, Long> {
 
-  /* 🌍 À venir */
+  // 🌍 PUBLIC
   List<AgendaEvent> findByEnabledTrueAndEventDateGreaterThanEqualOrderByEventDateAsc(
     LocalDate today
   );
 
-  /* 🌍 Passés */
   List<AgendaEvent> findByEnabledTrueAndEventDateLessThanOrderByEventDateDesc(
     LocalDate today
   );
 
-  /* 🌍 Mois */
   List<AgendaEvent> findByEnabledTrueAndEventDateBetweenOrderByEventDateAsc(
+    LocalDate start,
+    LocalDate end
+  );
+
+  // 🔐 ADMIN (SANS filtre enabled)
+  List<AgendaEvent> findByEventDateBetweenOrderByEventDateAsc(
     LocalDate start,
     LocalDate end
   );

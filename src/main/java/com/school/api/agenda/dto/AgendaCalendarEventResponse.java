@@ -15,5 +15,6 @@ public record AgendaCalendarEventResponse(
   LocalTime startTime,
   LocalTime endTime,
   String location,
+  Boolean enabled,      // ✅ AJOUT
   boolean multiDay
 ) {}

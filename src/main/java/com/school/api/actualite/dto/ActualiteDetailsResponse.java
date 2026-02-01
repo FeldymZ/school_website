@@ -12,5 +12,6 @@ public record ActualiteDetailsResponse(
   String content,
   String coverImageUrl,
   List<String> galleryImages,
+  Integer displayOrder,
   LocalDateTime publishedAt
 ) {}

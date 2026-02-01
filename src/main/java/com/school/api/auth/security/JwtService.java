@@ -1,6 +1,7 @@
 package com.school.api.auth.security;
 
 import com.school.api.auth.entity.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
@@ -14,18 +15,39 @@ public class JwtService {
   private static final String SECRET =
     "SUPER_SECRET_KEY_CHANGE_ME_SUPER_SECRET_KEY_CHANGE_ME";
 
-  private static final long EXPIRATION = 1000 * 60 * 60 * 24;
+  private static final long ACCESS_EXPIRATION = 1000 * 60 * 15; // 15 min
+  private static final long REFRESH_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 jours
 
   private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-  public String generateToken(User user) {
+  /* ================= ACCESS TOKEN ================= */
+  public String generateAccessToken(User user) {
     return Jwts.builder()
       .setSubject(user.getEmail())
       .claim("role", user.getRole())
       .setIssuedAt(new Date())
-      .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+      .setExpiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRATION))
       .signWith(key)
       .compact();
+  }
+
+  /* ================= REFRESH TOKEN ================= */
+  public String generateRefreshToken(User user) {
+    return Jwts.builder()
+      .setSubject(user.getEmail())
+      .setIssuedAt(new Date())
+      .setExpiration(new Date(System.currentTimeMillis() + REFRESH_EXPIRATION))
+      .signWith(key)
+      .compact();
+  }
+
+  /* ================= PARSE ================= */
+  public Claims parse(String token) {
+    return Jwts.parserBuilder()
+      .setSigningKey(key)
+      .build()
+      .parseClaimsJws(token)
+      .getBody();
   }
 
   public SecretKey getKey() {

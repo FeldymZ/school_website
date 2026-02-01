@@ -18,11 +18,25 @@ public class ActualiteAdminController {
 
   private final ActualiteService service;
 
+  /* =========================
+     LISTE DES ACTUALITÉS
+     ========================= */
   @GetMapping
   public List<ActualiteResponse> all() {
     return service.getAll();
   }
 
+  /* =========================
+     DÉTAIL D’UNE ACTUALITÉ
+     ========================= */
+  @GetMapping("/{id}")
+  public ActualiteDetailsResponse getDetails(@PathVariable Long id) {
+    return service.getDetails(id);
+  }
+
+  /* =========================
+     CRÉATION
+     ========================= */
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ActualiteResponse create(
     @RequestParam String title,
@@ -34,6 +48,9 @@ public class ActualiteAdminController {
     return service.create(title, content, displayOrder, enabled, coverImage);
   }
 
+  /* =========================
+     MISE À JOUR TEXTE
+     ========================= */
   @PutMapping("/{id}")
   public ActualiteResponse update(
     @PathVariable Long id,
@@ -42,6 +59,9 @@ public class ActualiteAdminController {
     return service.update(id, request);
   }
 
+  /* =========================
+     MISE À JOUR COUVERTURE
+     ========================= */
   @PutMapping(
     value = "/{id}/cover",
     consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -53,6 +73,9 @@ public class ActualiteAdminController {
     return service.updateCover(id, coverImage);
   }
 
+  /* =========================
+     AJOUT IMAGES GALERIE
+     ========================= */
   @PostMapping(
     value = "/{id}/images",
     consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -64,6 +87,9 @@ public class ActualiteAdminController {
     service.addGalleryImages(id, images);
   }
 
+  /* =========================
+     REMPLACEMENT GALERIE
+     ========================= */
   @PutMapping(
     value = "/{id}/images",
     consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -75,6 +101,9 @@ public class ActualiteAdminController {
     service.replaceGalleryImages(id, images);
   }
 
+  /* =========================
+     HISTORIQUE DE PUBLICATION
+     ========================= */
   @GetMapping("/{id}/history")
   public List<ActualitePublicationHistoryResponse> history(
     @PathVariable Long id
@@ -82,15 +111,21 @@ public class ActualiteAdminController {
     return service.getPublicationHistory(id);
   }
 
+  /* =========================
+     SUPPRESSION (SUPERADMIN)
+     🔥 FIX 403 ICI
+     ========================= */
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('SUPERADMIN')")
+  @PreAuthorize("hasAuthority('ROLE_SUPERADMIN')")
   public void delete(@PathVariable Long id) {
     service.delete(id);
   }
 
+  /* =========================
+     RÉORDONNANCEMENT
+     ========================= */
   @PutMapping("/reorder")
   public void reorder(@RequestBody ActualiteReorderRequest request) {
     service.reorder(request);
   }
-
 }

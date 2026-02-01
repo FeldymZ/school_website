@@ -23,7 +23,6 @@ public class BannerAdminController {
   /* ============================
      📋 LISTE
      ============================ */
-
   @GetMapping
   public List<BannerResponse> all() {
     return service.getAll();
@@ -32,7 +31,6 @@ public class BannerAdminController {
   /* ============================
      ➕ CRÉATION (MULTIPART)
      ============================ */
-
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public BannerResponse create(
     @RequestParam String title,
@@ -40,14 +38,10 @@ public class BannerAdminController {
     @RequestParam(required = false) String subtitleAlt,
     @RequestParam Integer displayOrder,
     @RequestParam(required = false) Boolean enabled,
-
     @RequestParam(required = false) String startAt,
     @RequestParam(required = false) String endAt,
-
-    // 🆕 bouton optionnel
     @RequestParam(required = false) String buttonLabel,
     @RequestParam(required = false) String buttonUrl,
-
     @RequestParam MultipartFile media
   ) {
     return service.create(
@@ -67,7 +61,6 @@ public class BannerAdminController {
   /* ============================
      ✏️ UPDATE
      ============================ */
-
   @PutMapping("/{id}")
   public BannerResponse update(
     @PathVariable Long id,
@@ -79,7 +72,6 @@ public class BannerAdminController {
   /* ============================
      ✅ ENABLE / DISABLE
      ============================ */
-
   @PutMapping("/{id}/enable")
   public BannerResponse enable(@PathVariable Long id) {
     return service.enable(id);
@@ -93,18 +85,16 @@ public class BannerAdminController {
   /* ============================
      🔀 REORDER
      ============================ */
-
   @PutMapping("/reorder")
   public void reorder(@RequestBody List<BannerOrderRequest> orders) {
     service.reorder(orders);
   }
 
   /* ============================
-     🗑️ DELETE
+     🗑️ DELETE (🔥 FIX FINAL)
      ============================ */
-
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('SUPERADMIN')")
+  @PreAuthorize("hasAuthority('ROLE_SUPERADMIN')")
   public void delete(@PathVariable Long id) {
     service.delete(id);
   }
@@ -112,7 +102,6 @@ public class BannerAdminController {
   /* ============================
      📊 CLASSIFIED
      ============================ */
-
   @GetMapping("/classified")
   public List<BannerResponse> classified() {
     return service.getAllClassified();

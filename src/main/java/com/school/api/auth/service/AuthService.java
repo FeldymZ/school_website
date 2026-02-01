@@ -1,6 +1,7 @@
 package com.school.api.auth.service;
 
-import com.school.api.auth.dto.*;
+import com.school.api.auth.dto.LoginRequest;
+import com.school.api.auth.dto.LoginResponse;
 import com.school.api.auth.entity.User;
 import com.school.api.auth.repository.UserRepository;
 import com.school.api.auth.security.JwtService;
@@ -29,6 +30,7 @@ public class AuthService {
       throw new RuntimeException("Identifiants invalides");
     }
 
-    return new LoginResponse(jwtService.generateToken(user));
+    String accessToken = jwtService.generateAccessToken(user);
+    return new LoginResponse(accessToken);
   }
 }

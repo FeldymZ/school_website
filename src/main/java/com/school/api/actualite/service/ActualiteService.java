@@ -24,7 +24,7 @@ public class ActualiteService {
      🌍 PUBLIC
      ============================ */
 
-  /** Liste publique (visible + images galerie existantes) */
+  /** Liste publique */
   public List<ActualiteResponse> getPublic() {
     return repository.findPublicVisible()
       .stream()
@@ -32,7 +32,7 @@ public class ActualiteService {
       .toList();
   }
 
-  /** Détails publics */
+  /** Détails publics / admin */
   public ActualiteDetailsResponse getDetails(Long id) {
 
     Actualite actualite = get(id);
@@ -49,6 +49,7 @@ public class ActualiteService {
       .content(actualite.getContent())
       .coverImageUrl(actualite.getCoverImageUrl())
       .galleryImages(galleryImages)
+      .displayOrder(actualite.getDisplayOrder()) // ✅ CORRECTION
       .publishedAt(actualite.getPublishedAt())
       .build();
   }
@@ -57,7 +58,7 @@ public class ActualiteService {
      🔐 ADMIN
      ============================ */
 
-  /** Liste admin complète */
+  /** Liste admin */
   public List<ActualiteResponse> getAll() {
     return repository.findAllByOrderByDisplayOrderAsc()
       .stream()
@@ -89,7 +90,6 @@ public class ActualiteService {
 
     Actualite saved = repository.save(actualite);
 
-    // Publication immédiate si demandé
     if (Boolean.TRUE.equals(enabled)) {
       publish(saved);
       saved = repository.save(saved);
@@ -98,7 +98,7 @@ public class ActualiteService {
     return toListDto(saved);
   }
 
-  /** Mise à jour texte + visibilité */
+  /** Mise à jour */
   public ActualiteResponse update(Long id, ActualiteUpdateRequest request) {
 
     Actualite actualite = get(id);
@@ -124,7 +124,7 @@ public class ActualiteService {
     return toListDto(repository.save(actualite));
   }
 
-  /** Ajout images galerie */
+  /** Ajout images */
   public void addGalleryImages(Long actualiteId, List<MultipartFile> images) {
 
     Actualite actualite = get(actualiteId);
@@ -146,7 +146,7 @@ public class ActualiteService {
     }
   }
 
-  /** Remplacer toute la galerie */
+  /** Remplacer galerie */
   public void replaceGalleryImages(Long actualiteId, List<MultipartFile> images) {
 
     Actualite actualite = get(actualiteId);
@@ -166,7 +166,7 @@ public class ActualiteService {
     }
   }
 
-  /** Changer la cover */
+  /** Changer cover */
   public ActualiteResponse updateCover(Long id, MultipartFile coverImage) {
 
     if (coverImage == null || coverImage.isEmpty()) {
@@ -194,7 +194,6 @@ public class ActualiteService {
      📜 HISTORIQUE
      ============================ */
 
-  /** Historique classé : UNPUBLISHED → PUBLISHED */
   public List<ActualitePublicationHistoryResponse> getPublicationHistory(Long id) {
     return historyRepository.findByActualiteIdOrdered(id)
       .stream()
@@ -206,7 +205,7 @@ public class ActualiteService {
   }
 
   /* ============================
-     🔒 LOGIQUE MÉTIER
+     🔒 MÉTIER
      ============================ */
 
   private void publish(Actualite actualite) {
@@ -271,6 +270,4 @@ public class ActualiteService {
       repository.save(actualite);
     }
   }
-
-
 }

@@ -14,7 +14,6 @@ public record AgendaEventResponse(
   LocalDate endDate,
   LocalTime startTime,
   LocalTime endTime,
-  String location
+  String location,
+  Boolean enabled // ✅ AJOUT OBLIGATOIRE
 ) {}
-
-

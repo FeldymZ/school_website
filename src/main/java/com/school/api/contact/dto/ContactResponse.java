@@ -1,7 +1,6 @@
 package com.school.api.contact.dto;
 
 import lombok.Builder;
-
 import java.time.LocalDateTime;
 
 @Builder
@@ -13,5 +12,9 @@ public record ContactResponse(
   LocalDateTime sentAt,
   Boolean replied,
   LocalDateTime repliedAt,
-  String replyMessage
+  String replyMessage,
+
+  // 📎 PJ
+  String attachmentUrl,
+  String attachmentName
 ) {}
