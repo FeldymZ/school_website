@@ -7,6 +7,7 @@ import com.school.api.common.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -40,7 +41,6 @@ public class ActualiteService {
         HttpStatus.NOT_FOUND, "Actualité introuvable"
       ));
 
-    // 🔐 SÉCURITÉ PUBLIC : uniquement publié
     if (!Boolean.TRUE.equals(actualite.getEnabled())) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
@@ -103,6 +103,7 @@ public class ActualiteService {
      ✏️ CRÉATION / MISE À JOUR
      ============================ */
 
+  @Transactional
   public ActualiteResponse create(
     String title,
     String content,
@@ -135,6 +136,7 @@ public class ActualiteService {
     return toListDto(saved);
   }
 
+  @Transactional
   public ActualiteResponse update(Long id, ActualiteUpdateRequest request) {
 
     Actualite actualite = get(id);
@@ -160,6 +162,7 @@ public class ActualiteService {
     return toListDto(repository.save(actualite));
   }
 
+  @Transactional
   public ActualiteResponse updateCover(Long id, MultipartFile coverImage) {
 
     if (coverImage == null || coverImage.isEmpty()) {
@@ -181,6 +184,7 @@ public class ActualiteService {
      🖼️ GALERIE
      ============================ */
 
+  @Transactional
   public void addGalleryImages(Long actualiteId, List<MultipartFile> images) {
 
     Actualite actualite = get(actualiteId);
@@ -202,6 +206,7 @@ public class ActualiteService {
     }
   }
 
+  @Transactional
   public void replaceGalleryImages(Long actualiteId, List<MultipartFile> images) {
 
     imageRepository.findByActualiteIdOrderByDisplayOrderAsc(actualiteId)
@@ -225,6 +230,7 @@ public class ActualiteService {
     }
   }
 
+  @Transactional
   public void deleteGalleryImage(Long imageId) {
 
     ActualiteImage image = imageRepository.findById(imageId)
@@ -240,6 +246,7 @@ public class ActualiteService {
      🗑️ SUPPRESSION ACTUALITÉ
      ============================ */
 
+  @Transactional
   public void delete(Long id) {
 
     Actualite actualite = get(id);
@@ -344,11 +351,11 @@ public class ActualiteService {
     return slug;
   }
 
-
   /* ============================
-   🔁 RÉORDONNANCEMENT
-   ============================ */
+     🔁 RÉORDONNANCEMENT
+     ============================ */
 
+  @Transactional
   public void reorder(ActualiteReorderRequest request) {
 
     List<Long> ids = request.orderedIds();
@@ -369,5 +376,4 @@ public class ActualiteService {
       repository.save(actualite);
     }
   }
-
 }
