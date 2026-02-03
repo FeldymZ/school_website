@@ -233,4 +233,19 @@ public class FileStorageService {
     }
     return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
   }
+
+
+  /**
+   * 🧹 Suppression silencieuse
+   * - Ne jette jamais d’exception
+   * - Utilisée par les services métier
+   */
+  public void deleteQuietly(String publicUrl) {
+    try {
+      delete(publicUrl);
+    } catch (Exception ignored) {
+      // volontairement ignoré
+    }
+  }
+
 }
