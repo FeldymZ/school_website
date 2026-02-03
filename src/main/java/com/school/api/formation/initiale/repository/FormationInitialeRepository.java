@@ -5,28 +5,26 @@ import com.school.api.formation.initiale.entity.FormationInitialeLevel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FormationInitialeRepository
   extends JpaRepository<FormationInitiale, Long> {
 
-  /* ============================
-     🌍 PUBLIC
-     ============================ */
-
-  // Toutes les formations activées
+  // PUBLIC
   List<FormationInitiale>
   findByEnabledTrueOrderByDisplayOrderAsc();
 
-  // Par niveau (LICENCE / MASTER)
   List<FormationInitiale>
   findByEnabledTrueAndLevelOrderByDisplayOrderAsc(
     FormationInitialeLevel level
   );
 
-  /* ============================
-     🔐 ADMIN
-     ============================ */
-
+  // ADMIN
   List<FormationInitiale>
   findAllByOrderByDisplayOrderAsc();
+
+  // SLUG
+  boolean existsBySlug(String slug);
+
+  Optional<FormationInitiale> findBySlug(String slug);
 }

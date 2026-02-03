@@ -22,23 +22,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
 
+  /**
+   * 🔥 POINT CRITIQUE
+   * On ignore complètement le filtre JWT pour les routes publiques
+   */
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    String path = request.getServletPath();
+
+    return
+      path.startsWith("/api/public/") ||
+      path.startsWith("/api/auth/login") ||
+      path.startsWith("/api/auth/refresh") ||
+      path.startsWith("/swagger-ui") ||
+      path.startsWith("/v3/api-docs");
+  }
+
   @Override
   protected void doFilterInternal(
     HttpServletRequest request,
     HttpServletResponse response,
     FilterChain filterChain
   ) throws ServletException, IOException {
-
-    String path = request.getServletPath();
-
-    // ✅ NE PAS FILTRER LOGIN / REFRESH
-    if (
-      path.startsWith("/api/auth/login") ||
-      path.startsWith("/api/auth/refresh")
-    ) {
-      filterChain.doFilter(request, response);
-      return;
-    }
 
     String header = request.getHeader("Authorization");
 
@@ -68,7 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       SecurityContextHolder.getContext().setAuthentication(auth);
 
     } catch (Exception e) {
-      // ❌ Token expiré ou invalide → on laisse passer (401 sera géré par Spring)
+      // Token invalide / expiré → pas d'auth
       SecurityContextHolder.clearContext();
     }
 

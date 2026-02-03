@@ -9,9 +9,16 @@ import java.util.List;
 public record ActualiteDetailsResponse(
   Long id,
   String title,
+  String slug,
   String content,
   String coverImageUrl,
+
+  // 🌍 PUBLIC (inchangé)
   List<String> galleryImages,
+
+  // 🔐 ADMIN (NOUVEAU)
+  List<ActualiteGalleryImageResponse> galleryImagesAdmin,
+
   Integer displayOrder,
   LocalDateTime publishedAt
 ) {}

@@ -4,7 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "formations_initiales")
+@Table(
+  name = "formations_initiales",
+  uniqueConstraints = {
+    @UniqueConstraint(columnNames = "slug")
+  }
+)
 @Getter
 @Setter
 @Builder
@@ -16,14 +21,15 @@ public class FormationInitiale {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  // Nom réel (ex: Cyber Défense)
   @Column(nullable = false)
   private String name;
+
+  @Column(nullable = false, unique = true)
+  private String slug; // ✅ NOUVEAU
 
   @Column(columnDefinition = "TEXT")
   private String description;
 
-  // 🟢 IMAGE PRINCIPALE (portrait)
   @Column(nullable = false)
   private String coverImageUrl;
 
@@ -31,7 +37,7 @@ public class FormationInitiale {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private FormationInitialeLevel level; // LICENCE / MASTER
+  private FormationInitialeLevel level;
 
   private Integer displayOrder;
 

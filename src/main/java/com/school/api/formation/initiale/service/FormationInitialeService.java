@@ -12,10 +12,13 @@ import com.school.api.formation.initiale.repository.FormationInitialeImageReposi
 import com.school.api.formation.initiale.repository.FormationInitialeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.Normalizer;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +28,9 @@ public class FormationInitialeService {
   private final FormationInitialeImageRepository imageRepository;
   private final FileStorageService fileStorageService;
 
-  /* ============================
+  /* =====================================================
      🌍 PUBLIC
-     ============================ */
+     ===================================================== */
 
   public List<FormationInitialeResponse> getAllPublic() {
     return repository
@@ -37,7 +40,9 @@ public class FormationInitialeService {
       .toList();
   }
 
-  public List<FormationInitialeResponse> getPublic(FormationInitialeLevel level) {
+  public List<FormationInitialeResponse> getPublic(
+    FormationInitialeLevel level
+  ) {
     return repository
       .findByEnabledTrueAndLevelOrderByDisplayOrderAsc(level)
       .stream()
@@ -45,30 +50,19 @@ public class FormationInitialeService {
       .toList();
   }
 
-  public FormationInitialeDetailsResponse getDetails(Long id) {
+  public FormationInitialeDetailsResponse getPublicDetailsBySlug(
+    String slug
+  ) {
+    FormationInitiale formation = repository.findBySlug(slug)
+      .filter(FormationInitiale::getEnabled)
+      .orElseThrow(() -> new RuntimeException("Formation indisponible"));
 
-    FormationInitiale formation = get(id);
-
-    List<String> galleryImages = imageRepository
-      .findByFormationIdOrderByDisplayOrderAsc(id)
-      .stream()
-      .map(FormationInitialeImage::getImageUrl)
-      .toList();
-
-    return FormationInitialeDetailsResponse.builder()
-      .id(formation.getId())
-      .title(buildTitle(formation))
-      .description(formation.getDescription())
-      .coverImageUrl(formation.getCoverImageUrl())
-      .galleryImages(galleryImages)
-      .pdfUrl(formation.getPdfUrl())
-      .level(formation.getLevel())
-      .build();
+    return buildDetails(formation);
   }
 
-  /* ============================
+  /* =====================================================
      🔐 ADMIN
-     ============================ */
+     ===================================================== */
 
   public List<FormationInitialeResponse> getAll() {
     return repository
@@ -76,6 +70,10 @@ public class FormationInitialeService {
       .stream()
       .map(this::toListDto)
       .toList();
+  }
+
+  public FormationInitialeDetailsResponse getDetails(Long id) {
+    return buildDetails(get(id));
   }
 
   public FormationInitialeResponse create(
@@ -99,6 +97,7 @@ public class FormationInitialeService {
 
     FormationInitiale formation = FormationInitiale.builder()
       .name(name)
+      .slug(generateUniqueSlug(name))
       .description(description)
       .level(level)
       .coverImageUrl(coverUrl)
@@ -110,15 +109,30 @@ public class FormationInitialeService {
     return toListDto(repository.save(formation));
   }
 
-  public FormationInitialeResponse update(Long id, FormationInitialeUpdateRequest request) {
+  public FormationInitialeResponse update(
+    Long id,
+    FormationInitialeUpdateRequest request
+  ) {
 
     FormationInitiale formation = get(id);
 
-    if (request.name() != null) formation.setName(request.name());
-    if (request.description() != null) formation.setDescription(request.description());
-    if (request.level() != null) formation.setLevel(request.level());
-    if (request.displayOrder() != null) formation.setDisplayOrder(request.displayOrder());
-    if (request.enabled() != null) formation.setEnabled(request.enabled());
+    if (request.name() != null &&
+        !request.name().equals(formation.getName())) {
+      formation.setName(request.name());
+      formation.setSlug(generateUniqueSlug(request.name()));
+    }
+
+    if (request.description() != null)
+      formation.setDescription(request.description());
+
+    if (request.level() != null)
+      formation.setLevel(request.level());
+
+    if (request.displayOrder() != null)
+      formation.setDisplayOrder(request.displayOrder());
+
+    if (request.enabled() != null)
+      formation.setEnabled(request.enabled());
 
     return toListDto(repository.save(formation));
   }
@@ -130,11 +144,20 @@ public class FormationInitialeService {
     }
 
     FormationInitiale formation = get(id);
-    formation.setCoverImageUrl(fileStorageService.storeFormationCover(cover));
+    formation.setCoverImageUrl(
+      fileStorageService.storeFormationCover(cover)
+    );
     repository.save(formation);
   }
 
-  public void addGalleryImages(Long formationId, List<MultipartFile> images) {
+  /* =====================================================
+     🖼️ GALERIE
+     ===================================================== */
+
+  public void addGalleryImages(
+    Long formationId,
+    List<MultipartFile> images
+  ) {
 
     if (images == null || images.isEmpty()) return;
 
@@ -147,19 +170,36 @@ public class FormationInitialeService {
     for (MultipartFile file : images) {
       if (file.isEmpty()) continue;
 
-      String imageUrl = fileStorageService.storeFormationGalleryImage(file);
-
       imageRepository.save(
         FormationInitialeImage.builder()
           .formation(formation)
-          .imageUrl(imageUrl)
+          .imageUrl(
+            fileStorageService.storeFormationGalleryImage(file)
+          )
           .displayOrder(order++)
           .build()
       );
     }
   }
 
+  /**
+   * ❌ SUPPRESSION IMAGE — SUPERADMIN UNIQUEMENT
+   */
   public void deleteGalleryImage(Long imageId) {
+
+    var auth = SecurityContextHolder.getContext().getAuthentication();
+
+    if (
+      auth == null ||
+      auth.getAuthorities().stream().noneMatch(
+        a -> a.getAuthority().equals("ROLE_SUPERADMIN")
+      )
+    ) {
+      throw new SecurityException(
+        "Suppression réservée au SUPERADMIN"
+      );
+    }
+
     imageRepository.delete(
       imageRepository.findById(imageId)
         .orElseThrow(() -> new RuntimeException("Image introuvable"))
@@ -175,16 +215,23 @@ public class FormationInitialeService {
     FormationInitiale formation = get(formationId);
 
     for (FormationImageOrderRequest item : orders) {
+
       FormationInitialeImage image = imageRepository.findById(item.id())
         .orElseThrow(() -> new RuntimeException("Image introuvable"));
 
       if (!image.getFormation().getId().equals(formation.getId())) {
-        throw new IllegalArgumentException("Image invalide pour cette formation");
+        throw new IllegalArgumentException(
+          "Image invalide pour cette formation"
+        );
       }
 
       image.setDisplayOrder(item.displayOrder());
     }
   }
+
+  /* =====================================================
+     📄 PDF
+     ===================================================== */
 
   public void removePdf(Long id) {
     FormationInitiale formation = get(id);
@@ -192,9 +239,9 @@ public class FormationInitialeService {
     repository.save(formation);
   }
 
-  /* ============================
-     🗑️ SUPPRESSION (CORRIGÉ)
-     ============================ */
+  /* =====================================================
+     🗑️ SUPPRESSION
+     ===================================================== */
 
   @Transactional
   public void delete(Long id) {
@@ -202,25 +249,80 @@ public class FormationInitialeService {
     repository.delete(get(id));
   }
 
-  /* ============================
-     🧩 UTILS
-     ============================ */
+  /* =====================================================
+     🔁 SLUG ↔ ID
+     ===================================================== */
+
+  public String getSlugById(Long id) {
+    return get(id).getSlug();
+  }
+
+  public Long getIdBySlug(String slug) {
+    return repository.findBySlug(slug)
+      .orElseThrow(() -> new RuntimeException("Formation introuvable"))
+      .getId();
+  }
+
+  /* =====================================================
+     🧩 UTILS INTERNES
+     ===================================================== */
 
   private FormationInitiale get(Long id) {
     return repository.findById(id)
       .orElseThrow(() -> new RuntimeException("Formation introuvable"));
   }
 
-  private String buildTitle(FormationInitiale f) {
-    return f.getLevel().getLabel() + " " + f.getName();
+  private FormationInitialeDetailsResponse buildDetails(
+    FormationInitiale f
+  ) {
+
+    List<String> galleryImages = imageRepository
+      .findByFormationIdOrderByDisplayOrderAsc(f.getId())
+      .stream()
+      .map(FormationInitialeImage::getImageUrl)
+      .toList();
+
+    return FormationInitialeDetailsResponse.builder()
+      .id(f.getId())
+      .title(buildTitle(f))
+      .slug(f.getSlug())
+      .description(f.getDescription())
+      .coverImageUrl(f.getCoverImageUrl())
+      .galleryImages(galleryImages)
+      .pdfUrl(f.getPdfUrl())
+      .level(f.getLevel())
+      .build();
   }
 
   private FormationInitialeResponse toListDto(FormationInitiale f) {
     return FormationInitialeResponse.builder()
       .id(f.getId())
       .title(buildTitle(f))
+      .slug(f.getSlug())
       .coverImageUrl(f.getCoverImageUrl())
       .level(f.getLevel())
       .build();
+  }
+
+  private String buildTitle(FormationInitiale f) {
+    return f.getLevel().getLabel() + " " + f.getName();
+  }
+
+  private String generateUniqueSlug(String input) {
+
+    String baseSlug = Normalizer.normalize(input, Normalizer.Form.NFD)
+      .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+      .toLowerCase(Locale.ROOT)
+      .replaceAll("[^a-z0-9]+", "-")
+      .replaceAll("(^-|-$)", "");
+
+    String slug = baseSlug;
+    int counter = 1;
+
+    while (repository.existsBySlug(slug)) {
+      slug = baseSlug + "-" + counter++;
+    }
+
+    return slug;
   }
 }

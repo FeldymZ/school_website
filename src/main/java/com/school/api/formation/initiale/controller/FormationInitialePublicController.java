@@ -5,7 +5,9 @@ import com.school.api.formation.initiale.dto.FormationInitialeResponse;
 import com.school.api.formation.initiale.entity.FormationInitialeLevel;
 import com.school.api.formation.initiale.service.FormationInitialeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class FormationInitialePublicController {
   private final FormationInitialeService service;
 
   /* ============================
-     📋 TOUTES LES FORMATIONS
+     📋 TOUTES LES FORMATIONS (PUBLIC)
      ============================ */
   @GetMapping
   public List<FormationInitialeResponse> getAll() {
@@ -25,7 +27,7 @@ public class FormationInitialePublicController {
   }
 
   /* ============================
-     📋 LISTE PAR NIVEAU
+     📋 LISTE PAR NIVEAU (PUBLIC)
      ============================ */
   @GetMapping("/level/{level}")
   public List<FormationInitialeResponse> getByLevel(
@@ -35,12 +37,23 @@ public class FormationInitialePublicController {
   }
 
   /* ============================
-     🔎 DÉTAILS
+     ❌ ACCÈS PAR ID INTERDIT (PUBLIC)
      ============================ */
   @GetMapping("/{id}")
-  public FormationInitialeDetailsResponse details(
-    @PathVariable Long id
+  public void forbiddenById() {
+    throw new ResponseStatusException(
+      HttpStatus.NOT_FOUND,
+      "Cette ressource n'existe plus. Utilisez le slug."
+    );
+  }
+
+  /* ============================
+     ✅ DÉTAILS PAR SLUG (URL CANONIQUE)
+     ============================ */
+  @GetMapping("/slug/{slug}")
+  public FormationInitialeDetailsResponse detailsBySlug(
+    @PathVariable String slug
   ) {
-    return service.getDetails(id);
+    return service.getPublicDetailsBySlug(slug);
   }
 }

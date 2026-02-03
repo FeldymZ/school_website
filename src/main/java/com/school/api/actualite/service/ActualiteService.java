@@ -32,31 +32,60 @@ public class ActualiteService {
       .toList();
   }
 
-  /** Détails publics / admin */
+  /** Détails publics par slug (URL canonique) */
+  public ActualiteDetailsResponse getDetailsBySlug(String slug) {
+
+    Actualite actualite = repository.findBySlug(slug)
+      .orElseThrow(() -> new RuntimeException("Actualité introuvable"));
+
+    return getDetails(actualite.getId());
+  }
+
+  /** Récupération du slug pour redirection ID → slug */
+  public String getSlugById(Long id) {
+    return repository.findById(id)
+      .map(Actualite::getSlug)
+      .orElseThrow(() -> new RuntimeException("Actualité introuvable"));
+  }
+
+  /* ============================
+     🔐 ADMIN / PUBLIC
+     ============================ */
+
+  /** Détails complets (admin & public) */
   public ActualiteDetailsResponse getDetails(Long id) {
 
     Actualite actualite = get(id);
 
-    List<String> galleryImages = imageRepository
-      .findByActualiteIdOrderByDisplayOrderAsc(id)
-      .stream()
+    List<ActualiteImage> images =
+      imageRepository.findByActualiteIdOrderByDisplayOrderAsc(id);
+
+    // 🌍 PUBLIC → URL uniquement
+    List<String> publicImages = images.stream()
       .map(ActualiteImage::getImageUrl)
+      .toList();
+
+    // 🔐 ADMIN → ID + URL
+    List<ActualiteGalleryImageResponse> adminImages = images.stream()
+      .map(img -> ActualiteGalleryImageResponse.builder()
+        .id(img.getId())
+        .url(img.getImageUrl())
+        .displayOrder(img.getDisplayOrder())
+        .build())
       .toList();
 
     return ActualiteDetailsResponse.builder()
       .id(actualite.getId())
       .title(actualite.getTitle())
+      .slug(actualite.getSlug())
       .content(actualite.getContent())
       .coverImageUrl(actualite.getCoverImageUrl())
-      .galleryImages(galleryImages)
-      .displayOrder(actualite.getDisplayOrder()) // ✅ CORRECTION
+      .galleryImages(publicImages)
+      .galleryImagesAdmin(adminImages)
+      .displayOrder(actualite.getDisplayOrder())
       .publishedAt(actualite.getPublishedAt())
       .build();
   }
-
-  /* ============================
-     🔐 ADMIN
-     ============================ */
 
   /** Liste admin */
   public List<ActualiteResponse> getAll() {
@@ -66,7 +95,10 @@ public class ActualiteService {
       .toList();
   }
 
-  /** Création */
+  /* ============================
+     ✏️ CRÉATION / MISE À JOUR
+     ============================ */
+
   public ActualiteResponse create(
     String title,
     String content,
@@ -81,6 +113,7 @@ public class ActualiteService {
 
     Actualite actualite = Actualite.builder()
       .title(title)
+      .slug(generateSlug(title))
       .content(content)
       .coverImageUrl(fileStorageService.storeActualiteCover(coverImage))
       .displayOrder(displayOrder)
@@ -98,17 +131,19 @@ public class ActualiteService {
     return toListDto(saved);
   }
 
-  /** Mise à jour */
   public ActualiteResponse update(Long id, ActualiteUpdateRequest request) {
 
     Actualite actualite = get(id);
 
     if (request.title() != null) {
       actualite.setTitle(request.title());
+      actualite.setSlug(generateSlug(request.title()));
     }
+
     if (request.content() != null) {
       actualite.setContent(request.content());
     }
+
     if (request.displayOrder() != null) {
       actualite.setDisplayOrder(request.displayOrder());
     }
@@ -124,7 +159,24 @@ public class ActualiteService {
     return toListDto(repository.save(actualite));
   }
 
-  /** Ajout images */
+  public ActualiteResponse updateCover(Long id, MultipartFile coverImage) {
+
+    if (coverImage == null || coverImage.isEmpty()) {
+      throw new IllegalArgumentException("Image de couverture manquante");
+    }
+
+    Actualite actualite = get(id);
+    actualite.setCoverImageUrl(
+      fileStorageService.storeActualiteCover(coverImage)
+    );
+
+    return toListDto(repository.save(actualite));
+  }
+
+  /* ============================
+     🖼️ GALERIE
+     ============================ */
+
   public void addGalleryImages(Long actualiteId, List<MultipartFile> images) {
 
     Actualite actualite = get(actualiteId);
@@ -146,7 +198,6 @@ public class ActualiteService {
     }
   }
 
-  /** Remplacer galerie */
   public void replaceGalleryImages(Long actualiteId, List<MultipartFile> images) {
 
     Actualite actualite = get(actualiteId);
@@ -166,22 +217,19 @@ public class ActualiteService {
     }
   }
 
-  /** Changer cover */
-  public ActualiteResponse updateCover(Long id, MultipartFile coverImage) {
+  public void deleteGalleryImage(Long imageId) {
 
-    if (coverImage == null || coverImage.isEmpty()) {
-      throw new IllegalArgumentException("Image de couverture manquante");
-    }
+    ActualiteImage image = imageRepository.findById(imageId)
+      .orElseThrow(() -> new RuntimeException("Image introuvable"));
 
-    Actualite actualite = get(id);
-    actualite.setCoverImageUrl(
-      fileStorageService.storeActualiteCover(coverImage)
-    );
-
-    return toListDto(repository.save(actualite));
+    fileStorageService.delete(image.getImageUrl());
+    imageRepository.delete(image);
   }
 
-  /** Suppression */
+  /* ============================
+     🗑️ SUPPRESSION ACTUALITÉ
+     ============================ */
+
   public void delete(Long id) {
     imageRepository.deleteByActualiteId(id);
     historyRepository.deleteAll(
@@ -247,10 +295,32 @@ public class ActualiteService {
     return ActualiteResponse.builder()
       .id(a.getId())
       .title(a.getTitle())
+      .slug(a.getSlug())
       .coverImageUrl(a.getCoverImageUrl())
       .publishedAt(a.getPublishedAt())
       .build();
   }
+
+  private String generateSlug(String title) {
+
+    String base = org.apache.commons.lang3.StringUtils.stripAccents(title)
+      .toLowerCase()
+      .replaceAll("[^a-z0-9]+", "-")
+      .replaceAll("(^-|-$)", "");
+
+    String slug = base;
+    int i = 1;
+
+    while (repository.existsBySlug(slug)) {
+      slug = base + "-" + i++;
+    }
+
+    return slug;
+  }
+
+  /* ============================
+     🔁 RÉORDONNANCEMENT
+     ============================ */
 
   public void reorder(ActualiteReorderRequest request) {
 

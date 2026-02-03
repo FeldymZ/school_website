@@ -24,9 +24,11 @@ public class JwtService {
   public String generateAccessToken(User user) {
     return Jwts.builder()
       .setSubject(user.getEmail())
-      .claim("role", user.getRole())
+      .claim("role", user.getRole().name()) // ✅ CORRECTION ICI
       .setIssuedAt(new Date())
-      .setExpiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRATION))
+      .setExpiration(
+        new Date(System.currentTimeMillis() + ACCESS_EXPIRATION)
+      )
       .signWith(key)
       .compact();
   }
@@ -36,7 +38,9 @@ public class JwtService {
     return Jwts.builder()
       .setSubject(user.getEmail())
       .setIssuedAt(new Date())
-      .setExpiration(new Date(System.currentTimeMillis() + REFRESH_EXPIRATION))
+      .setExpiration(
+        new Date(System.currentTimeMillis() + REFRESH_EXPIRATION)
+      )
       .signWith(key)
       .compact();
   }

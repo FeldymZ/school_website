@@ -18,9 +18,11 @@ public class CorsConfig {
 
         // 🌍 ORIGINS AUTORISÉS
         config.setAllowedOrigins(List.of(
-            "http://localhost:5173",
+            "http://localhost:5173",      // Front public local
+            "http://localhost:5174",      // Back-office local ✅
             "https://test.esiitech-gabon.com",
-            "https://esiitech-gabon.com"
+            "https://esiitech-gabon.com",
+            "https://admin.esiitech-gabon.com"
         ));
 
         // 🔓 MÉTHODES AUTORISÉES
@@ -35,10 +37,10 @@ public class CorsConfig {
         // 🔓 HEADERS AUTORISÉS
         config.setAllowedHeaders(List.of("*"));
 
-        // 🔑 JWT / AUTH HEADER
+        // 🔑 AUTH / JWT (cookies ou Authorization)
         config.setAllowCredentials(true);
 
-        // (optionnel mais propre)
+        // 📤 HEADERS EXPOSÉS AU FRONT
         config.setExposedHeaders(List.of(
             "Authorization",
             "Content-Type"
@@ -47,7 +49,7 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source =
             new UrlBasedCorsConfigurationSource();
 
-        // ⚠️ IMPORTANT
+        // ⚠️ IMPORTANT : appliquer à toutes les routes
         source.registerCorsConfiguration("/**", config);
 
         return source;

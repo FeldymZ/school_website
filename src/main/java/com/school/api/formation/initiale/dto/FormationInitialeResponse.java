@@ -6,7 +6,8 @@ import lombok.Builder;
 @Builder
 public record FormationInitialeResponse(
   Long id,
-  String title,           // (LICENCE) Cyber Défense
+  String title,
+  String slug,            // ✅ NOUVEAU
   String coverImageUrl,
   FormationInitialeLevel level
 ) {}

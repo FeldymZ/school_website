@@ -5,18 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ActualiteRepository extends JpaRepository<Actualite, Long> {
 
-  /* ============================
-     🌍 PUBLIC
-     ============================ */
+  Optional<Actualite> findBySlug(String slug);
 
-  /**
-   * Une actualité est visible publiquement SI ET SEULEMENT SI :
-   * - enabled = true
-   * - elle possède au moins une image de galerie
-   */
+  boolean existsBySlug(String slug);
+
   @Query("""
     SELECT a FROM Actualite a
     WHERE a.enabled = true
@@ -28,10 +24,5 @@ public interface ActualiteRepository extends JpaRepository<Actualite, Long> {
   """)
   List<Actualite> findPublicVisible();
 
-  /* ============================
-     🔐 ADMIN
-     ============================ */
-
-  // Liste complète admin
   List<Actualite> findAllByOrderByDisplayOrderAsc();
 }

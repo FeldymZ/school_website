@@ -22,14 +22,48 @@ public class FormationBrochureService {
   private final MailService mailService;
   private final PublicUrlResolver publicUrlResolver;
 
+  /* =====================================================
+     PUBLIC — SLUG
+     ===================================================== */
+
+  @Transactional
+  public void sendBrochureBySlug(
+    String slug,
+    FormationBrochureRequestDto request
+  ) {
+    FormationInitiale formation = formationRepository
+      .findBySlug(slug)
+      .filter(FormationInitiale::getEnabled)
+      .orElseThrow(() ->
+        new RuntimeException("Formation introuvable ou indisponible")
+      );
+
+    sendBrochureInternal(formation, request);
+  }
+
+  /* =====================================================
+     ADMIN / INTERNE — ID
+     ===================================================== */
+
   @Transactional
   public void sendBrochure(
     Long formationId,
     FormationBrochureRequestDto request
   ) {
-
     FormationInitiale formation = formationRepository.findById(formationId)
       .orElseThrow(() -> new RuntimeException("Formation introuvable"));
+
+    sendBrochureInternal(formation, request);
+  }
+
+  /* =====================================================
+     LOGIQUE COMMUNE
+     ===================================================== */
+
+  private void sendBrochureInternal(
+    FormationInitiale formation,
+    FormationBrochureRequestDto request
+  ) {
 
     if (formation.getPdfUrl() == null || formation.getPdfUrl().isBlank()) {
       throw new IllegalStateException(
@@ -47,10 +81,11 @@ public class FormationBrochureService {
         .build()
     );
 
-    // 🔥 CORRECTION MAJEURE ICI
+    // URL publique du PDF
     String pdfPublicUrl =
       publicUrlResolver.toAbsoluteUrl(formation.getPdfUrl());
 
+    // Envoi email
     mailService.sendFormationBrochure(
       request.email(),
       request.name(),

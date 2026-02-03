@@ -132,6 +132,33 @@ public class FileStorageService {
   }
 
   /* ============================
+     🗑️ SUPPRESSION FICHIER (AJOUT)
+     ============================ */
+
+  public void delete(String publicUrl) {
+
+    if (publicUrl == null || publicUrl.isBlank()) {
+      return;
+    }
+
+    try {
+      // Exemple publicUrl : /files/actualites/gallery/xxx.jpg
+      if (!publicUrl.startsWith("/files/")) {
+        return;
+      }
+
+      Path path = Path.of(publicUrl);
+      Files.deleteIfExists(path);
+
+    } catch (IOException e) {
+      // ⚠️ On ne casse jamais le métier pour un fichier
+      System.err.println(
+        "❌ Impossible de supprimer le fichier : " + publicUrl
+      );
+    }
+  }
+
+  /* ============================
      ⚙️ CORE COMMUN
      ============================ */
 

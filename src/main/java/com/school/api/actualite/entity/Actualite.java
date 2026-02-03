@@ -6,7 +6,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "actualites")
+@Table(
+  name = "actualites",
+  uniqueConstraints = @UniqueConstraint(columnNames = "slug")
+)
 @Getter
 @Setter
 @Builder
@@ -21,19 +24,19 @@ public class Actualite {
   @Column(nullable = false)
   private String title;
 
+  @Column(nullable = false, unique = true)
+  private String slug;
+
   @Column(columnDefinition = "TEXT", nullable = false)
   private String content;
 
-  // Cover image
   @Column(nullable = false)
   private String coverImageUrl;
 
   private Integer displayOrder;
 
-  // Visibilité
   @Column(nullable = false)
   private Boolean enabled;
 
-  // 📅 Date + heure de publication
   private LocalDateTime publishedAt;
 }

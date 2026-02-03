@@ -3,6 +3,7 @@ package com.school.api.actualite.controller;
 import com.school.api.actualite.dto.*;
 import com.school.api.actualite.service.ActualiteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -102,6 +103,17 @@ public class ActualiteAdminController {
   }
 
   /* =========================
+     ✅ SUPPRESSION IMAGE
+     ADMIN + SUPERADMIN
+     ========================= */
+  @DeleteMapping("/images/{imageId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
+  public void deleteImage(@PathVariable Long imageId) {
+    service.deleteGalleryImage(imageId);
+  }
+
+  /* =========================
      HISTORIQUE DE PUBLICATION
      ========================= */
   @GetMapping("/{id}/history")
@@ -112,11 +124,12 @@ public class ActualiteAdminController {
   }
 
   /* =========================
-     SUPPRESSION (SUPERADMIN)
-     🔥 FIX 403 ICI
+     SUPPRESSION ACTUALITÉ
+     SUPERADMIN SEULEMENT
      ========================= */
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasAuthority('ROLE_SUPERADMIN')")
+  @PreAuthorize("hasRole('SUPERADMIN')")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable Long id) {
     service.delete(id);
   }

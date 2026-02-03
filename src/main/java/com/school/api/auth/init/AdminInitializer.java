@@ -13,28 +13,28 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class AdminInitializer {
 
-  private final UserRepository userRepository;
-  private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-  @Bean
-  CommandLineRunner initAdmin() {
-    return args -> {
+    @Bean
+    CommandLineRunner initAdmin() {
+        return args -> {
 
-      String email = "superadmin@school.com";
+            String email = "noreply@esiitech-gabon.com";
 
-      if (userRepository.findByEmail(email).isEmpty()) {
+            if (userRepository.findByEmail(email).isEmpty()) {
 
-        userRepository.save(
-          User.builder()
-            .email(email)
-            .password(passwordEncoder.encode("Sadmin123"))
-            .role(Role.SUPERADMIN)   //  ENUM
-            .enabled(true)
-            .build()
-        );
+                userRepository.save(
+                    User.builder()
+                        .email(email)
+                        .password(passwordEncoder.encode("Esiitech2026#"))
+                        .role(Role.SUPERADMIN)   // ENUM
+                        .enabled(true)
+                        .build()
+                );
 
-        System.out.println(" Superadmin créé");
-      }
-    };
-  }
+                System.out.println("✅ Superadmin créé : " + email);
+            }
+        };
+    }
 }
