@@ -1,16 +1,10 @@
 package com.school.api.formation.initiale.controller;
 
-import com.school.api.formation.initiale.dto.FormationImageOrderRequest;
-import com.school.api.formation.initiale.dto.FormationInitialeDetailsResponse;
-import com.school.api.formation.initiale.dto.FormationInitialeResponse;
-import com.school.api.formation.initiale.dto.FormationInitialeUpdateRequest;
+import com.school.api.formation.initiale.dto.*;
 import com.school.api.formation.initiale.entity.FormationInitialeLevel;
 import com.school.api.formation.initiale.service.FormationInitialeService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,16 +21,13 @@ public class FormationInitialeAdminController {
   private final FormationInitialeService service;
 
   /* =========================
-     📋 LISTE ADMIN
+     LISTE
      ========================= */
   @GetMapping
   public List<FormationInitialeResponse> all() {
     return service.getAll();
   }
 
-  /* =========================
-     📋 LISTE PAR NIVEAU (ADMIN)
-     ========================= */
   @GetMapping("/level/{level}")
   public List<FormationInitialeResponse> getByLevel(
     @PathVariable FormationInitialeLevel level
@@ -45,16 +36,14 @@ public class FormationInitialeAdminController {
   }
 
   /* =========================
-     🔁 REDIRECTION ID → SLUG
+     REDIRECTION ID → SLUG
      ========================= */
   @GetMapping("/{id}")
-  public ResponseEntity<Void> redirectToSlug(
-    @PathVariable Long id
-  ) {
-    String slug = service.getSlugById(id);
+  public ResponseEntity<Void> redirectToSlug(@PathVariable Long id) {
 
     URI location = URI.create(
-      "/api/admin/formations/initiale/slug/" + slug
+      "/api/admin/formations/initiale/slug/" +
+        service.getSlugById(id)
     );
 
     return ResponseEntity
@@ -63,20 +52,15 @@ public class FormationInitialeAdminController {
       .build();
   }
 
-  /* =========================
-     🔎 DÉTAILS PAR SLUG
-     ========================= */
   @GetMapping("/slug/{slug}")
   public FormationInitialeDetailsResponse detailsBySlug(
     @PathVariable String slug
   ) {
-    return service.getDetails(
-      service.getIdBySlug(slug)
-    );
+    return service.getDetails(service.getIdBySlug(slug));
   }
 
   /* =========================
-     ➕ CRÉATION
+     CRÉATION
      ========================= */
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public FormationInitialeResponse create(
@@ -94,7 +78,7 @@ public class FormationInitialeAdminController {
   }
 
   /* =========================
-     ✏️ MODIFIER INFOS
+     UPDATE
      ========================= */
   @PutMapping("/{id}")
   public FormationInitialeResponse update(
@@ -105,7 +89,7 @@ public class FormationInitialeAdminController {
   }
 
   /* =========================
-     🖼️ COVER
+     COVER
      ========================= */
   @PutMapping(
     value = "/{id}/cover",
@@ -119,7 +103,28 @@ public class FormationInitialeAdminController {
   }
 
   /* =========================
-     🖼️ GALERIE
+     PDF (AJOUT / REMPLACEMENT)
+     ========================= */
+  @PutMapping(
+    value = "/{id}/pdf",
+    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
+  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
+  public void uploadPdf(
+    @PathVariable Long id,
+    @RequestParam MultipartFile pdf
+  ) {
+    service.updatePdf(id, pdf);
+  }
+
+  @DeleteMapping("/{id}/pdf")
+  @PreAuthorize("hasRole('SUPERADMIN')")
+  public void deletePdf(@PathVariable Long id) {
+    service.removePdf(id);
+  }
+
+  /* =========================
+     GALERIE
      ========================= */
   @PostMapping(
     value = "/{id}/images",
@@ -132,14 +137,9 @@ public class FormationInitialeAdminController {
     service.addGalleryImages(id, images);
   }
 
-  /**
-   * ❌ SUPPRESSION IMAGE — SUPERADMIN UNIQUEMENT
-   */
   @DeleteMapping("/images/{imageId}")
   @PreAuthorize("hasRole('SUPERADMIN')")
-  public void deleteImage(
-    @PathVariable Long imageId
-  ) {
+  public void deleteImage(@PathVariable Long imageId) {
     service.deleteGalleryImage(imageId);
   }
 
@@ -152,15 +152,7 @@ public class FormationInitialeAdminController {
   }
 
   /* =========================
-     📄 PDF
-     ========================= */
-  @DeleteMapping("/{id}/pdf")
-  public void deletePdf(@PathVariable Long id) {
-    service.removePdf(id);
-  }
-
-  /* =========================
-     🗑️ SUPPRESSION FORMATION
+     SUPPRESSION FORMATION
      ========================= */
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('SUPERADMIN')")
