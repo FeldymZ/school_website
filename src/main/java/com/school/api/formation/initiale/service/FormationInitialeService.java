@@ -117,7 +117,7 @@ public class FormationInitialeService {
     FormationInitiale formation = get(id);
 
     if (request.name() != null &&
-        !request.name().equals(formation.getName())) {
+      !request.name().equals(formation.getName())) {
       formation.setName(request.name());
       formation.setSlug(generateUniqueSlug(request.name()));
     }
@@ -144,6 +144,12 @@ public class FormationInitialeService {
     }
 
     FormationInitiale formation = get(id);
+
+    // 🔥 suppression ancienne cover
+    try {
+      fileStorageService.delete(formation.getCoverImageUrl());
+    } catch (Exception ignored) {}
+
     formation.setCoverImageUrl(
       fileStorageService.storeFormationCover(cover)
     );
@@ -185,25 +191,33 @@ public class FormationInitialeService {
   /**
    * ❌ SUPPRESSION IMAGE — SUPERADMIN UNIQUEMENT
    */
+  @Transactional
   public void deleteGalleryImage(Long imageId) {
 
     var auth = SecurityContextHolder.getContext().getAuthentication();
 
     if (
       auth == null ||
-      auth.getAuthorities().stream().noneMatch(
-        a -> a.getAuthority().equals("ROLE_SUPERADMIN")
-      )
+        auth.getAuthorities().stream().noneMatch(
+          a -> a.getAuthority().equals("ROLE_SUPERADMIN")
+        )
     ) {
-      throw new SecurityException(
-        "Suppression réservée au SUPERADMIN"
+      throw new SecurityException("Suppression réservée au SUPERADMIN");
+    }
+
+    FormationInitialeImage image = imageRepository.findById(imageId)
+      .orElseThrow(() -> new RuntimeException("Image introuvable"));
+
+    // 🔥 suppression fichier physique (SÉCURISÉE)
+    try {
+      fileStorageService.delete(image.getImageUrl());
+    } catch (Exception e) {
+      System.err.println(
+        "⚠️ Impossible de supprimer le fichier : " + image.getImageUrl()
       );
     }
 
-    imageRepository.delete(
-      imageRepository.findById(imageId)
-        .orElseThrow(() -> new RuntimeException("Image introuvable"))
-    );
+    imageRepository.delete(image);
   }
 
   @Transactional
@@ -235,18 +249,46 @@ public class FormationInitialeService {
 
   public void removePdf(Long id) {
     FormationInitiale formation = get(id);
+
+    try {
+      if (formation.getPdfUrl() != null) {
+        fileStorageService.delete(formation.getPdfUrl());
+      }
+    } catch (Exception ignored) {}
+
     formation.setPdfUrl(null);
     repository.save(formation);
   }
 
   /* =====================================================
-     🗑️ SUPPRESSION
+     🗑️ SUPPRESSION FORMATION
      ===================================================== */
 
   @Transactional
   public void delete(Long id) {
+
+    // 🔥 suppression fichiers galerie
+    imageRepository.findByFormationIdOrderByDisplayOrderAsc(id)
+      .forEach(img -> {
+        try {
+          fileStorageService.delete(img.getImageUrl());
+        } catch (Exception ignored) {}
+      });
+
     imageRepository.deleteByFormationId(id);
-    repository.delete(get(id));
+
+    FormationInitiale formation = get(id);
+
+    try {
+      fileStorageService.delete(formation.getCoverImageUrl());
+    } catch (Exception ignored) {}
+
+    try {
+      if (formation.getPdfUrl() != null)
+        fileStorageService.delete(formation.getPdfUrl());
+    } catch (Exception ignored) {}
+
+    repository.delete(formation);
   }
 
   /* =====================================================
