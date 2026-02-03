@@ -5,8 +5,10 @@ import com.school.api.actualite.entity.*;
 import com.school.api.actualite.repository.*;
 import com.school.api.common.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +26,6 @@ public class ActualiteService {
      🌍 PUBLIC
      ============================ */
 
-  /** Liste publique */
   public List<ActualiteResponse> getPublic() {
     return repository.findPublicVisible()
       .stream()
@@ -32,27 +33,33 @@ public class ActualiteService {
       .toList();
   }
 
-  /** Détails publics par slug (URL canonique) */
   public ActualiteDetailsResponse getDetailsBySlug(String slug) {
 
     Actualite actualite = repository.findBySlug(slug)
-      .orElseThrow(() -> new RuntimeException("Actualité introuvable"));
+      .orElseThrow(() -> new ResponseStatusException(
+        HttpStatus.NOT_FOUND, "Actualité introuvable"
+      ));
+
+    // 🔐 SÉCURITÉ PUBLIC : uniquement publié
+    if (!Boolean.TRUE.equals(actualite.getEnabled())) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
 
     return getDetails(actualite.getId());
   }
 
-  /** Récupération du slug pour redirection ID → slug */
   public String getSlugById(Long id) {
     return repository.findById(id)
       .map(Actualite::getSlug)
-      .orElseThrow(() -> new RuntimeException("Actualité introuvable"));
+      .orElseThrow(() -> new ResponseStatusException(
+        HttpStatus.NOT_FOUND, "Actualité introuvable"
+      ));
   }
 
   /* ============================
      🔐 ADMIN / PUBLIC
      ============================ */
 
-  /** Détails complets (admin & public) */
   public ActualiteDetailsResponse getDetails(Long id) {
 
     Actualite actualite = get(id);
@@ -60,12 +67,10 @@ public class ActualiteService {
     List<ActualiteImage> images =
       imageRepository.findByActualiteIdOrderByDisplayOrderAsc(id);
 
-    // 🌍 PUBLIC → URL uniquement
     List<String> publicImages = images.stream()
       .map(ActualiteImage::getImageUrl)
       .toList();
 
-    // 🔐 ADMIN → ID + URL
     List<ActualiteGalleryImageResponse> adminImages = images.stream()
       .map(img -> ActualiteGalleryImageResponse.builder()
         .id(img.getId())
@@ -87,7 +92,6 @@ public class ActualiteService {
       .build();
   }
 
-  /** Liste admin */
   public List<ActualiteResponse> getAll() {
     return repository.findAllByOrderByDisplayOrderAsc()
       .stream()
@@ -113,7 +117,7 @@ public class ActualiteService {
 
     Actualite actualite = Actualite.builder()
       .title(title)
-      .slug(generateSlug(title))
+      .slug(generateUniqueSlug(title, null))
       .content(content)
       .coverImageUrl(fileStorageService.storeActualiteCover(coverImage))
       .displayOrder(displayOrder)
@@ -137,7 +141,7 @@ public class ActualiteService {
 
     if (request.title() != null) {
       actualite.setTitle(request.title());
-      actualite.setSlug(generateSlug(request.title()));
+      actualite.setSlug(generateUniqueSlug(request.title(), id));
     }
 
     if (request.content() != null) {
@@ -149,11 +153,8 @@ public class ActualiteService {
     }
 
     if (request.enabled() != null) {
-      if (request.enabled()) {
-        publish(actualite);
-      } else {
-        unpublish(actualite);
-      }
+      if (request.enabled()) publish(actualite);
+      else unpublish(actualite);
     }
 
     return toListDto(repository.save(actualite));
@@ -166,6 +167,9 @@ public class ActualiteService {
     }
 
     Actualite actualite = get(id);
+
+    fileStorageService.delete(actualite.getCoverImageUrl());
+
     actualite.setCoverImageUrl(
       fileStorageService.storeActualiteCover(coverImage)
     );
@@ -200,8 +204,12 @@ public class ActualiteService {
 
   public void replaceGalleryImages(Long actualiteId, List<MultipartFile> images) {
 
-    Actualite actualite = get(actualiteId);
+    imageRepository.findByActualiteIdOrderByDisplayOrderAsc(actualiteId)
+      .forEach(img -> fileStorageService.delete(img.getImageUrl()));
+
     imageRepository.deleteByActualiteId(actualiteId);
+
+    Actualite actualite = get(actualiteId);
 
     int order = 0;
     for (MultipartFile file : images) {
@@ -220,7 +228,9 @@ public class ActualiteService {
   public void deleteGalleryImage(Long imageId) {
 
     ActualiteImage image = imageRepository.findById(imageId)
-      .orElseThrow(() -> new RuntimeException("Image introuvable"));
+      .orElseThrow(() -> new ResponseStatusException(
+        HttpStatus.NOT_FOUND, "Image introuvable"
+      ));
 
     fileStorageService.delete(image.getImageUrl());
     imageRepository.delete(image);
@@ -231,11 +241,21 @@ public class ActualiteService {
      ============================ */
 
   public void delete(Long id) {
+
+    Actualite actualite = get(id);
+
+    imageRepository.findByActualiteIdOrderByDisplayOrderAsc(id)
+      .forEach(img -> fileStorageService.delete(img.getImageUrl()));
+
     imageRepository.deleteByActualiteId(id);
+
+    fileStorageService.delete(actualite.getCoverImageUrl());
+
     historyRepository.deleteAll(
       historyRepository.findByActualiteIdOrdered(id)
     );
-    repository.delete(get(id));
+
+    repository.delete(actualite);
   }
 
   /* ============================
@@ -288,7 +308,9 @@ public class ActualiteService {
 
   private Actualite get(Long id) {
     return repository.findById(id)
-      .orElseThrow(() -> new RuntimeException("Actualité introuvable"));
+      .orElseThrow(() -> new ResponseStatusException(
+        HttpStatus.NOT_FOUND, "Actualité introuvable"
+      ));
   }
 
   private ActualiteResponse toListDto(Actualite a) {
@@ -301,7 +323,7 @@ public class ActualiteService {
       .build();
   }
 
-  private String generateSlug(String title) {
+  private String generateUniqueSlug(String title, Long excludeId) {
 
     String base = org.apache.commons.lang3.StringUtils.stripAccents(title)
       .toLowerCase()
@@ -311,16 +333,21 @@ public class ActualiteService {
     String slug = base;
     int i = 1;
 
-    while (repository.existsBySlug(slug)) {
+    while (
+      excludeId == null
+        ? repository.existsBySlug(slug)
+        : repository.existsBySlugAndIdNot(slug, excludeId)
+    ) {
       slug = base + "-" + i++;
     }
 
     return slug;
   }
 
+
   /* ============================
-     🔁 RÉORDONNANCEMENT
-     ============================ */
+   🔁 RÉORDONNANCEMENT
+   ============================ */
 
   public void reorder(ActualiteReorderRequest request) {
 
@@ -334,10 +361,13 @@ public class ActualiteService {
 
     for (Long id : ids) {
       Actualite actualite = repository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Actualité introuvable : " + id));
+        .orElseThrow(() -> new RuntimeException(
+          "Actualité introuvable : " + id
+        ));
 
       actualite.setDisplayOrder(order++);
       repository.save(actualite);
     }
   }
+
 }

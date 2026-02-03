@@ -13,13 +13,12 @@ public interface ActualiteRepository extends JpaRepository<Actualite, Long> {
 
   boolean existsBySlug(String slug);
 
+  // ✅ indispensable pour la mise à jour sans collision
+  boolean existsBySlugAndIdNot(String slug, Long id);
+
   @Query("""
     SELECT a FROM Actualite a
     WHERE a.enabled = true
-      AND EXISTS (
-        SELECT i FROM ActualiteImage i
-        WHERE i.actualite.id = a.id
-      )
     ORDER BY a.displayOrder ASC
   """)
   List<Actualite> findPublicVisible();

@@ -28,7 +28,7 @@ public class ActualitePublicController {
   }
 
   /* =========================
-     🔥 URL CANONIQUE (SLUG)
+     🔥 DÉTAIL PUBLIC (SLUG)
      ========================= */
   @GetMapping("/slug/{slug}")
   public ActualiteDetailsResponse detailsBySlug(
@@ -39,6 +39,7 @@ public class ActualitePublicController {
 
   /* =========================
      🔁 REDIRECTION ID → SLUG
+     (SEO / rétrocompatibilité)
      ========================= */
   @GetMapping("/{id}")
   public ResponseEntity<Void> redirectById(

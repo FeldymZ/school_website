@@ -5,7 +5,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "users")
-@Getter @Setter
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,6 +26,7 @@ public class User {
   @Column(nullable = false)
   private Role role;
 
+  @Builder.Default
   @Column(nullable = false)
   private Boolean enabled = true;
 }
