@@ -9,10 +9,10 @@ import java.util.List;
 public record FormationInitialeDetailsResponse(
   Long id,
   String title,
-  String slug,            // ✅ NOUVEAU
+  String slug,
   String description,
   String coverImageUrl,
-  List<String> galleryImages,
+  List<FormationGalleryImageResponse> galleryImages,
   String pdfUrl,
   FormationInitialeLevel level
 ) {}

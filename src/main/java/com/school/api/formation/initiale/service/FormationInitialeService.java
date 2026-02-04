@@ -148,7 +148,7 @@ public class FormationInitialeService {
   }
 
   /* =========================
-     📄 PDF (AJOUT / REMPLACEMENT)
+     📄 PDF
      ========================= */
 
   public void updatePdf(Long id, MultipartFile pdf) {
@@ -272,6 +272,10 @@ public class FormationInitialeService {
       .orElseThrow(() -> new RuntimeException("Formation introuvable"));
   }
 
+  /**
+   * 🔥 MÉTHODE CLÉ — CORRIGÉE
+   * Envoie des OBJETS galerie (et non des String)
+   */
   private FormationInitialeDetailsResponse buildDetails(FormationInitiale f) {
     return FormationInitialeDetailsResponse.builder()
       .id(f.getId())
@@ -283,7 +287,12 @@ public class FormationInitialeService {
         imageRepository
           .findByFormationIdOrderByDisplayOrderAsc(f.getId())
           .stream()
-          .map(FormationInitialeImage::getImageUrl)
+          .map(img -> FormationGalleryImageResponse.builder()
+            .id(img.getId())
+            .imageUrl(img.getImageUrl())
+            .displayOrder(img.getDisplayOrder())
+            .build()
+          )
           .toList()
       )
       .pdfUrl(f.getPdfUrl())
