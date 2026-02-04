@@ -306,6 +306,7 @@ public class FormationInitialeService {
       .slug(f.getSlug())
       .coverImageUrl(f.getCoverImageUrl())
       .level(f.getLevel())
+      .enabled(f.getEnabled())
       .build();
   }
 
