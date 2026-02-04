@@ -7,7 +7,7 @@ import lombok.Builder;
 public record FormationInitialeResponse(
   Long id,
   String title,
-  String slug,            // ✅ NOUVEAU
+  String slug,
   String coverImageUrl,
   FormationInitialeLevel level
 ) {}

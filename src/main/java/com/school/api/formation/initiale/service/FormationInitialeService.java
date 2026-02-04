@@ -273,8 +273,7 @@ public class FormationInitialeService {
   }
 
   /**
-   * 🔥 MÉTHODE CLÉ — CORRIGÉE
-   * Envoie des OBJETS galerie (et non des String)
+   * 🔥 MÉTHODE CLÉ — ALIGNÉE AVEC LE FRONTEND
    */
   private FormationInitialeDetailsResponse buildDetails(FormationInitiale f) {
     return FormationInitialeDetailsResponse.builder()
@@ -289,7 +288,7 @@ public class FormationInitialeService {
           .stream()
           .map(img -> FormationGalleryImageResponse.builder()
             .id(img.getId())
-            .imageUrl(img.getImageUrl())
+            .url(img.getImageUrl()) // ✅ url simple
             .displayOrder(img.getDisplayOrder())
             .build()
           )

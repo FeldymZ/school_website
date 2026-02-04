@@ -5,6 +5,6 @@ import lombok.Builder;
 @Builder
 public record FormationGalleryImageResponse(
   Long id,
-  String imageUrl,
+  String url,
   Integer displayOrder
 ) {}
