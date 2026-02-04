@@ -9,5 +9,6 @@ public record FormationInitialeResponse(
   String title,
   String slug,
   String coverImageUrl,
-  FormationInitialeLevel level
+  FormationInitialeLevel level,
+  Boolean enabled
 ) {}
