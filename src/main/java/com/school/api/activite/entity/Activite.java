@@ -1,18 +1,11 @@
 package com.school.api.activite.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "activites")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Activite {
 
   @Id
@@ -30,6 +23,19 @@ public class Activite {
     cascade = CascadeType.ALL,
     orphanRemoval = true
   )
-  @Builder.Default
   private List<ActiviteImage> images = new ArrayList<>();
+
+  /* GETTERS / SETTERS */
+
+  public Long getId() { return id; }
+
+  public String getTitre() { return titre; }
+
+  public void setTitre(String titre) { this.titre = titre; }
+
+  public String getContenu() { return contenu; }
+
+  public void setContenu(String contenu) { this.contenu = contenu; }
+
+  public List<ActiviteImage> getImages() { return images; }
 }

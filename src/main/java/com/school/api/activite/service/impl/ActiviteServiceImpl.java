@@ -6,6 +6,7 @@ import com.school.api.activite.repository.*;
 import com.school.api.activite.service.ActiviteService;
 import com.school.api.common.exception.ResourceNotFoundException;
 import com.school.api.common.storage.FileStorageService;
+import com.school.api.banner.entity.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,109 +32,97 @@ public class ActiviteServiceImpl implements ActiviteService {
   }
 
   @Override
-  public ActiviteResponse create(ActiviteRequest request, MultipartFile photo) {
+  public ActiviteResponse create(
+    ActiviteRequest request,
+    MultipartFile[] photos,
+    MultipartFile video
+  ) {
 
-    if (photo == null || photo.isEmpty()) {
-      throw new IllegalArgumentException("La photo est obligatoire");
+    if (photos == null || photos.length == 0) {
+      throw new IllegalArgumentException("Au moins une photo est obligatoire");
     }
 
     Activite activite = new Activite();
     activite.setTitre(request.getTitre());
     activite.setContenu(request.getContenu());
-
     activiteRepository.save(activite);
 
-    String imageUrl = fileStorageService.storeActualiteGalleryImage(photo);
+    // PHOTOS
+    for (MultipartFile photo : photos) {
+      String url = fileStorageService.storeActualiteGalleryImage(photo);
+      ActiviteImage img = new ActiviteImage();
+      img.setFileUrl(url);
+      img.setType(ActiviteMediaType.IMAGE);
+      img.setActivite(activite);
+      activiteImageRepository.save(img);
+      activite.getImages().add(img);
+    }
 
-    ActiviteImage image = new ActiviteImage();
-    image.setFileName(imageUrl);
-    image.setActivite(activite);
+    // VIDEO (optionnelle)
+    if (video != null && !video.isEmpty()) {
+      String url = fileStorageService.storeBannerMedia(video, MediaType.VIDEO);
+      ActiviteImage vid = new ActiviteImage();
+      vid.setFileUrl(url);
+      vid.setType(ActiviteMediaType.VIDEO);
+      vid.setActivite(activite);
+      activiteImageRepository.save(vid);
+      activite.getImages().add(vid);
+    }
 
-    activiteImageRepository.save(image);
-    activite.getImages().add(image);
-
-    return mapToResponse(activite);
+    return map(activite);
   }
 
   @Override
-  public ActiviteResponse update(Long id, ActiviteRequest request, MultipartFile photo) {
+  public List<ActiviteResponse> getAll() {
+    return activiteRepository.findAll().stream().map(this::map).toList();
+  }
 
-    Activite activite = activiteRepository.findById(id)
-      .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"));
-
-    activite.setTitre(request.getTitre());
-    activite.setContenu(request.getContenu());
-
-    if (photo != null && !photo.isEmpty()) {
-      String imageUrl = fileStorageService.storeActualiteGalleryImage(photo);
-
-      ActiviteImage image = new ActiviteImage();
-      image.setFileName(imageUrl);
-      image.setActivite(activite);
-
-      activiteImageRepository.save(image);
-      activite.getImages().add(image);
-    }
-
-    return mapToResponse(activite);
+  @Override
+  public ActiviteResponse getById(Long id) {
+    return map(
+      activiteRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"))
+    );
   }
 
   @Override
   public void delete(Long id) {
-
     Activite activite = activiteRepository.findById(id)
       .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"));
 
-    activite.getImages()
-      .forEach(img -> fileStorageService.deleteQuietly(img.getFileName()));
+    activite.getImages().forEach(
+      img -> fileStorageService.deleteQuietly(img.getFileUrl())
+    );
 
     activiteRepository.delete(activite);
   }
 
   @Override
-  public void deleteImage(Long imageId) {
+  public void deleteMedia(Long mediaId) {
+    ActiviteImage img = activiteImageRepository.findById(mediaId)
+      .orElseThrow(() -> new ResourceNotFoundException("Média introuvable"));
 
-    ActiviteImage image = activiteImageRepository.findById(imageId)
-      .orElseThrow(() -> new ResourceNotFoundException("Image introuvable"));
-
-    fileStorageService.deleteQuietly(image.getFileName());
-    activiteImageRepository.delete(image);
+    fileStorageService.deleteQuietly(img.getFileUrl());
+    activiteImageRepository.delete(img);
   }
 
-  @Override
-  public List<ActiviteResponse> getAll() {
-    return activiteRepository.findAll().stream()
-      .map(this::mapToResponse)
-      .toList();
-  }
+  private ActiviteResponse map(Activite activite) {
 
-  @Override
-  public ActiviteResponse getById(Long id) {
+    ActiviteResponse r = new ActiviteResponse();
+    r.setId(activite.getId());
+    r.setTitre(activite.getTitre());
+    r.setContenu(activite.getContenu());
 
-    Activite activite = activiteRepository.findById(id)
-      .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"));
-
-    return mapToResponse(activite);
-  }
-
-  private ActiviteResponse mapToResponse(Activite activite) {
-
-    ActiviteResponse response = new ActiviteResponse();
-    response.setId(activite.getId());
-    response.setTitre(activite.getTitre());
-    response.setContenu(activite.getContenu());
-
-    response.setImages(
-      activite.getImages().stream()
-        .map(img -> {
-          ActiviteImageResponse r = new ActiviteImageResponse();
-          r.setId(img.getId());
-          r.setUrl(img.getFileName());
-          return r;
-        })
-        .toList()
+    r.setMedias(
+      activite.getImages().stream().map(img -> {
+        ActiviteMediaResponse m = new ActiviteMediaResponse();
+        m.setId(img.getId());
+        m.setUrl(img.getFileUrl());
+        m.setType(img.getType());
+        return m;
+      }).toList()
     );
 
-    return response;
+    return r;
   }
 }

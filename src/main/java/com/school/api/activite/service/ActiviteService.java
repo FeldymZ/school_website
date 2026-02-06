@@ -8,23 +8,17 @@ import java.util.List;
 
 public interface ActiviteService {
 
-    /* =========================
-       CRUD ACTIVITÉ
-       ========================= */
-
-  ActiviteResponse create(ActiviteRequest request, MultipartFile photo);
-
-  ActiviteResponse update(Long id, ActiviteRequest request, MultipartFile photo);
-
-  void delete(Long id);
+  ActiviteResponse create(
+    ActiviteRequest request,
+    MultipartFile[] photos,
+    MultipartFile video
+  );
 
   List<ActiviteResponse> getAll();
 
   ActiviteResponse getById(Long id);
 
-    /* =========================
-       IMAGES
-       ========================= */
+  void delete(Long id);
 
-  void deleteImage(Long imageId);
+  void deleteMedia(Long mediaId);
 }
