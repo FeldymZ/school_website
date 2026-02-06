@@ -1,8 +1,12 @@
 package com.school.api.activite.service.impl;
 
-import com.school.api.activite.dto.*;
-import com.school.api.activite.entity.*;
-import com.school.api.activite.repository.*;
+import com.school.api.activite.dto.ActiviteImageResponse;
+import com.school.api.activite.dto.ActiviteRequest;
+import com.school.api.activite.dto.ActiviteResponse;
+import com.school.api.activite.entity.Activite;
+import com.school.api.activite.entity.ActiviteImage;
+import com.school.api.activite.repository.ActiviteImageRepository;
+import com.school.api.activite.repository.ActiviteRepository;
 import com.school.api.activite.service.ActiviteService;
 import com.school.api.common.exception.ResourceNotFoundException;
 import com.school.api.common.storage.FileStorageService;
@@ -22,9 +26,7 @@ public class ActiviteServiceImpl implements ActiviteService {
   private final ActiviteImageRepository activiteImageRepository;
   private final FileStorageService fileStorageService;
 
-    /* =====================================================
-       ======================= CREATE ======================
-       ===================================================== */
+  /* ========================= CREATE ========================= */
 
   @Override
   public ActiviteResponse create(ActiviteRequest request, MultipartFile photo) {
@@ -33,7 +35,6 @@ public class ActiviteServiceImpl implements ActiviteService {
       throw new IllegalArgumentException("La photo est obligatoire");
     }
 
-    // 1️⃣ Création activité
     Activite activite = Activite.builder()
       .titre(request.getTitre())
       .contenu(request.getContenu())
@@ -41,12 +42,10 @@ public class ActiviteServiceImpl implements ActiviteService {
 
     activiteRepository.save(activite);
 
-    // 2️⃣ Stockage image (URL publique retournée)
     String imageUrl = fileStorageService.storeActualiteGalleryImage(photo);
 
-    // 3️⃣ Lien image ↔ activité
     ActiviteImage image = ActiviteImage.builder()
-      .fileName(imageUrl) // ⚠️ contient déjà /files/...
+      .fileName(imageUrl) // URL publique /files/...
       .activite(activite)
       .build();
 
@@ -56,20 +55,19 @@ public class ActiviteServiceImpl implements ActiviteService {
     return mapToResponse(activite);
   }
 
-    /* =====================================================
-       ======================= UPDATE ======================
-       ===================================================== */
+  /* ========================= UPDATE ========================= */
 
   @Override
   public ActiviteResponse update(Long id, ActiviteRequest request, MultipartFile photo) {
 
     Activite activite = activiteRepository.findById(id)
-      .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"));
+      .orElseThrow(() ->
+        new ResourceNotFoundException("Activité introuvable")
+      );
 
     activite.setTitre(request.getTitre());
     activite.setContenu(request.getContenu());
 
-    // ➕ Ajout nouvelle image si fournie
     if (photo != null && !photo.isEmpty()) {
 
       String imageUrl = fileStorageService.storeActualiteGalleryImage(photo);
@@ -86,17 +84,16 @@ public class ActiviteServiceImpl implements ActiviteService {
     return mapToResponse(activite);
   }
 
-    /* =====================================================
-       ======================= DELETE ======================
-       ===================================================== */
+  /* ========================= DELETE ========================= */
 
   @Override
   public void delete(Long id) {
 
     Activite activite = activiteRepository.findById(id)
-      .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"));
+      .orElseThrow(() ->
+        new ResourceNotFoundException("Activité introuvable")
+      );
 
-    // 🗑️ Suppression fichiers liés
     activite.getImages().forEach(
       img -> fileStorageService.deleteQuietly(img.getFileName())
     );
@@ -104,23 +101,21 @@ public class ActiviteServiceImpl implements ActiviteService {
     activiteRepository.delete(activite);
   }
 
-    /* =====================================================
-       =================== DELETE IMAGE ====================
-       ===================================================== */
+  /* ====================== DELETE IMAGE ====================== */
 
   @Override
   public void deleteImage(Long imageId) {
 
     ActiviteImage image = activiteImageRepository.findById(imageId)
-      .orElseThrow(() -> new ResourceNotFoundException("Image introuvable"));
+      .orElseThrow(() ->
+        new ResourceNotFoundException("Image introuvable")
+      );
 
     fileStorageService.deleteQuietly(image.getFileName());
     activiteImageRepository.delete(image);
   }
 
-    /* =====================================================
-       ======================== READ =======================
-       ===================================================== */
+  /* ========================= READ ========================= */
 
   @Override
   public List<ActiviteResponse> getAll() {
@@ -134,14 +129,14 @@ public class ActiviteServiceImpl implements ActiviteService {
   public ActiviteResponse getById(Long id) {
 
     Activite activite = activiteRepository.findById(id)
-      .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"));
+      .orElseThrow(() ->
+        new ResourceNotFoundException("Activité introuvable")
+      );
 
     return mapToResponse(activite);
   }
 
-    /* =====================================================
-       ===================== MAPPING =======================
-       ===================================================== */
+  /* ======================== MAPPER ========================= */
 
   private ActiviteResponse mapToResponse(Activite activite) {
 
@@ -153,7 +148,7 @@ public class ActiviteServiceImpl implements ActiviteService {
         activite.getImages().stream()
           .map(img -> ActiviteImageResponse.builder()
             .id(img.getId())
-            .url(img.getFileName()) // URL publique directe
+            .url(img.getFileName())
             .build()
           )
           .toList()
