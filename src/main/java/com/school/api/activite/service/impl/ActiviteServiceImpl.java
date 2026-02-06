@@ -1,13 +1,8 @@
 package com.school.api.activite.service.impl;
 
-import com.school.api.activite.dto.ActiviteMediaResponse;
-import com.school.api.activite.dto.ActiviteRequest;
-import com.school.api.activite.dto.ActiviteResponse;
-import com.school.api.activite.entity.Activite;
-import com.school.api.activite.entity.ActiviteImage;
-import com.school.api.activite.entity.ActiviteMediaType;
-import com.school.api.activite.repository.ActiviteImageRepository;
-import com.school.api.activite.repository.ActiviteRepository;
+import com.school.api.activite.dto.*;
+import com.school.api.activite.entity.*;
+import com.school.api.activite.repository.*;
 import com.school.api.activite.service.ActiviteService;
 import com.school.api.banner.entity.MediaType;
 import com.school.api.common.exception.ResourceNotFoundException;
@@ -36,9 +31,7 @@ public class ActiviteServiceImpl implements ActiviteService {
     this.fileStorageService = fileStorageService;
   }
 
-    /* =====================================================
-       ======================= CREATE ======================
-       ===================================================== */
+  /* ======================= CREATE ======================= */
 
   @Override
   public ActiviteResponse create(
@@ -51,19 +44,18 @@ public class ActiviteServiceImpl implements ActiviteService {
       throw new IllegalArgumentException("Au moins une photo est obligatoire");
     }
 
-    // 1️⃣ Création activité
     Activite activite = new Activite();
     activite.setTitre(request.getTitre());
     activite.setContenu(request.getContenu());
     activiteRepository.save(activite);
 
-    // 2️⃣ Enregistrement des photos
+    /* ===================== PHOTOS ===================== */
     for (MultipartFile photo : photos) {
 
       String imageUrl = fileStorageService.storeActualiteGalleryImage(photo);
 
       ActiviteImage image = new ActiviteImage();
-      image.setImageUrl(imageUrl);                 // ✅ COMME LES AUTRES MODULES
+      image.setImageUrl(imageUrl);
       image.setType(ActiviteMediaType.IMAGE);
       image.setActivite(activite);
 
@@ -71,14 +63,14 @@ public class ActiviteServiceImpl implements ActiviteService {
       activite.getImages().add(image);
     }
 
-    // 3️⃣ Enregistrement de la vidéo (optionnelle)
+    /* ===================== VIDEO ====================== */
     if (video != null && !video.isEmpty()) {
 
       String videoUrl =
         fileStorageService.storeBannerMedia(video, MediaType.VIDEO);
 
       ActiviteImage videoEntity = new ActiviteImage();
-      videoEntity.setImageUrl(videoUrl);           // ✅
+      videoEntity.setImageUrl(videoUrl);
       videoEntity.setType(ActiviteMediaType.VIDEO);
       videoEntity.setActivite(activite);
 
@@ -89,9 +81,7 @@ public class ActiviteServiceImpl implements ActiviteService {
     return mapToResponse(activite);
   }
 
-    /* =====================================================
-       ======================== READ =======================
-       ===================================================== */
+  /* ======================== READ ======================= */
 
   @Override
   public List<ActiviteResponse> getAll() {
@@ -110,9 +100,7 @@ public class ActiviteServiceImpl implements ActiviteService {
     return mapToResponse(activite);
   }
 
-    /* =====================================================
-       ======================= DELETE ======================
-       ===================================================== */
+  /* ======================= DELETE ====================== */
 
   @Override
   public void delete(Long id) {
@@ -122,17 +110,12 @@ public class ActiviteServiceImpl implements ActiviteService {
         new ResourceNotFoundException("Activité introuvable")
       );
 
-    // Suppression physique des fichiers
     activite.getImages().forEach(
       img -> fileStorageService.deleteQuietly(img.getImageUrl())
     );
 
     activiteRepository.delete(activite);
   }
-
-    /* =====================================================
-       ==================== DELETE MEDIA ===================
-       ===================================================== */
 
   @Override
   public void deleteMedia(Long mediaId) {
@@ -146,9 +129,7 @@ public class ActiviteServiceImpl implements ActiviteService {
     activiteImageRepository.delete(image);
   }
 
-    /* =====================================================
-       ====================== MAPPING ======================
-       ===================================================== */
+  /* ====================== MAPPING ====================== */
 
   private ActiviteResponse mapToResponse(Activite activite) {
 
@@ -162,7 +143,7 @@ public class ActiviteServiceImpl implements ActiviteService {
         .map(img -> {
           ActiviteMediaResponse media = new ActiviteMediaResponse();
           media.setId(img.getId());
-          media.setUrl(img.getImageUrl());   // ✅ image_url
+          media.setUrl(img.getImageUrl());
           media.setType(img.getType());
           return media;
         })

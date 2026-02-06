@@ -10,13 +10,11 @@ public class ActiviteImage {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  // Lien vers l’activité
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "activite_id", nullable = false)
   private Activite activite;
 
-  // URL publique du média (image ou vidéo)
-  @Column(nullable = false)
+  @Column(name = "image_url", nullable = false)
   private String imageUrl;
 
   @Enumerated(EnumType.STRING)
