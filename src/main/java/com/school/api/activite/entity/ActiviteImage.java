@@ -10,30 +10,46 @@ public class ActiviteImage {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private String fileUrl; // /files/...
+  // Lien vers l’activité
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "activite_id", nullable = false)
+  private Activite activite;
+
+  // URL publique du média (image ou vidéo)
+  @Column(name = "file_name", nullable = false)
+  private String fileName;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private ActiviteMediaType type;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "activite_id", nullable = false)
-  private Activite activite;
+  /* ================= GETTERS / SETTERS ================= */
 
-  /* GETTERS / SETTERS */
+  public Long getId() {
+    return id;
+  }
 
-  public Long getId() { return id; }
+  public Activite getActivite() {
+    return activite;
+  }
 
-  public String getFileUrl() { return fileUrl; }
+  public void setActivite(Activite activite) {
+    this.activite = activite;
+  }
 
-  public void setFileUrl(String fileUrl) { this.fileUrl = fileUrl; }
+  public String getFileName() {
+    return fileName;
+  }
 
-  public ActiviteMediaType getType() { return type; }
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
+  }
 
-  public void setType(ActiviteMediaType type) { this.type = type; }
+  public ActiviteMediaType getType() {
+    return type;
+  }
 
-  public Activite getActivite() { return activite; }
-
-  public void setActivite(Activite activite) { this.activite = activite; }
+  public void setType(ActiviteMediaType type) {
+    this.type = type;
+  }
 }
