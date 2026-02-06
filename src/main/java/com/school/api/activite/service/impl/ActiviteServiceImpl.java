@@ -47,24 +47,30 @@ public class ActiviteServiceImpl implements ActiviteService {
     activite.setContenu(request.getContenu());
     activiteRepository.save(activite);
 
-    // PHOTOS
+    /* ===================== PHOTOS ===================== */
+
     for (MultipartFile photo : photos) {
       String url = fileStorageService.storeActualiteGalleryImage(photo);
+
       ActiviteImage img = new ActiviteImage();
-      img.setFileUrl(url);
+      img.setFileName(url); // ✅ CORRIGÉ
       img.setType(ActiviteMediaType.IMAGE);
       img.setActivite(activite);
+
       activiteImageRepository.save(img);
       activite.getImages().add(img);
     }
 
-    // VIDEO (optionnelle)
+    /* ===================== VIDEO (OPTIONNELLE) ===================== */
+
     if (video != null && !video.isEmpty()) {
       String url = fileStorageService.storeBannerMedia(video, MediaType.VIDEO);
+
       ActiviteImage vid = new ActiviteImage();
-      vid.setFileUrl(url);
+      vid.setFileName(url); // ✅ CORRIGÉ
       vid.setType(ActiviteMediaType.VIDEO);
       vid.setActivite(activite);
+
       activiteImageRepository.save(vid);
       activite.getImages().add(vid);
     }
@@ -74,15 +80,17 @@ public class ActiviteServiceImpl implements ActiviteService {
 
   @Override
   public List<ActiviteResponse> getAll() {
-    return activiteRepository.findAll().stream().map(this::map).toList();
+    return activiteRepository.findAll()
+      .stream()
+      .map(this::map)
+      .toList();
   }
 
   @Override
   public ActiviteResponse getById(Long id) {
-    return map(
-      activiteRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"))
-    );
+    Activite activite = activiteRepository.findById(id)
+      .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"));
+    return map(activite);
   }
 
   @Override
@@ -90,9 +98,10 @@ public class ActiviteServiceImpl implements ActiviteService {
     Activite activite = activiteRepository.findById(id)
       .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"));
 
-    activite.getImages().forEach(
-      img -> fileStorageService.deleteQuietly(img.getFileUrl())
-    );
+    activite.getImages()
+      .forEach(img ->
+        fileStorageService.deleteQuietly(img.getFileName()) // ✅ CORRIGÉ
+      );
 
     activiteRepository.delete(activite);
   }
@@ -102,9 +111,11 @@ public class ActiviteServiceImpl implements ActiviteService {
     ActiviteImage img = activiteImageRepository.findById(mediaId)
       .orElseThrow(() -> new ResourceNotFoundException("Média introuvable"));
 
-    fileStorageService.deleteQuietly(img.getFileUrl());
+    fileStorageService.deleteQuietly(img.getFileName()); // ✅ CORRIGÉ
     activiteImageRepository.delete(img);
   }
+
+  /* ===================== MAPPING ===================== */
 
   private ActiviteResponse map(Activite activite) {
 
@@ -117,7 +128,7 @@ public class ActiviteServiceImpl implements ActiviteService {
       activite.getImages().stream().map(img -> {
         ActiviteMediaResponse m = new ActiviteMediaResponse();
         m.setId(img.getId());
-        m.setUrl(img.getFileUrl());
+        m.setUrl(img.getFileName()); // ✅ CORRIGÉ
         m.setType(img.getType());
         return m;
       }).toList()
