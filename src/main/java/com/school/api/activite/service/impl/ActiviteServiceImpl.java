@@ -31,7 +31,7 @@ public class ActiviteServiceImpl implements ActiviteService {
     this.fileStorageService = fileStorageService;
   }
 
-  /* ======================= CREATE ======================= */
+  /* ================= ADMIN ================= */
 
   @Override
   public ActiviteResponse create(
@@ -49,9 +49,7 @@ public class ActiviteServiceImpl implements ActiviteService {
     activite.setContenu(request.getContenu());
     activiteRepository.save(activite);
 
-    /* ===================== PHOTOS ===================== */
     for (MultipartFile photo : photos) {
-
       String imageUrl = fileStorageService.storeActualiteGalleryImage(photo);
 
       ActiviteImage image = new ActiviteImage();
@@ -63,9 +61,7 @@ public class ActiviteServiceImpl implements ActiviteService {
       activite.getImages().add(image);
     }
 
-    /* ===================== VIDEO ====================== */
     if (video != null && !video.isEmpty()) {
-
       String videoUrl =
         fileStorageService.storeBannerMedia(video, MediaType.VIDEO);
 
@@ -78,16 +74,14 @@ public class ActiviteServiceImpl implements ActiviteService {
       activite.getImages().add(videoEntity);
     }
 
-    return mapToResponse(activite);
+    return mapToAdminResponse(activite);
   }
-
-  /* ======================== READ ======================= */
 
   @Override
   public List<ActiviteResponse> getAll() {
     return activiteRepository.findAll()
       .stream()
-      .map(this::mapToResponse)
+      .map(this::mapToAdminResponse)
       .toList();
   }
 
@@ -97,14 +91,11 @@ public class ActiviteServiceImpl implements ActiviteService {
       .orElseThrow(() ->
         new ResourceNotFoundException("Activité introuvable")
       );
-    return mapToResponse(activite);
+    return mapToAdminResponse(activite);
   }
-
-  /* ======================= DELETE ====================== */
 
   @Override
   public void delete(Long id) {
-
     Activite activite = activiteRepository.findById(id)
       .orElseThrow(() ->
         new ResourceNotFoundException("Activité introuvable")
@@ -119,7 +110,6 @@ public class ActiviteServiceImpl implements ActiviteService {
 
   @Override
   public void deleteMedia(Long mediaId) {
-
     ActiviteImage image = activiteImageRepository.findById(mediaId)
       .orElseThrow(() ->
         new ResourceNotFoundException("Média introuvable")
@@ -129,9 +119,28 @@ public class ActiviteServiceImpl implements ActiviteService {
     activiteImageRepository.delete(image);
   }
 
-  /* ====================== MAPPING ====================== */
+  /* ================= PUBLIC ================= */
 
-  private ActiviteResponse mapToResponse(Activite activite) {
+  @Override
+  public List<ActivitePublicResponse> getAllPublic() {
+    return activiteRepository.findAll()
+      .stream()
+      .map(this::mapToPublicResponse)
+      .toList();
+  }
+
+  @Override
+  public ActivitePublicResponse getPublicById(Long id) {
+    Activite activite = activiteRepository.findById(id)
+      .orElseThrow(() ->
+        new ResourceNotFoundException("Activité introuvable")
+      );
+    return mapToPublicResponse(activite);
+  }
+
+  /* ================= MAPPINGS ================= */
+
+  private ActiviteResponse mapToAdminResponse(Activite activite) {
 
     ActiviteResponse response = new ActiviteResponse();
     response.setId(activite.getId());
@@ -143,6 +152,27 @@ public class ActiviteServiceImpl implements ActiviteService {
         .map(img -> {
           ActiviteMediaResponse media = new ActiviteMediaResponse();
           media.setId(img.getId());
+          media.setUrl(img.getImageUrl());
+          media.setType(img.getType());
+          return media;
+        })
+        .toList()
+    );
+
+    return response;
+  }
+
+  private ActivitePublicResponse mapToPublicResponse(Activite activite) {
+
+    ActivitePublicResponse response = new ActivitePublicResponse();
+    response.setId(activite.getId());
+    response.setTitre(activite.getTitre());
+    response.setContenu(activite.getContenu());
+
+    response.setMedias(
+      activite.getImages().stream()
+        .map(img -> {
+          ActiviteMediaPublicResponse media = new ActiviteMediaPublicResponse();
           media.setUrl(img.getImageUrl());
           media.setType(img.getType());
           return media;
