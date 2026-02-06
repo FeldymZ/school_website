@@ -16,8 +16,8 @@ public class ActiviteImage {
   private Activite activite;
 
   // URL publique du média (image ou vidéo)
-  @Column(name = "file_name", nullable = false)
-  private String fileName;
+  @Column(nullable = false)
+  private String imageUrl;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -37,12 +37,12 @@ public class ActiviteImage {
     this.activite = activite;
   }
 
-  public String getFileName() {
-    return fileName;
+  public String getImageUrl() {
+    return imageUrl;
   }
 
-  public void setFileName(String fileName) {
-    this.fileName = fileName;
+  public void setImageUrl(String imageUrl) {
+    this.imageUrl = imageUrl;
   }
 
   public ActiviteMediaType getType() {
