@@ -1,14 +1,14 @@
-package com.school.api.activite.dto;
+  package com.school.api.activite.dto;
 
-import lombok.*;
+  import lombok.*;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class ActiviteImageResponse {
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  public class ActiviteImageResponse {
 
-  private Long id;
-  private String url;
-}
+    private Long id;
+    private String url;
+  }

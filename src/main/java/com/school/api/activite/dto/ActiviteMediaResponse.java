@@ -18,5 +18,7 @@ public class ActiviteMediaResponse {
 
   public ActiviteMediaType getType() { return type; }
 
-  public void setType(ActiviteMediaType type) { this.type = type; }
+  public void setType(ActiviteMediaType type) {
+    this.type = type;
+  }
 }

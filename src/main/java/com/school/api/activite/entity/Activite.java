@@ -5,7 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "activites")
+@Table(
+  name = "activites",
+  uniqueConstraints = {
+    @UniqueConstraint(columnNames = "slug")
+  }
+)
 public class Activite {
 
   @Id
@@ -18,6 +23,9 @@ public class Activite {
   @Column(nullable = false, columnDefinition = "TEXT")
   private String contenu;
 
+  @Column(nullable = false, length = 180, unique = true)
+  private String slug;
+
   @OneToMany(
     mappedBy = "activite",
     cascade = CascadeType.ALL,
@@ -25,7 +33,7 @@ public class Activite {
   )
   private List<ActiviteImage> images = new ArrayList<>();
 
-  /* GETTERS / SETTERS */
+  /* ================= GETTERS / SETTERS ================= */
 
   public Long getId() { return id; }
 
@@ -36,6 +44,10 @@ public class Activite {
   public String getContenu() { return contenu; }
 
   public void setContenu(String contenu) { this.contenu = contenu; }
+
+  public String getSlug() { return slug; }
+
+  public void setSlug(String slug) { this.slug = slug; }
 
   public List<ActiviteImage> getImages() { return images; }
 }

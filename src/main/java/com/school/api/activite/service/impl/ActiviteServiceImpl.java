@@ -31,7 +31,17 @@ public class ActiviteServiceImpl implements ActiviteService {
     this.fileStorageService = fileStorageService;
   }
 
-  /* ================= ADMIN ================= */
+  /**
+   * Génère un slug à partir d'une chaîne en minuscule,
+   * remplaçant les caractères non alphanumériques par des tirets,
+   * sans tirets en début ou fin.
+   */
+  private String generateSlug(String input) {
+    return input
+      .toLowerCase()
+      .replaceAll("[^a-z0-9]+", "-")
+      .replaceAll("(^-|-$)", "");
+  }
 
   @Override
   public ActiviteResponse create(
@@ -40,38 +50,45 @@ public class ActiviteServiceImpl implements ActiviteService {
     MultipartFile video
   ) {
 
-    if (photos == null || photos.length == 0) {
-      throw new IllegalArgumentException("Au moins une photo est obligatoire");
-    }
-
     Activite activite = new Activite();
     activite.setTitre(request.getTitre());
     activite.setContenu(request.getContenu());
+
+    // Génération du slug unique
+    String baseSlug = generateSlug(request.getTitre());
+    String slug = baseSlug;
+    int i = 1;
+    while (activiteRepository.existsBySlug(slug)) {
+      slug = baseSlug + "-" + i++;
+    }
+    activite.setSlug(slug);
+
     activiteRepository.save(activite);
 
+    // Sauvegarde des photos associées
     for (MultipartFile photo : photos) {
-      String imageUrl = fileStorageService.storeActualiteGalleryImage(photo);
+      String url = fileStorageService.storeActualiteGalleryImage(photo);
 
-      ActiviteImage image = new ActiviteImage();
-      image.setImageUrl(imageUrl);
-      image.setType(ActiviteMediaType.IMAGE);
-      image.setActivite(activite);
+      ActiviteImage img = new ActiviteImage();
+      img.setImageUrl(url);
+      img.setType(ActiviteMediaType.IMAGE);
+      img.setActivite(activite);
 
-      activiteImageRepository.save(image);
-      activite.getImages().add(image);
+      activiteImageRepository.save(img);
+      activite.getImages().add(img);
     }
 
+    // Sauvegarde de la vidéo associée si présente
     if (video != null && !video.isEmpty()) {
-      String videoUrl =
-        fileStorageService.storeBannerMedia(video, MediaType.VIDEO);
+      String videoUrl = fileStorageService.storeBannerMedia(video, MediaType.VIDEO);
 
-      ActiviteImage videoEntity = new ActiviteImage();
-      videoEntity.setImageUrl(videoUrl);
-      videoEntity.setType(ActiviteMediaType.VIDEO);
-      videoEntity.setActivite(activite);
+      ActiviteImage vid = new ActiviteImage();
+      vid.setImageUrl(videoUrl);
+      vid.setType(ActiviteMediaType.VIDEO);
+      vid.setActivite(activite);
 
-      activiteImageRepository.save(videoEntity);
-      activite.getImages().add(videoEntity);
+      activiteImageRepository.save(vid);
+      activite.getImages().add(vid);
     }
 
     return mapToAdminResponse(activite);
@@ -88,19 +105,16 @@ public class ActiviteServiceImpl implements ActiviteService {
   @Override
   public ActiviteResponse getById(Long id) {
     Activite activite = activiteRepository.findById(id)
-      .orElseThrow(() ->
-        new ResourceNotFoundException("Activité introuvable")
-      );
+      .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"));
     return mapToAdminResponse(activite);
   }
 
   @Override
   public void delete(Long id) {
     Activite activite = activiteRepository.findById(id)
-      .orElseThrow(() ->
-        new ResourceNotFoundException("Activité introuvable")
-      );
+      .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"));
 
+    // Suppression des fichiers médias liés
     activite.getImages().forEach(
       img -> fileStorageService.deleteQuietly(img.getImageUrl())
     );
@@ -110,16 +124,12 @@ public class ActiviteServiceImpl implements ActiviteService {
 
   @Override
   public void deleteMedia(Long mediaId) {
-    ActiviteImage image = activiteImageRepository.findById(mediaId)
-      .orElseThrow(() ->
-        new ResourceNotFoundException("Média introuvable")
-      );
+    ActiviteImage img = activiteImageRepository.findById(mediaId)
+      .orElseThrow(() -> new ResourceNotFoundException("Média introuvable"));
 
-    fileStorageService.deleteQuietly(image.getImageUrl());
-    activiteImageRepository.delete(image);
+    fileStorageService.deleteQuietly(img.getImageUrl());
+    activiteImageRepository.delete(img);
   }
-
-  /* ================= PUBLIC ================= */
 
   @Override
   public List<ActivitePublicResponse> getAllPublic() {
@@ -130,56 +140,48 @@ public class ActiviteServiceImpl implements ActiviteService {
   }
 
   @Override
-  public ActivitePublicResponse getPublicById(Long id) {
-    Activite activite = activiteRepository.findById(id)
-      .orElseThrow(() ->
-        new ResourceNotFoundException("Activité introuvable")
-      );
+  public ActivitePublicResponse getPublicBySlug(String slug) {
+    Activite activite = activiteRepository.findBySlug(slug)
+      .orElseThrow(() -> new ResourceNotFoundException("Activité introuvable"));
     return mapToPublicResponse(activite);
   }
 
-  /* ================= MAPPINGS ================= */
-
   private ActiviteResponse mapToAdminResponse(Activite activite) {
+    ActiviteResponse res = new ActiviteResponse();
+    res.setId(activite.getId());
+    res.setTitre(activite.getTitre());
+    res.setContenu(activite.getContenu());
+    res.setSlug(activite.getSlug());
 
-    ActiviteResponse response = new ActiviteResponse();
-    response.setId(activite.getId());
-    response.setTitre(activite.getTitre());
-    response.setContenu(activite.getContenu());
-
-    response.setMedias(
-      activite.getImages().stream()
-        .map(img -> {
-          ActiviteMediaResponse media = new ActiviteMediaResponse();
-          media.setId(img.getId());
-          media.setUrl(img.getImageUrl());
-          media.setType(img.getType());
-          return media;
-        })
-        .toList()
+    res.setMedias(
+      activite.getImages().stream().map(img -> {
+        ActiviteMediaResponse m = new ActiviteMediaResponse();
+        m.setId(img.getId());
+        m.setUrl(img.getImageUrl());
+        m.setType(img.getType());
+        return m;
+      }).toList()
     );
 
-    return response;
+    return res;
   }
 
   private ActivitePublicResponse mapToPublicResponse(Activite activite) {
+    ActivitePublicResponse res = new ActivitePublicResponse();
+    res.setId(activite.getId());
+    res.setTitre(activite.getTitre());
+    res.setContenu(activite.getContenu());
+    res.setSlug(activite.getSlug());
 
-    ActivitePublicResponse response = new ActivitePublicResponse();
-    response.setId(activite.getId());
-    response.setTitre(activite.getTitre());
-    response.setContenu(activite.getContenu());
-
-    response.setMedias(
-      activite.getImages().stream()
-        .map(img -> {
-          ActiviteMediaPublicResponse media = new ActiviteMediaPublicResponse();
-          media.setUrl(img.getImageUrl());
-          media.setType(img.getType());
-          return media;
-        })
-        .toList()
+    res.setMedias(
+      activite.getImages().stream().map(img -> {
+        ActiviteMediaPublicResponse m = new ActiviteMediaPublicResponse();
+        m.setUrl(img.getImageUrl());
+        m.setType(img.getType());
+        return m;
+      }).toList()
     );
 
-    return response;
+    return res;
   }
 }

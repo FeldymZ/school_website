@@ -21,31 +21,21 @@ public class ActiviteImage {
   @Column(nullable = false)
   private ActiviteMediaType type;
 
-  /* ================= GETTERS / SETTERS ================= */
+  public Long getId() { return id; }
 
-  public Long getId() {
-    return id;
-  }
-
-  public Activite getActivite() {
-    return activite;
-  }
+  public Activite getActivite() { return activite; }
 
   public void setActivite(Activite activite) {
     this.activite = activite;
   }
 
-  public String getImageUrl() {
-    return imageUrl;
-  }
+  public String getImageUrl() { return imageUrl; }
 
   public void setImageUrl(String imageUrl) {
     this.imageUrl = imageUrl;
   }
 
-  public ActiviteMediaType getType() {
-    return type;
-  }
+  public ActiviteMediaType getType() { return type; }
 
   public void setType(ActiviteMediaType type) {
     this.type = type;
