@@ -2,12 +2,19 @@ package com.school.api.activite.service;
 
 import com.school.api.activite.dto.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 public interface ActiviteService {
 
   ActiviteResponse create(
     ActiviteRequest request,
+    MultipartFile[] photos,
+    MultipartFile video
+  );
+
+  ActiviteResponse addMedias(
+    Long activiteId,
     MultipartFile[] photos,
     MultipartFile video
   );

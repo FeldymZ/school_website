@@ -22,16 +22,7 @@ public class ActiviteAdminController {
     this.activiteService = activiteService;
   }
 
-    /* =====================================================
-       ======================= CREATE ======================
-       ===================================================== */
-  /**
-   * Création d'une activité
-   * - form-data
-   * - au moins 1 photo obligatoire
-   * - plusieurs photos possibles
-   * - 1 vidéo optionnelle
-   */
+  /* ================= CREATE ================= */
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ActiviteResponse create(
     @RequestParam @NotBlank String titre,
@@ -39,9 +30,10 @@ public class ActiviteAdminController {
     @RequestParam("photos") MultipartFile[] photos,
     @RequestParam(value = "video", required = false) MultipartFile video
   ) {
-
     if (photos == null || photos.length == 0) {
-      throw new IllegalArgumentException("Au moins une photo est obligatoire");
+      throw new IllegalArgumentException(
+        "Au moins une photo est obligatoire"
+      );
     }
 
     ActiviteRequest request = new ActiviteRequest();
@@ -51,10 +43,22 @@ public class ActiviteAdminController {
     return activiteService.create(request, photos, video);
   }
 
-    /* =====================================================
-       ======================= READ ========================
-       ===================================================== */
+  /* ================= ADD MEDIAS ================= */
+  @PostMapping(
+    value = "/{id}/medias",
+    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+  )
+  public ActiviteResponse addMedias(
+    @PathVariable Long id,
+    @RequestParam(value = "photos", required = false)
+    MultipartFile[] photos,
+    @RequestParam(value = "video", required = false)
+    MultipartFile video
+  ) {
+    return activiteService.addMedias(id, photos, video);
+  }
 
+  /* ================= READ ================= */
   @GetMapping
   public List<ActiviteResponse> getAll() {
     return activiteService.getAll();
@@ -65,23 +69,13 @@ public class ActiviteAdminController {
     return activiteService.getById(id);
   }
 
-    /* =====================================================
-       ======================= DELETE ======================
-       ===================================================== */
-
+  /* ================= DELETE ================= */
   @DeleteMapping("/{id}")
   public void delete(@PathVariable Long id) {
     activiteService.delete(id);
   }
 
-    /* =====================================================
-       ============ DELETE MEDIA (SUPERADMIN) ==============
-       ===================================================== */
-  /**
-   * Suppression d'une image ou vidéo
-   * - suppression DB + fichier
-   * - SUPERADMIN uniquement
-   */
+  /* ================= DELETE MEDIA ================= */
   @PreAuthorize("hasRole('SUPERADMIN')")
   @DeleteMapping("/medias/{mediaId}")
   public void deleteMedia(@PathVariable Long mediaId) {

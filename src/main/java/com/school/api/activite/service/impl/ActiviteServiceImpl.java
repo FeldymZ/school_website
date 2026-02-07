@@ -32,18 +32,8 @@ public class ActiviteServiceImpl implements ActiviteService {
     this.fileStorageService = fileStorageService;
   }
 
-  /**
-   * Génère un slug SEO-safe :
-   * - supprime les accents
-   * - minuscule
-   * - remplace caractères spéciaux par "-"
-   * - cohérent avec PostgreSQL unaccent()
-   */
+  /* ================= SLUG ================= */
   private String generateSlug(String input) {
-    if (input == null || input.isBlank()) {
-      return "";
-    }
-
     return Normalizer.normalize(input, Normalizer.Form.NFD)
       .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
       .toLowerCase()
@@ -51,18 +41,17 @@ public class ActiviteServiceImpl implements ActiviteService {
       .replaceAll("(^-|-$)", "");
   }
 
+  /* ================= CREATE ================= */
   @Override
   public ActiviteResponse create(
     ActiviteRequest request,
     MultipartFile[] photos,
     MultipartFile video
   ) {
-
     Activite activite = new Activite();
     activite.setTitre(request.getTitre());
     activite.setContenu(request.getContenu());
 
-    /* ================= SLUG UNIQUE ================= */
     String baseSlug = generateSlug(request.getTitre());
     String slug = baseSlug;
     int i = 1;
@@ -74,40 +63,77 @@ public class ActiviteServiceImpl implements ActiviteService {
     activite.setSlug(slug);
     activiteRepository.save(activite);
 
-    /* ================= IMAGES ================= */
+    addMediasInternal(activite, photos, video);
+
+    return mapToAdminResponse(activite);
+  }
+
+  /* ================= ADD MEDIAS ================= */
+  @Override
+  public ActiviteResponse addMedias(
+    Long activiteId,
+    MultipartFile[] photos,
+    MultipartFile video
+  ) {
+    Activite activite = activiteRepository.findById(activiteId)
+      .orElseThrow(() ->
+        new ResourceNotFoundException("Activité introuvable")
+      );
+
+    addMediasInternal(activite, photos, video);
+
+    return mapToAdminResponse(activite);
+  }
+
+  /* ================= INTERNAL MEDIA HANDLER ================= */
+  private void addMediasInternal(
+    Activite activite,
+    MultipartFile[] photos,
+    MultipartFile video
+  ) {
+    /* ===== IMAGES ===== */
     if (photos != null) {
       for (MultipartFile photo : photos) {
         if (photo == null || photo.isEmpty()) continue;
 
-        String url = fileStorageService.storeActualiteGalleryImage(photo);
+        String url =
+          fileStorageService.storeActualiteGalleryImage(photo);
 
         ActiviteImage img = new ActiviteImage();
+        img.setActivite(activite);
         img.setImageUrl(url);
         img.setType(ActiviteMediaType.IMAGE);
-        img.setActivite(activite);
 
         activiteImageRepository.save(img);
         activite.getImages().add(img);
       }
     }
 
-    /* ================= VIDEO ================= */
+    /* ===== VIDEO (UNIQUE, REMPLACEMENT) ===== */
     if (video != null && !video.isEmpty()) {
+
+      // suppression ancienne vidéo
+      activite.getImages().stream()
+        .filter(m -> m.getType() == ActiviteMediaType.VIDEO)
+        .forEach(m -> {
+          fileStorageService.deleteQuietly(m.getImageUrl());
+          activiteImageRepository.delete(m);
+        });
+
       String videoUrl =
         fileStorageService.storeBannerMedia(video, MediaType.VIDEO);
 
       ActiviteImage vid = new ActiviteImage();
+      vid.setActivite(activite);
       vid.setImageUrl(videoUrl);
       vid.setType(ActiviteMediaType.VIDEO);
-      vid.setActivite(activite);
 
       activiteImageRepository.save(vid);
       activite.getImages().add(vid);
     }
-
-    return mapToAdminResponse(activite);
   }
 
+  /* ================= READ ================= */
   @Override
   public List<ActiviteResponse> getAll() {
     return activiteRepository.findAll()
@@ -122,10 +148,10 @@ public class ActiviteServiceImpl implements ActiviteService {
       .orElseThrow(() ->
         new ResourceNotFoundException("Activité introuvable")
       );
-
     return mapToAdminResponse(activite);
   }
 
+  /* ================= DELETE ================= */
   @Override
   public void delete(Long id) {
     Activite activite = activiteRepository.findById(id)
@@ -133,9 +159,10 @@ public class ActiviteServiceImpl implements ActiviteService {
         new ResourceNotFoundException("Activité introuvable")
       );
 
-    activite.getImages().forEach(
-      img -> fileStorageService.deleteQuietly(img.getImageUrl())
-    );
+    activite.getImages()
+      .forEach(img ->
+        fileStorageService.deleteQuietly(img.getImageUrl())
+      );
 
     activiteRepository.delete(activite);
   }
@@ -151,6 +178,7 @@ public class ActiviteServiceImpl implements ActiviteService {
     activiteImageRepository.delete(img);
   }
 
+  /* ================= PUBLIC ================= */
   @Override
   public List<ActivitePublicResponse> getAllPublic() {
     return activiteRepository.findAll()
@@ -165,12 +193,10 @@ public class ActiviteServiceImpl implements ActiviteService {
       .orElseThrow(() ->
         new ResourceNotFoundException("Activité introuvable")
       );
-
     return mapToPublicResponse(activite);
   }
 
   /* ================= MAPPERS ================= */
-
   private ActiviteResponse mapToAdminResponse(Activite activite) {
     ActiviteResponse res = new ActiviteResponse();
     res.setId(activite.getId());
