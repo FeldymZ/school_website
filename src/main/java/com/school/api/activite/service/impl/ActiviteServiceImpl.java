@@ -68,6 +68,36 @@ public class ActiviteServiceImpl implements ActiviteService {
     return mapToAdminResponse(activite);
   }
 
+  /* ================= UPDATE ================= */
+  @Override
+  public ActiviteResponse update(Long id, ActiviteRequest request) {
+
+    Activite activite = activiteRepository.findById(id)
+      .orElseThrow(() ->
+        new ResourceNotFoundException("Activité introuvable")
+      );
+
+    activite.setTitre(request.getTitre());
+    activite.setContenu(request.getContenu());
+
+    String baseSlug = generateSlug(request.getTitre());
+    String slug = baseSlug;
+    int i = 1;
+
+    while (
+      activiteRepository.existsBySlug(slug)
+        && !slug.equals(activite.getSlug())
+    ) {
+      slug = baseSlug + "-" + i++;
+    }
+
+    activite.setSlug(slug);
+
+    activiteRepository.save(activite);
+
+    return mapToAdminResponse(activite);
+  }
+
   /* ================= ADD MEDIAS ================= */
   @Override
   public ActiviteResponse addMedias(
@@ -91,7 +121,6 @@ public class ActiviteServiceImpl implements ActiviteService {
     MultipartFile[] photos,
     MultipartFile video
   ) {
-    /* ===== IMAGES ===== */
     if (photos != null) {
       for (MultipartFile photo : photos) {
         if (photo == null || photo.isEmpty()) continue;
@@ -109,10 +138,8 @@ public class ActiviteServiceImpl implements ActiviteService {
       }
     }
 
-    /* ===== VIDEO (UNIQUE, REMPLACEMENT) ===== */
     if (video != null && !video.isEmpty()) {
 
-      // suppression ancienne vidéo
       activite.getImages().stream()
         .filter(m -> m.getType() == ActiviteMediaType.VIDEO)
         .forEach(m -> {

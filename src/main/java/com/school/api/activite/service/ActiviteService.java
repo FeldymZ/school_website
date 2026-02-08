@@ -13,6 +13,8 @@ public interface ActiviteService {
     MultipartFile video
   );
 
+  ActiviteResponse update(Long id, ActiviteRequest request);
+
   ActiviteResponse addMedias(
     Long activiteId,
     MultipartFile[] photos,

@@ -30,17 +30,20 @@ public class ActiviteAdminController {
     @RequestParam("photos") MultipartFile[] photos,
     @RequestParam(value = "video", required = false) MultipartFile video
   ) {
-    if (photos == null || photos.length == 0) {
-      throw new IllegalArgumentException(
-        "Au moins une photo est obligatoire"
-      );
-    }
-
     ActiviteRequest request = new ActiviteRequest();
     request.setTitre(titre);
     request.setContenu(contenu);
 
     return activiteService.create(request, photos, video);
+  }
+
+  /* ================= UPDATE ================= */
+  @PutMapping("/{id}")
+  public ActiviteResponse update(
+    @PathVariable Long id,
+    @RequestBody ActiviteRequest request
+  ) {
+    return activiteService.update(id, request);
   }
 
   /* ================= ADD MEDIAS ================= */
