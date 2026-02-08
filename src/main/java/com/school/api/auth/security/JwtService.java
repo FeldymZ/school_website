@@ -15,8 +15,9 @@ public class JwtService {
   private static final String SECRET =
     "SUPER_SECRET_KEY_CHANGE_ME_SUPER_SECRET_KEY_CHANGE_ME";
 
-  private static final long ACCESS_EXPIRATION = 1000 * 60 * 15; // 15 min
-  private static final long REFRESH_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 jours
+  // ⏱ NOUVELLES DURÉES
+  private static final long ACCESS_EXPIRATION = 1000L * 60 * 60; // 1 heure
+  private static final long REFRESH_EXPIRATION = 1000L * 60 * 60 * 24; // 24 heures MAX
 
   private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
@@ -24,11 +25,9 @@ public class JwtService {
   public String generateAccessToken(User user) {
     return Jwts.builder()
       .setSubject(user.getEmail())
-      .claim("role", user.getRole().name()) // ✅ CORRECTION ICI
+      .claim("role", user.getRole().name())
       .setIssuedAt(new Date())
-      .setExpiration(
-        new Date(System.currentTimeMillis() + ACCESS_EXPIRATION)
-      )
+      .setExpiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRATION))
       .signWith(key)
       .compact();
   }
@@ -38,9 +37,7 @@ public class JwtService {
     return Jwts.builder()
       .setSubject(user.getEmail())
       .setIssuedAt(new Date())
-      .setExpiration(
-        new Date(System.currentTimeMillis() + REFRESH_EXPIRATION)
-      )
+      .setExpiration(new Date(System.currentTimeMillis() + REFRESH_EXPIRATION))
       .signWith(key)
       .compact();
   }
