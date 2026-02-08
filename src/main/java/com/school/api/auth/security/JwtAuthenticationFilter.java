@@ -22,20 +22,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
 
-  /**
-   * 🔥 POINT CRITIQUE
-   * On ignore complètement le filtre JWT pour les routes publiques
-   */
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
     String path = request.getServletPath();
 
     return
       path.startsWith("/api/public/") ||
-      path.startsWith("/api/auth/login") ||
-      path.startsWith("/api/auth/refresh") ||
-      path.startsWith("/swagger-ui") ||
-      path.startsWith("/v3/api-docs");
+        path.startsWith("/api/auth/login") ||
+        path.startsWith("/api/auth/refresh") ||
+        path.startsWith("/swagger-ui") ||
+        path.startsWith("/v3/api-docs");
   }
 
   @Override
@@ -64,16 +60,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       String email = claims.getSubject();
       String role = claims.get("role", String.class);
 
+      if (email == null || role == null) {
+        filterChain.doFilter(request, response);
+        return;
+      }
+
+      String authority = role.startsWith("ROLE_")
+        ? role
+        : "ROLE_" + role;
+
       var auth = new UsernamePasswordAuthenticationToken(
         email,
         null,
-        List.of(new SimpleGrantedAuthority("ROLE_" + role))
+        List.of(new SimpleGrantedAuthority(authority))
       );
 
       SecurityContextHolder.getContext().setAuthentication(auth);
 
     } catch (Exception e) {
-      // Token invalide / expiré → pas d'auth
       SecurityContextHolder.clearContext();
     }
 
