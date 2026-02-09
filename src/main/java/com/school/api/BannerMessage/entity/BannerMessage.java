@@ -13,14 +13,19 @@ public class BannerMessage {
 
   private String title;
 
-  @Column(nullable = false)
+  @Column(nullable = false, length = 500)
   private String content;
 
-  @Column(name = "is_active")
-  private boolean active;
+  @Column(name = "is_active", nullable = false)
+  private boolean active = false;
 
+  @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
+
+  @Column(nullable = false)
   private LocalDateTime updatedAt;
+
+  /* ================= LIFECYCLE ================= */
 
   @PrePersist
   void onCreate() {
@@ -47,7 +52,6 @@ public class BannerMessage {
     return content;
   }
 
-  /** 🔥 IMPORTANT : isActive() */
   public boolean isActive() {
     return active;
   }

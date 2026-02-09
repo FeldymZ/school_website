@@ -36,10 +36,18 @@ public class BannerMessageAdminController {
   public BannerMessage update(
     @PathVariable Long id,
     @RequestParam(required = false) String title,
-    @RequestParam String content,
-    @RequestParam(defaultValue = "false") boolean active
+    @RequestParam(required = false) String content,
+    @RequestParam(required = false) Boolean active
   ) {
-    return service.update(id, title, content, active);
+    return service.updatePartial(id, title, content, active);
+  }
+
+  @PutMapping("/{id}/active")
+  public BannerMessage toggleActive(
+    @PathVariable Long id,
+    @RequestParam boolean active
+  ) {
+    return service.setActive(id, active);
   }
 
   @DeleteMapping("/{id}")
