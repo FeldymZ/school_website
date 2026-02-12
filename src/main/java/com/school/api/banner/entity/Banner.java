@@ -6,12 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-  name = "banners",
-  uniqueConstraints = {
-    @UniqueConstraint(columnNames = "displayOrder")
-  }
-)
+@Table(name = "banners")
 @Getter
 @Setter
 @Builder
@@ -32,7 +27,13 @@ public class Banner {
   @Enumerated(EnumType.STRING)
   private MediaType mediaType;
 
-  @Column(nullable = false, unique = true)
+  /*
+   * displayOrder :
+   * - utilisé uniquement pour les bannières actives
+   * - null si bannière désactivée
+   * - géré entièrement par le service
+   */
+  @Column(nullable = true)
   private Integer displayOrder;
 
   private Boolean enabled;

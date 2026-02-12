@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -39,21 +40,22 @@ public class BannerService {
      ===================================================== */
 
   public List<BannerResponse> getAll() {
-    return repository.findAllByOrderByDisplayOrderAsc()
+    return repository.findAll()
       .stream()
+      .sorted(Comparator.comparing(
+        Banner::getDisplayOrder,
+        Comparator.nullsLast(Integer::compareTo)
+      ))
       .map(this::toDto)
       .toList();
   }
 
   public List<BannerResponse> getAllClassified() {
-    return repository.findAllByOrderByDisplayOrderAsc()
-      .stream()
-      .map(this::toDto)
-      .toList();
+    return getAll();
   }
 
   /* =====================================================
-     ➕ CREATE (MULTIPART + BOUTON)
+     ➕ CREATE (AUTO ORDER)
      ===================================================== */
 
   @Transactional
@@ -62,7 +64,7 @@ public class BannerService {
     String subtitle,
     String subtitleAlt,
     MultipartFile media,
-    Integer displayOrder,
+    Integer ignoredDisplayOrder, // plus utilisé
     Boolean enabled,
     String startAt,
     String endAt,
@@ -83,12 +85,10 @@ public class BannerService {
       throw new IllegalArgumentException("Dates invalides");
     }
 
-    if (repository.existsByDisplayOrder(displayOrder)) {
-      repository.shiftDownFrom(displayOrder);
-    }
-
     MediaType mediaType = resolveMediaType(media.getContentType());
     String mediaUrl = fileStorageService.storeBannerMedia(media, mediaType);
+
+    boolean isEnabled = enabled == null || enabled;
 
     Banner banner = Banner.builder()
       .title(title)
@@ -96,19 +96,16 @@ public class BannerService {
       .subtitleAlt(subtitleAlt)
       .mediaUrl(mediaUrl)
       .mediaType(mediaType)
-      .displayOrder(displayOrder)
-      .enabled(enabled != null ? enabled : true)
+      .displayOrder(isEnabled ? resolveNextAvailableOrder() : null)
+      .enabled(isEnabled)
       .startAt(start)
       .endAt(end)
-
-      // bouton optionnel
       .buttonUrl(buttonUrl)
       .buttonLabel(
         buttonUrl != null
           ? (buttonLabel != null ? buttonLabel : "En savoir plus")
           : null
       )
-
       .build();
 
     return toDto(repository.save(banner));
@@ -127,26 +124,25 @@ public class BannerService {
       validateButtonUrl(request.buttonUrl());
     }
 
-    Integer oldOrder = banner.getDisplayOrder();
-    Integer newOrder = request.displayOrder();
-
-    if (newOrder != null && !newOrder.equals(oldOrder)) {
-      if (newOrder < oldOrder) {
-        repository.shiftDownFrom(newOrder);
-      } else {
-        repository.shiftUpBetween(oldOrder, newOrder);
-      }
-      banner.setDisplayOrder(newOrder);
-    }
-
     if (request.title() != null) banner.setTitle(request.title());
     if (request.subtitle() != null) banner.setSubtitle(request.subtitle());
     if (request.subtitleAlt() != null) banner.setSubtitleAlt(request.subtitleAlt());
-    if (request.enabled() != null) banner.setEnabled(request.enabled());
     if (request.startAt() != null) banner.setStartAt(request.startAt());
     if (request.endAt() != null) banner.setEndAt(request.endAt());
 
-    // bouton
+    if (request.enabled() != null) {
+
+      if (request.enabled() && Boolean.FALSE.equals(banner.getEnabled())) {
+        banner.setDisplayOrder(resolveNextAvailableOrder());
+      }
+
+      if (!request.enabled()) {
+        banner.setDisplayOrder(null);
+      }
+
+      banner.setEnabled(request.enabled());
+    }
+
     if (request.buttonUrl() != null) {
       banner.setButtonUrl(request.buttonUrl());
       banner.setButtonLabel(
@@ -171,14 +167,22 @@ public class BannerService {
   @Transactional
   public BannerResponse enable(Long id) {
     Banner banner = get(id);
-    banner.setEnabled(true);
+
+    if (Boolean.FALSE.equals(banner.getEnabled())) {
+      banner.setEnabled(true);
+      banner.setDisplayOrder(resolveNextAvailableOrder());
+    }
+
     return toDto(repository.save(banner));
   }
 
   @Transactional
   public BannerResponse disable(Long id) {
     Banner banner = get(id);
+
     banner.setEnabled(false);
+    banner.setDisplayOrder(null);
+
     return toDto(repository.save(banner));
   }
 
@@ -190,11 +194,10 @@ public class BannerService {
   public void delete(Long id) {
     Banner banner = get(id);
     repository.delete(banner);
-    repository.compactAfterDelete(banner.getDisplayOrder());
   }
 
   /* =====================================================
-     🔀 REORDER
+     🔀 REORDER (optionnel manuel)
      ===================================================== */
 
   @Transactional
@@ -212,6 +215,32 @@ public class BannerService {
     orders.forEach(o ->
       get(o.id()).setDisplayOrder(o.displayOrder())
     );
+  }
+
+  /* =====================================================
+     🧠 ORDER RESOLUTION
+     ===================================================== */
+
+  private Integer resolveNextAvailableOrder() {
+
+    List<Integer> usedOrders = repository.findAll()
+      .stream()
+      .filter(b -> Boolean.TRUE.equals(b.getEnabled()))
+      .map(Banner::getDisplayOrder)
+      .filter(o -> o != null)
+      .sorted()
+      .toList();
+
+    int expected = 1;
+
+    for (Integer order : usedOrders) {
+      if (!order.equals(expected)) {
+        return expected;
+      }
+      expected++;
+    }
+
+    return expected;
   }
 
   /* =====================================================
@@ -238,7 +267,7 @@ public class BannerService {
   }
 
   /* =====================================================
-     🔐 VALIDATION URL
+     🔐 VALIDATION
      ===================================================== */
 
   private void validateButtonUrl(String url) {
