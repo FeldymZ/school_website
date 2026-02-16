@@ -11,47 +11,48 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
 
-        CorsConfiguration config = new CorsConfiguration();
+    CorsConfiguration config = new CorsConfiguration();
 
-        // 🌍 ORIGINS AUTORISÉS
-        config.setAllowedOrigins(List.of(
-            "http://localhost:5173",      // Front public local
-            "http://localhost:5174",      // Back-office local ✅
-            "https://test.esiitech-gabon.com",
-            "https://esiitech-gabon.com",
-            "https://admin.esiitech-gabon.com"
-        ));
+    // 🌍 ORIGINS AUTORISÉS
+    config.setAllowedOrigins(List.of(
+      "http://localhost:5173",          // Front public local
+      "http://localhost:5174",          // Back-office local
+      "https://test.esiitech-gabon.com",
+      "https://esiitech-gabon.com",
+      "https://www.esiitech-gabon.com",   // ✅ AJOUT IMPORTANT
+      "https://admin.esiitech-gabon.com"
+    ));
 
-        // 🔓 MÉTHODES AUTORISÉES
-        config.setAllowedMethods(List.of(
-            "GET",
-            "POST",
-            "PUT",
-            "DELETE",
-            "OPTIONS"
-        ));
+    // 🔓 MÉTHODES AUTORISÉES
+    config.setAllowedMethods(List.of(
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE",
+      "OPTIONS"
+    ));
 
-        // 🔓 HEADERS AUTORISÉS
-        config.setAllowedHeaders(List.of("*"));
+    // 🔓 HEADERS AUTORISÉS
+    config.setAllowedHeaders(List.of("*"));
 
-        // 🔑 AUTH / JWT (cookies ou Authorization)
-        config.setAllowCredentials(true);
+    // 🔑 AUTH / JWT (cookies ou Authorization)
+    config.setAllowCredentials(true);
 
-        // 📤 HEADERS EXPOSÉS AU FRONT
-        config.setExposedHeaders(List.of(
-            "Authorization",
-            "Content-Type"
-        ));
+    // 📤 HEADERS EXPOSÉS AU FRONT
+    config.setExposedHeaders(List.of(
+      "Authorization",
+      "Content-Type"
+    ));
 
-        UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+    UrlBasedCorsConfigurationSource source =
+      new UrlBasedCorsConfigurationSource();
 
-        // ⚠️ IMPORTANT : appliquer à toutes les routes
-        source.registerCorsConfiguration("/**", config);
+    // ⚠️ IMPORTANT : appliquer à toutes les routes
+    source.registerCorsConfiguration("/**", config);
 
-        return source;
-    }
+    return source;
+  }
 }
