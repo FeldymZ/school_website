@@ -4,6 +4,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,6 +15,8 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Year;
 
 @Slf4j
@@ -52,7 +55,6 @@ public class MailService {
 
   /* ============================
      EMAIL HTML SIMPLE AVEC REPLY-TO
-     (POUR CONTACT PUBLIC)
      ============================ */
 
   @Async
@@ -208,8 +210,8 @@ public class MailService {
     );
   }
 
-    /* ============================
-     RÉPONSE DEVIS CONTINUES
+  /* ============================
+     RÉPONSE DEVIS CONTINUES (CORRIGÉ)
      ============================ */
 
   @Async
@@ -248,13 +250,21 @@ public class MailService {
       helper.setText(html, true);
 
       if (hasAttachment) {
-        // ⚠️ Ici on suppose que le fichier est accessible via URL publique
-        helper.addAttachment(
-          "devis.pdf",
-          new ByteArrayResource(
-            new java.net.URL(pieceJointeUrl).openStream().readAllBytes()
-          )
-        );
+
+        // Conversion URL publique → chemin local
+        // Exemple: /files/formations/continues/devis-reponses/xxx.pdf
+        Path path = Path.of(pieceJointeUrl);
+
+        if (Files.exists(path)) {
+
+          helper.addAttachment(
+            path.getFileName().toString(),
+            new FileSystemResource(path.toFile())
+          );
+
+        } else {
+          log.warn("Pièce jointe introuvable : {}", pieceJointeUrl);
+        }
       }
 
       mailSender.send(mimeMessage);
