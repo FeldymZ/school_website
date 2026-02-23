@@ -3,6 +3,7 @@ package com.school.api.formation.continues.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -34,5 +35,5 @@ public class FormationContinues {
   private boolean enabled = true;
 
   @OneToMany(mappedBy = "formation")
-  private List<DemandeDevisFormationContinues> demandes;
+  private List<DemandeDevisFormationContinues> demandes = new ArrayList<>();
 }
