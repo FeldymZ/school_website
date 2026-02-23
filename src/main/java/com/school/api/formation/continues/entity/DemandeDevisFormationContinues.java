@@ -41,15 +41,16 @@ public class DemandeDevisFormationContinues {
 
   private LocalDateTime dateTraitement;
 
-  /* =====================================================
-     🔥 CORRECTION LAZY / JSON
-     ===================================================== */
+  /* ============================
+     🔥 LAZY PROTECTION
+     ============================ */
 
   @JsonIgnore
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "formation_id", nullable = false)
   private FormationContinues formation;
 
+  @JsonIgnore
   @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL)
   private List<DemandeDevisReponseContinues> reponses;
 }
