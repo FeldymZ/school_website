@@ -17,9 +17,10 @@ public class DemandeDevisContinuesPublicService {
   private final DemandeDevisFormationContinuesRepository repository;
   private final FormationContinuesRepository formationRepository;
 
-  public void create(Long formationId, CreateDemandeDevisContinuesDTO dto) {
+  public void create(String slug, CreateDemandeDevisContinuesDTO dto) {
 
-    FormationContinues formation = formationRepository.findById(formationId)
+    FormationContinues formation = formationRepository.findBySlug(slug)
+      .filter(FormationContinues::isEnabled)
       .orElseThrow(() -> new RuntimeException("Formation introuvable"));
 
     DemandeDevisFormationContinues demande =
@@ -32,6 +33,7 @@ public class DemandeDevisContinuesPublicService {
     demande.setNomStructure(dto.getNomStructure());
     demande.setNombreParticipants(dto.getNombreParticipants());
     demande.setDureeSouhaitee(dto.getDureeSouhaitee());
+    demande.setUniteDuree(dto.getUniteDuree());
     demande.setDateDemande(LocalDate.now());
     demande.setFormation(formation);
 

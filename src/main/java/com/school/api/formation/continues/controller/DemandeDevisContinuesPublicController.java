@@ -14,12 +14,12 @@ public class DemandeDevisContinuesPublicController {
 
   private final DemandeDevisContinuesPublicService service;
 
-  @PostMapping("/{id}/demande-devis")
+  @PostMapping("/slug/{slug}/demande-devis")
   public ResponseEntity<?> create(
-    @PathVariable Long id,
+    @PathVariable String slug,
     @RequestBody @Valid CreateDemandeDevisContinuesDTO dto
   ) {
-    service.create(id, dto);
+    service.create(slug, dto);
     return ResponseEntity.ok("Demande envoyée");
   }
 }

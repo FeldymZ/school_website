@@ -27,7 +27,11 @@ public class DemandeDevisFormationContinues {
   private String nomStructure;
 
   private Integer nombreParticipants;
+
   private Integer dureeSouhaitee;
+
+  @Enumerated(EnumType.STRING)
+  private UniteDuree uniteDuree;
 
   private LocalDate dateDemande;
 

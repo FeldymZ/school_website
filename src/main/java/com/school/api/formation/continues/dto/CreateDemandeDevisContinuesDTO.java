@@ -1,5 +1,6 @@
 package com.school.api.formation.continues.dto;
 
+import com.school.api.formation.continues.entity.UniteDuree;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,6 +28,9 @@ public class CreateDemandeDevisContinuesDTO {
   @NotNull(message = "Le nombre de participants est obligatoire")
   private Integer nombreParticipants;
 
-  @NotNull(message = "La durée souhaitée est obligatoire")
+  @NotNull(message = "La durée est obligatoire")
   private Integer dureeSouhaitee;
+
+  @NotNull(message = "L'unité de durée est obligatoire")
+  private UniteDuree uniteDuree;
 }
