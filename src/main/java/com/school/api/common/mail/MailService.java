@@ -207,4 +207,62 @@ public class MailService {
       context
     );
   }
+
+    /* ============================
+     RÉPONSE DEVIS CONTINUES
+     ============================ */
+
+  @Async
+  public void sendDevisResponse(
+    String to,
+    String clientName,
+    String message,
+    String pieceJointeUrl
+  ) {
+
+    try {
+
+      Context context = new Context();
+      context.setVariable("name", clientName);
+      context.setVariable("message", message);
+      context.setVariable("year", Year.now().getValue());
+
+      String html =
+        templateEngine.process("mail/devis-reponse", context);
+
+      MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+      boolean hasAttachment =
+        pieceJointeUrl != null && !pieceJointeUrl.isBlank();
+
+      MimeMessageHelper helper =
+        new MimeMessageHelper(
+          mimeMessage,
+          hasAttachment,
+          StandardCharsets.UTF_8.name()
+        );
+
+      helper.setFrom(mailProperties.getFrom());
+      helper.setTo(to);
+      helper.setSubject("Réponse à votre demande de devis");
+      helper.setText(html, true);
+
+      if (hasAttachment) {
+        // ⚠️ Ici on suppose que le fichier est accessible via URL publique
+        helper.addAttachment(
+          "devis.pdf",
+          new ByteArrayResource(
+            new java.net.URL(pieceJointeUrl).openStream().readAllBytes()
+          )
+        );
+      }
+
+      mailSender.send(mimeMessage);
+
+      log.info("Email devis envoyé à {}", to);
+
+    } catch (Exception e) {
+      log.error("Erreur envoi devis", e);
+    }
+  }
 }

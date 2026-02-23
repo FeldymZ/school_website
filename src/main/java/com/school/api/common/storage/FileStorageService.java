@@ -248,4 +248,37 @@ public class FileStorageService {
     }
   }
 
+
+    /* ============================
+     🎓 FORMATIONS CONTINUES (AJOUT)
+     ============================ */
+
+  public String storeFormationContinuesCover(MultipartFile file) {
+    validateImage(file);
+    validateSize(file, MAX_IMAGE_SIZE);
+    return store(file, "formations/continues/covers");
+  }
+
+  public String storeFormationContinuesGalleryImage(MultipartFile file) {
+    validateImage(file);
+    validateSize(file, MAX_IMAGE_SIZE);
+    return store(file, "formations/continues/gallery");
+  }
+
+  public String storeFormationContinuesPdf(MultipartFile file) {
+    validatePdf(file);
+    validateSize(file, MAX_PDF_SIZE);
+    return store(file, "formations/continues/pdfs");
+  }
+
+  /* ============================
+     📄 RÉPONSES DEVIS CONTINUES (AJOUT)
+     ============================ */
+
+  public String storeDevisContinuesAttachment(MultipartFile file) {
+    validatePdf(file);
+    validateSize(file, MAX_PDF_SIZE);
+    return store(file, "formations/continues/devis-reponses");
+  }
+
 }
