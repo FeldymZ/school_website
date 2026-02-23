@@ -1,5 +1,6 @@
 package com.school.api.formation.continues.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -40,6 +41,11 @@ public class DemandeDevisFormationContinues {
 
   private LocalDateTime dateTraitement;
 
+  /* =====================================================
+     🔥 CORRECTION LAZY / JSON
+     ===================================================== */
+
+  @JsonIgnore
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "formation_id", nullable = false)
   private FormationContinues formation;
