@@ -28,13 +28,12 @@ public class MailService {
   private final SpringTemplateEngine templateEngine;
   private final MailProperties mailProperties;
 
-  /* ============================
+  /* =====================================================
      EMAIL HTML SIMPLE
-     ============================ */
+     ===================================================== */
 
   @Async
   public void sendHtml(String to, String subject, String htmlContent) {
-
     try {
       MimeMessage message = mailSender.createMimeMessage();
       MimeMessageHelper helper =
@@ -53,9 +52,9 @@ public class MailService {
     }
   }
 
-  /* ============================
-     EMAIL HTML SIMPLE AVEC REPLY-TO
-     ============================ */
+  /* =====================================================
+     EMAIL HTML AVEC REPLY-TO
+     ===================================================== */
 
   @Async
   public void sendHtml(
@@ -64,7 +63,6 @@ public class MailService {
     String htmlContent,
     String replyTo
   ) {
-
     try {
       MimeMessage message = mailSender.createMimeMessage();
       MimeMessageHelper helper =
@@ -84,9 +82,9 @@ public class MailService {
     }
   }
 
-  /* ============================
-     EMAIL HTML AVEC PJ (LEGACY)
-     ============================ */
+  /* =====================================================
+     EMAIL HTML + PJ (MultipartFile)
+     ===================================================== */
 
   @Async
   public void sendHtmlWithAttachment(
@@ -112,16 +110,16 @@ public class MailService {
       );
 
       mailSender.send(message);
-      log.info("Email HTML + PJ (legacy) envoyé à {}", to);
+      log.info("Email HTML + PJ envoyé à {}", to);
 
     } catch (Exception e) {
-      log.error("Erreur email HTML + PJ (legacy)", e);
+      log.error("Erreur email HTML + PJ", e);
     }
   }
 
-  /* ============================
-     EMAIL HTML AVEC PJ (NOUVEAU)
-     ============================ */
+  /* =====================================================
+     EMAIL HTML + PJ (InputStreamSource)
+     ===================================================== */
 
   @Async
   public void sendHtmlWithAttachment(
@@ -152,9 +150,9 @@ public class MailService {
     }
   }
 
-  /* ============================
-     EMAIL AVEC TEMPLATE THYMELEAF
-     ============================ */
+  /* =====================================================
+     EMAIL TEMPLATE THYMELEAF
+     ===================================================== */
 
   @Async
   public void sendTemplateMail(
@@ -184,9 +182,9 @@ public class MailService {
     }
   }
 
-  /* ============================
+  /* =====================================================
      BROCHURE FORMATION
-     ============================ */
+     ===================================================== */
 
   @Async
   public void sendFormationBrochure(
@@ -210,9 +208,9 @@ public class MailService {
     );
   }
 
-  /* ============================
-     RÉPONSE DEVIS CONTINUES (CORRIGÉ)
-     ============================ */
+  /* =====================================================
+     RÉPONSE DEVIS CONTINUES
+     ===================================================== */
 
   @Async
   public void sendDevisResponse(
@@ -224,18 +222,19 @@ public class MailService {
 
     try {
 
+      boolean hasAttachment =
+        pieceJointeUrl != null && !pieceJointeUrl.isBlank();
+
       Context context = new Context();
       context.setVariable("name", clientName);
       context.setVariable("message", message);
       context.setVariable("year", Year.now().getValue());
+      context.setVariable("hasAttachment", hasAttachment);
 
       String html =
         templateEngine.process("mail/devis-reponse", context);
 
       MimeMessage mimeMessage = mailSender.createMimeMessage();
-
-      boolean hasAttachment =
-        pieceJointeUrl != null && !pieceJointeUrl.isBlank();
 
       MimeMessageHelper helper =
         new MimeMessageHelper(
@@ -251,24 +250,19 @@ public class MailService {
 
       if (hasAttachment) {
 
-        // Conversion URL publique → chemin local
-        // Exemple: /files/formations/continues/devis-reponses/xxx.pdf
         Path path = Path.of(pieceJointeUrl);
 
         if (Files.exists(path)) {
-
           helper.addAttachment(
             path.getFileName().toString(),
             new FileSystemResource(path.toFile())
           );
-
         } else {
           log.warn("Pièce jointe introuvable : {}", pieceJointeUrl);
         }
       }
 
       mailSender.send(mimeMessage);
-
       log.info("Email devis envoyé à {}", to);
 
     } catch (Exception e) {
