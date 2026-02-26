@@ -1,39 +1,40 @@
 package com.school.api.formation.continues.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "formations_continues")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class FormationContinues {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
   private String titre;
+
+  @Column(columnDefinition = "TEXT")
+  private String description;
 
   @Column(unique = true)
   private String slug;
-
-  @Column(length = 3000)
-  private String description;
 
   private String coverUrl;
 
   private String pdfUrl;
 
-  @Column(nullable = false)
-  private boolean enabled = true;
+  private boolean enabled;
 
-  @OneToMany(mappedBy = "formation")
-  private List<DemandeDevisFormationContinues> demandes = new ArrayList<>();
+  /* ==============================
+     RELATION DEMANDES DEVIS
+     ============================== */
+
+  @OneToMany(mappedBy = "formation", cascade = CascadeType.ALL)
+  @JsonIgnore
+  private List<DemandeDevisFormationContinues> demandes;
 }
