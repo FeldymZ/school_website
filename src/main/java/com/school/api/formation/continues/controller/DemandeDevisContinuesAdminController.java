@@ -15,14 +15,22 @@ public class DemandeDevisContinuesAdminController {
 
   private final DemandeDevisContinuesAdminService service;
 
+  /* =====================================
+     RÉPONDRE À UNE DEMANDE
+     ===================================== */
+
   @PostMapping("/{id}/repondre")
   public ResponseEntity<?> repondre(
-    @PathVariable Long id,
-    @ModelAttribute RepondreDemandeDevisContinuesDTO dto
+          @PathVariable Long id,
+          @ModelAttribute RepondreDemandeDevisContinuesDTO dto
   ) {
     service.repondre(id, dto);
     return ResponseEntity.ok("Réponse envoyée");
   }
+
+  /* =====================================
+     MARQUER TRAITÉE
+     ===================================== */
 
   @PostMapping("/{id}/marquer-traitee")
   public ResponseEntity<?> marquerTraitee(@PathVariable Long id) {
@@ -30,12 +38,34 @@ public class DemandeDevisContinuesAdminController {
     return ResponseEntity.ok("Demande marquée comme traitée");
   }
 
+  /* =====================================
+     LISTE DES DEMANDES
+     ===================================== */
+
   @GetMapping
   public ResponseEntity<?> getAll(
-    @RequestParam(required = false) String statut,
-    @RequestParam(defaultValue = "0") int page,
-    @RequestParam(defaultValue = "10") int size
+          @RequestParam(required = false) String statut,
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "10") int size
   ) {
     return ResponseEntity.ok(service.getDemandes(statut, page, size));
+  }
+
+  /* =====================================
+     RÉCUPÉRER LES RÉPONSES D'UNE DEMANDE
+     ===================================== */
+
+  @GetMapping("/{id}/reponses")
+  public ResponseEntity<?> getReponses(@PathVariable Long id) {
+    return ResponseEntity.ok(service.getReponses(id));
+  }
+
+  /* =====================================
+     COMPTER LES DEMANDES NON TRAITÉES
+     ===================================== */
+
+  @GetMapping("/count-non-traitees")
+  public ResponseEntity<Long> countNonTraitees() {
+    return ResponseEntity.ok(service.countNonTraitees());
   }
 }

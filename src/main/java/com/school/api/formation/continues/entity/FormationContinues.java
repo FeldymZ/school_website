@@ -8,33 +8,56 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
+@Table(name = "formation_continues")
 @Getter
 @Setter
 public class FormationContinues {
+
+  /* =====================================
+     ID
+     ===================================== */
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  /* =====================================
+     INFORMATIONS PRINCIPALES
+     ===================================== */
+
+  @Column(nullable = false)
   private String titre;
 
-  @Column(columnDefinition = "TEXT")
+  @Column(columnDefinition = "TEXT", nullable = false)
   private String description;
 
-  @Column(unique = true)
+  @Column(unique = true, nullable = false)
   private String slug;
+
+  /* =====================================
+     FICHIERS
+     ===================================== */
 
   private String coverUrl;
 
   private String pdfUrl;
 
-  private boolean enabled;
+  /* =====================================
+     STATUT
+     ===================================== */
 
-  /* ==============================
-     RELATION DEMANDES DEVIS
-     ============================== */
+  private boolean enabled = true;
 
-  @OneToMany(mappedBy = "formation", cascade = CascadeType.ALL)
+  /* =====================================
+     RELATION DEMANDES DE DEVIS
+     ===================================== */
+
+  @OneToMany(
+          mappedBy = "formation",
+          cascade = CascadeType.ALL,
+          orphanRemoval = true,
+          fetch = FetchType.LAZY
+  )
   @JsonIgnore
   private List<DemandeDevisFormationContinues> demandes;
 }

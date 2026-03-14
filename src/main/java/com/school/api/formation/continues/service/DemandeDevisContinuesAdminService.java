@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,28 +22,31 @@ public class DemandeDevisContinuesAdminService {
   private final MailService mailService;
   private final FileStorageService fileStorageService;
 
+  /* =====================================
+     RÉPONDRE À UNE DEMANDE
+     ===================================== */
+
   @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
   public void repondre(Long id, RepondreDemandeDevisContinuesDTO dto) {
 
     var demande = demandeRepository.findById(id)
-      .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+            .orElseThrow(() -> new RuntimeException("Demande introuvable"));
 
     String fileUrl = null;
 
     if (dto.getPieceJointe() != null && !dto.getPieceJointe().isEmpty()) {
       fileUrl = fileStorageService
-        .storeDevisContinuesAttachment(dto.getPieceJointe());
+              .storeDevisContinuesAttachment(dto.getPieceJointe());
     }
 
     mailService.sendDevisResponse(
-      demande.getEmail(),
-      demande.getNomClient(),
-      dto.getMessage(),
-      fileUrl
+            demande.getEmail(),
+            demande.getNomClient(),
+            dto.getMessage(),
+            fileUrl
     );
 
-    DemandeDevisReponseContinues reponse =
-      new DemandeDevisReponseContinues();
+    DemandeDevisReponseContinues reponse = new DemandeDevisReponseContinues();
 
     reponse.setMessage(dto.getMessage());
     reponse.setPieceJointeUrl(fileUrl);
@@ -53,11 +57,15 @@ public class DemandeDevisContinuesAdminService {
     reponseRepository.save(reponse);
   }
 
+  /* =====================================
+     MARQUER TRAITÉE
+     ===================================== */
+
   @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
   public void marquerTraitee(Long id) {
 
     var demande = demandeRepository.findById(id)
-      .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+            .orElseThrow(() -> new RuntimeException("Demande introuvable"));
 
     demande.setStatut(StatutDemande.TRAITEE);
     demande.setDateTraitement(LocalDateTime.now());
@@ -65,37 +73,58 @@ public class DemandeDevisContinuesAdminService {
     demandeRepository.save(demande);
   }
 
+  /* =====================================
+     LISTE PAGINÉE
+     ===================================== */
+
   @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
   public Page<DemandeDevisFormationContinues> getDemandes(
-    String statut,
-    int page,
-    int size
+          String statut,
+          int page,
+          int size
   ) {
 
     Pageable pageable = PageRequest.of(
-      page,
-      size,
-      Sort.by(Sort.Direction.DESC, "dateDemande")
+            page,
+            size,
+            Sort.by(Sort.Direction.DESC, "dateDemande")
     );
 
     if (statut != null && !statut.isBlank()) {
 
       StatutDemande statutEnum =
-        StatutDemande.valueOf(statut.toUpperCase());
+              StatutDemande.valueOf(statut.toUpperCase());
 
       return demandeRepository.findByStatut(
-        statutEnum,
-        pageable
+              statutEnum,
+              pageable
       );
     }
 
     return demandeRepository.findAll(pageable);
   }
 
+  /* =====================================
+     COMPTER NON TRAITÉES
+     ===================================== */
+
   @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
   public long countNonTraitees() {
     return demandeRepository.countByStatut(
-      StatutDemande.PAS_ENCORE_TRAITEE
+            StatutDemande.PAS_ENCORE_TRAITEE
     );
+  }
+
+  /* =====================================
+     RÉCUPÉRER LES RÉPONSES
+     ===================================== */
+
+  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
+  public List<DemandeDevisReponseContinues> getReponses(Long id) {
+
+    var demande = demandeRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+
+    return demande.getReponses();
   }
 }
