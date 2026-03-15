@@ -1,6 +1,7 @@
 package com.school.api.formation.continues.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@JsonIgnoreProperties({"reponses"})
 @Entity
 @Table(name = "demande_devis_formation_continues")
 @Getter
@@ -40,10 +42,6 @@ public class DemandeDevisFormationContinues {
   private StatutDemande statut = StatutDemande.PAS_ENCORE_TRAITEE;
 
   private LocalDateTime dateTraitement;
-
-  /* ============================
-     🔥 LAZY PROTECTION
-     ============================ */
 
   @JsonIgnore
   @ManyToOne(fetch = FetchType.LAZY)

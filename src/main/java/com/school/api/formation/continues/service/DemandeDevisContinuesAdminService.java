@@ -2,7 +2,7 @@ package com.school.api.formation.continues.service;
 
 import com.school.api.common.mail.MailService;
 import com.school.api.common.storage.FileStorageService;
-import com.school.api.formation.continues.dto.RepondreDemandeDevisContinuesDTO;
+import com.school.api.formation.continues.dto.*;
 import com.school.api.formation.continues.entity.*;
 import com.school.api.formation.continues.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +46,8 @@ public class DemandeDevisContinuesAdminService {
             fileUrl
     );
 
-    DemandeDevisReponseContinues reponse = new DemandeDevisReponseContinues();
+    DemandeDevisReponseContinues reponse =
+            new DemandeDevisReponseContinues();
 
     reponse.setMessage(dto.getMessage());
     reponse.setPieceJointeUrl(fileUrl);
@@ -114,18 +115,28 @@ public class DemandeDevisContinuesAdminService {
             StatutDemande.PAS_ENCORE_TRAITEE
     );
   }
-/* =====================================
-   RÉCUPÉRER LES RÉPONSES
-   ===================================== */
+
+  /* =====================================
+     RÉCUPÉRER LES RÉPONSES
+     ===================================== */
 
   @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-  public List<DemandeDevisReponseContinues> getReponses(Long id) {
+  public List<DemandeDevisReponseDTO> getReponses(Long id) {
 
     if (!demandeRepository.existsById(id)) {
       throw new RuntimeException("Demande introuvable");
     }
 
     return reponseRepository
-            .findByDemandeIdOrderByDateEnvoiAsc(id);
+            .findByDemandeIdOrderByDateEnvoiAsc(id)
+            .stream()
+            .map(r -> new DemandeDevisReponseDTO(
+                    r.getId(),
+                    r.getMessage(),
+                    r.getPieceJointeUrl(),
+                    r.getEnvoyePar(),
+                    r.getDateEnvoi()
+            ))
+            .toList();
   }
 }
