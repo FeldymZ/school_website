@@ -114,17 +114,18 @@ public class DemandeDevisContinuesAdminService {
             StatutDemande.PAS_ENCORE_TRAITEE
     );
   }
-
-  /* =====================================
-     RÉCUPÉRER LES RÉPONSES
-     ===================================== */
+/* =====================================
+   RÉCUPÉRER LES RÉPONSES
+   ===================================== */
 
   @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
   public List<DemandeDevisReponseContinues> getReponses(Long id) {
 
-    var demande = demandeRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+    if (!demandeRepository.existsById(id)) {
+      throw new RuntimeException("Demande introuvable");
+    }
 
-    return demande.getReponses();
+    return reponseRepository
+            .findByDemandeIdOrderByDateEnvoiAsc(id);
   }
 }

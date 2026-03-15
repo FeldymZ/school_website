@@ -1,5 +1,6 @@
 package com.school.api.formation.continues.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,6 +27,7 @@ public class DemandeDevisReponseContinues {
 
   private LocalDateTime dateEnvoi;
 
+  @JsonIgnore
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "demande_id", nullable = false)
   private DemandeDevisFormationContinues demande;

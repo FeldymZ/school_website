@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/public/formations-continues")
 @RequiredArgsConstructor
-public class DemandeDevisContinuesPublicController {
+public class  DemandeDevisContinuesPublicController {
 
   private final DemandeDevisContinuesPublicService service;
 
