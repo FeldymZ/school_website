@@ -1,7 +1,7 @@
 package com.school.api.formation.continues.controller.admin;
 
 import com.school.api.formation.continues.dto.CreateFormationContinuesDTO;
-import com.school.api.formation.continues.entity.FormationContinues;
+import com.school.api.formation.continues.dto.FormationDTO;
 import com.school.api.formation.continues.service.FormationContinuesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,7 +15,7 @@ public class FormationContinuesAdminController {
     private final FormationContinuesService service;
 
     @PostMapping
-    public FormationContinues create(
+    public FormationDTO create(
             @RequestParam Long sousCategorieId,
             @ModelAttribute CreateFormationContinuesDTO dto
     ) {
@@ -23,7 +23,7 @@ public class FormationContinuesAdminController {
     }
 
     @PutMapping("/{id}")
-    public FormationContinues update(
+    public FormationDTO update(
             @PathVariable Long id,
             @ModelAttribute CreateFormationContinuesDTO dto
     ) {
@@ -31,7 +31,7 @@ public class FormationContinuesAdminController {
     }
 
     @GetMapping
-    public Page<FormationContinues> getAll(
+    public Page<FormationDTO> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
@@ -39,19 +39,17 @@ public class FormationContinuesAdminController {
     }
 
     @GetMapping("/{id}")
-    public FormationContinues getById(@PathVariable Long id) {
+    public FormationDTO getById(@PathVariable Long id) {
         return service.getById(id);
     }
 
-    /* 🔥 SEARCH */
     @GetMapping("/search")
-    public FormationContinues searchByReference(@RequestParam Integer reference) {
+    public FormationDTO searchByReference(@RequestParam Integer reference) {
         return service.getByReference(reference);
     }
 
-    /* 🔥 FILTER */
     @GetMapping("/filter")
-    public Page<FormationContinues> filter(
+    public Page<FormationDTO> filter(
             @RequestParam(required = false) Long categorieId,
             @RequestParam(required = false) Long sousCategorieId,
             @RequestParam(defaultValue = "0") int page,

@@ -2,6 +2,7 @@ package com.school.api.formation.continues.controller.admin;
 
 import com.school.api.formation.continues.dto.CategorieDTO;
 import com.school.api.formation.continues.service.CategorieFormationContinuesService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class CategorieFormationContinuesAdminController {
     /* ================= CREATE ================= */
 
     @PostMapping
-    public CategorieDTO create(@RequestBody CategorieDTO request) {
+    public CategorieDTO create(@RequestBody @Valid CategorieDTO request) {
         return service.create(request.getLibelle());
     }
 
@@ -33,7 +34,7 @@ public class CategorieFormationContinuesAdminController {
     @PutMapping("/{id}")
     public CategorieDTO update(
             @PathVariable Long id,
-            @RequestBody CategorieDTO request
+            @RequestBody @Valid CategorieDTO request
     ) {
         return service.update(id, request.getLibelle());
     }

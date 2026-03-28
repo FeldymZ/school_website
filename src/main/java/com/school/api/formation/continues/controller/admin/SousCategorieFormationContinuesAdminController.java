@@ -16,7 +16,7 @@ public class SousCategorieFormationContinuesAdminController {
 
     @PostMapping
     public SousCategorieDTO create(@RequestBody SousCategorieDTO request) {
-        return service.create(request.getId(), request.getLibelle());
+        return service.create(request.getCategorieId(), request.getLibelle());
     }
 
     @GetMapping

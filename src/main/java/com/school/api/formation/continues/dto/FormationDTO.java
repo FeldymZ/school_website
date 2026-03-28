@@ -23,4 +23,10 @@ public class FormationDTO {
     private String uniteDuree;
 
     private String logo;
+
+    /* 🔥 AJOUT IMPORTANT */
+    private boolean enabled;
+
+    /* 🔥 AJOUT IMPORTANT */
+    private SousCategorieDTO sousCategorie;
 }
