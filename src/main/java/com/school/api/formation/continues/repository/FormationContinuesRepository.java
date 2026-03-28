@@ -5,12 +5,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
-
 public interface FormationContinuesRepository
-  extends JpaRepository<FormationContinues, Long> {
+        extends JpaRepository<FormationContinues, Long> {
 
-  Optional<FormationContinues> findBySlug(String slug);
+    Page<FormationContinues> findByEnabledTrue(Pageable pageable);
 
-  Page<FormationContinues> findByEnabledTrue(Pageable pageable);
+    /* 🔥 FILTRES */
+    Page<FormationContinues> findBySousCategorieId(Long sousCategorieId, Pageable pageable);
+
+    Page<FormationContinues> findBySousCategorieCategorieId(Long categorieId, Pageable pageable);
+
+    /* 🔥 SEARCH */
+    FormationContinues findByReference(Integer reference);
 }

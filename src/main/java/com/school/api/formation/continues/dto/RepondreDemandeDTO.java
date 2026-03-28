@@ -6,9 +6,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
-public class RepondreDemandeDevisContinuesDTO {
+public class RepondreDemandeDTO {
 
-  private String message;
+    private String message;
 
-  private MultipartFile pieceJointe;
+    private MultipartFile pieceJointe;
 }

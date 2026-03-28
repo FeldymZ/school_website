@@ -13,51 +13,54 @@ import java.util.List;
 @Setter
 public class FormationContinues {
 
-  /* =====================================
-     ID
-     ===================================== */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    /* =========================
+       REFERENCE UNIQUE
+       ========================= */
+    @Column(unique = true, nullable = false)
+    private Integer reference;
 
-  /* =====================================
-     INFORMATIONS PRINCIPALES
-     ===================================== */
+    /* =========================
+       INFOS
+       ========================= */
+    @Column(nullable = false)
+    private String libelle;
 
-  @Column(nullable = false)
-  private String titre;
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String description;
 
-  @Column(columnDefinition = "TEXT", nullable = false)
-  private String description;
+    @Column(columnDefinition = "TEXT")
+    private String objectifs;
 
-  @Column(unique = true, nullable = false)
-  private String slug;
+    @Column(columnDefinition = "TEXT")
+    private String competences;
 
-  /* =====================================
-     FICHIERS
-     ===================================== */
+    private Double prix;
 
-  private String coverUrl;
+    private Integer duree;
 
-  private String pdfUrl;
+    @Enumerated(EnumType.STRING)
+    private UniteDuree uniteDuree;
 
-  /* =====================================
-     STATUT
-     ===================================== */
+    private String lieu;
 
-  private boolean enabled = true;
+    private String titreDelivre;
 
-  /* =====================================
-     RELATION DEMANDES DE DEVIS
-     ===================================== */
+    private String logo;
 
-  @OneToMany(
-          mappedBy = "formation",
-          cascade = CascadeType.ALL,
-          orphanRemoval = true,
-          fetch = FetchType.LAZY
-  )
-  @JsonIgnore
-  private List<DemandeDevisFormationContinues> demandes;
+    private boolean enabled = true;
+
+    /* =========================
+       RELATION
+       ========================= */
+    @ManyToOne
+    @JoinColumn(name = "sous_categorie_id", nullable = false)
+    private SousCategorieFormationContinues sousCategorie;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "formation", cascade = CascadeType.ALL)
+    private List<DemandeDevisLigneFormationContinues> lignes;
 }

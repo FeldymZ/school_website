@@ -20,15 +20,15 @@ public class FileStorageService {
      LIMITES
      ============================ */
 
-  private static final long MAX_IMAGE_SIZE = 10_000_000;   // 10 Mo
-  private static final long MAX_VIDEO_SIZE = 30_000_000;  // 30 Mo
-  private static final long MAX_PDF_SIZE   = 10_000_000;  // 10 Mo
+  private static final long MAX_IMAGE_SIZE = 10_000_000;
+  private static final long MAX_VIDEO_SIZE = 30_000_000;
+  private static final long MAX_PDF_SIZE   = 10_000_000;
 
   private static final Set<String> IMAGE_EXTENSIONS =
-    Set.of("jpg", "jpeg", "png", "webp");
+          Set.of("jpg", "jpeg", "png", "webp");
 
   private static final Set<String> VIDEO_EXTENSIONS =
-    Set.of("mp4", "webm");
+          Set.of("mp4", "webm");
 
   /* ============================
      🖼️ BANNERS
@@ -122,7 +122,7 @@ public class FileStorageService {
   }
 
   /* ============================
-     🏭 VIE ÉTUDIANTE – VISITES ENTREPRISE
+     🏭 VIE ÉTUDIANTE
      ============================ */
 
   public String storeVisiteEntrepriseImage(MultipartFile file) {
@@ -132,7 +132,7 @@ public class FileStorageService {
   }
 
   /* ============================
-     🗑️ SUPPRESSION FICHIER (AJOUT)
+     🗑️ SUPPRESSION FICHIER (CORRIGÉ)
      ============================ */
 
   public void delete(String publicUrl) {
@@ -142,19 +142,19 @@ public class FileStorageService {
     }
 
     try {
-      // Exemple publicUrl : /files/actualites/gallery/xxx.jpg
+
       if (!publicUrl.startsWith("/files/")) {
         return;
       }
 
-      Path path = Path.of(publicUrl);
+      // ✅ CORRECTION ICI
+      String relativePath = publicUrl.replace("/files/", "");
+      Path path = Path.of(BASE_DIR, relativePath);
+
       Files.deleteIfExists(path);
 
     } catch (IOException e) {
-      // ⚠️ On ne casse jamais le métier pour un fichier
-      System.err.println(
-        "❌ Impossible de supprimer le fichier : " + publicUrl
-      );
+      System.err.println("❌ Impossible de supprimer le fichier : " + publicUrl);
     }
   }
 
@@ -174,7 +174,6 @@ public class FileStorageService {
       Path target = directory.resolve(filename);
       file.transferTo(target.toFile());
 
-      // 🌍 URL publique exposée par NGINX
       return "/files/" + subDir + "/" + filename;
 
     } catch (IOException e) {
@@ -222,7 +221,7 @@ public class FileStorageService {
   private void validateSize(MultipartFile file, long max) {
     if (file.getSize() > max) {
       throw new IllegalArgumentException(
-        "Fichier trop volumineux (max " + (max / 1_000_000) + " Mo)"
+              "Fichier trop volumineux (max " + (max / 1_000_000) + " Mo)"
       );
     }
   }
@@ -234,23 +233,14 @@ public class FileStorageService {
     return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
   }
 
-
-  /**
-   * 🧹 Suppression silencieuse
-   * - Ne jette jamais d’exception
-   * - Utilisée par les services métier
-   */
   public void deleteQuietly(String publicUrl) {
     try {
       delete(publicUrl);
-    } catch (Exception ignored) {
-      // volontairement ignoré
-    }
+    } catch (Exception ignored) {}
   }
 
-
-    /* ============================
-     🎓 FORMATIONS CONTINUES (AJOUT)
+  /* ============================
+     🎓 FORMATIONS CONTINUES
      ============================ */
 
   public String storeFormationContinuesCover(MultipartFile file) {
@@ -272,7 +262,7 @@ public class FileStorageService {
   }
 
   /* ============================
-     📄 RÉPONSES DEVIS CONTINUES (AJOUT)
+     📄 DEVIS CONTINUES
      ============================ */
 
   public String storeDevisContinuesAttachment(MultipartFile file) {
@@ -280,5 +270,4 @@ public class FileStorageService {
     validateSize(file, MAX_PDF_SIZE);
     return store(file, "formations/continues/devis-reponses");
   }
-
 }

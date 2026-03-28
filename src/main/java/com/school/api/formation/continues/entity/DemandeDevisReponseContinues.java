@@ -14,21 +14,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class DemandeDevisReponseContinues {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(length = 4000)
-  private String message;
+    @Column(length = 4000)
+    private String message;
 
-  private String pieceJointeUrl;
+    private String pieceJointeUrl;
 
-  private String envoyePar;
+    private String envoyePar;
 
-  private LocalDateTime dateEnvoi;
+    private LocalDateTime dateEnvoi;
 
-  @JsonIgnore
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "demande_id", nullable = false)
-  private DemandeDevisFormationContinues demande;
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "demande_id", nullable = false)
+    private DemandeDevisFormationContinues demande;
 }

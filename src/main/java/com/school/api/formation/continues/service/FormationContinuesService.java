@@ -2,195 +2,161 @@ package com.school.api.formation.continues.service;
 
 import com.school.api.common.storage.FileStorageService;
 import com.school.api.formation.continues.dto.CreateFormationContinuesDTO;
-import com.school.api.formation.continues.entity.FormationContinues;
-import com.school.api.formation.continues.repository.FormationContinuesRepository;
-import jakarta.validation.Valid;
+import com.school.api.formation.continues.entity.*;
+import com.school.api.formation.continues.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class FormationContinuesService {
 
-  private final FormationContinuesRepository repository;
-  private final FileStorageService fileStorageService;
+    private final FormationContinuesRepository repository;
+    private final SousCategorieFormationContinuesRepository sousCategorieRepository;
+    private final FileStorageService fileStorageService;
 
-  /* =====================================================
-     🟢 CRÉATION (ADMIN)
-     ===================================================== */
+    /* ================= CREATE ================= */
 
-  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-  public FormationContinues create(@Valid CreateFormationContinuesDTO dto) {
+    public FormationContinues create(Long sousCategorieId, CreateFormationContinuesDTO dto) {
 
-    FormationContinues formation = new FormationContinues();
+        SousCategorieFormationContinues sc = sousCategorieRepository.findById(sousCategorieId)
+                .orElseThrow(() -> new RuntimeException("Sous-catégorie introuvable"));
 
-    formation.setTitre(dto.getTitre());
-    formation.setDescription(dto.getDescription());
-    formation.setSlug(generateSlug(dto.getTitre()));
-    formation.setEnabled(true);
+        FormationContinues f = new FormationContinues();
 
-    // Cover
-    if (dto.getCover() != null && !dto.getCover().isEmpty()) {
-      formation.setCoverUrl(
-        fileStorageService.storeFormationContinuesCover(dto.getCover())
-      );
+        /* ===== INFOS ===== */
+        f.setLibelle(dto.getLibelle());
+        f.setDescription(dto.getDescription());
+        f.setObjectifs(dto.getObjectifs());
+        f.setCompetences(dto.getCompetences());
+        f.setPrix(dto.getPrix());
+        f.setDuree(dto.getDuree());
+
+        /* ===== UNITE DUREE (SECURISEE) ===== */
+        if (dto.getUniteDuree() != null) {
+            try {
+                f.setUniteDuree(
+                        UniteDuree.valueOf(dto.getUniteDuree().toUpperCase())
+                );
+            } catch (Exception e) {
+                throw new RuntimeException("Unité de durée invalide (JOURS, MOIS, ANNEES)");
+            }
+        }
+
+        f.setLieu(dto.getLieu());
+        f.setTitreDelivre(dto.getTitreDelivre());
+
+        /* ===== RELATION ===== */
+        f.setSousCategorie(sc);
+
+        /* ===== ACTIVE ===== */
+        f.setEnabled(true);
+
+        /* ===== COVER ===== */
+        if (dto.getCover() != null && !dto.getCover().isEmpty()) {
+            f.setLogo(fileStorageService.storeFormationContinuesCover(dto.getCover()));
+        }
+
+        return repository.save(f);
     }
 
-    // PDF
-    if (dto.getPdf() != null && !dto.getPdf().isEmpty()) {
-      formation.setPdfUrl(
-        fileStorageService.storeFormationContinuesPdf(dto.getPdf())
-      );
+    /* ================= UPDATE ================= */
+
+    public FormationContinues update(Long id, CreateFormationContinuesDTO dto) {
+
+        FormationContinues f = getById(id);
+
+        /* ===== INFOS ===== */
+        f.setLibelle(dto.getLibelle());
+        f.setDescription(dto.getDescription());
+        f.setObjectifs(dto.getObjectifs());
+        f.setCompetences(dto.getCompetences());
+        f.setPrix(dto.getPrix());
+        f.setDuree(dto.getDuree());
+
+        /* ===== UNITE DUREE (SECURISEE) ===== */
+        if (dto.getUniteDuree() != null) {
+            try {
+                f.setUniteDuree(
+                        UniteDuree.valueOf(dto.getUniteDuree().toUpperCase())
+                );
+            } catch (Exception e) {
+                throw new RuntimeException("Unité de durée invalide (JOURS, MOIS, ANNEES)");
+            }
+        }
+
+        f.setLieu(dto.getLieu());
+        f.setTitreDelivre(dto.getTitreDelivre());
+
+        /* ===== COVER ===== */
+        if (dto.getCover() != null && !dto.getCover().isEmpty()) {
+            fileStorageService.deleteQuietly(f.getLogo());
+            f.setLogo(fileStorageService.storeFormationContinuesCover(dto.getCover()));
+        }
+
+        return repository.save(f);
     }
 
-    return repository.save(formation);
-  }
+    /* ================= GET ================= */
 
-  /* =====================================================
-     🟡 MISE À JOUR (ADMIN)
-     ===================================================== */
-
-  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-  public FormationContinues update(Long id, @Valid CreateFormationContinuesDTO dto) {
-
-    FormationContinues formation = repository.findById(id)
-      .orElseThrow(() -> new RuntimeException("Formation introuvable"));
-
-    // Si le titre change réellement → on régénère le slug
-    if (!formation.getTitre().equals(dto.getTitre())) {
-      formation.setSlug(generateSlug(dto.getTitre()));
+    public Page<FormationContinues> getAll(int page, int size) {
+        return repository.findAll(PageRequest.of(page, size));
     }
 
-    formation.setTitre(dto.getTitre());
-    formation.setDescription(dto.getDescription());
-
-    // Cover
-    if (dto.getCover() != null && !dto.getCover().isEmpty()) {
-
-      if (formation.getCoverUrl() != null) {
-        fileStorageService.deleteQuietly(formation.getCoverUrl());
-      }
-
-      formation.setCoverUrl(
-        fileStorageService.storeFormationContinuesCover(dto.getCover())
-      );
+    public Page<FormationContinues> getAllPublic(int page, int size) {
+        return repository.findByEnabledTrue(PageRequest.of(page, size));
     }
 
-    // PDF
-    if (dto.getPdf() != null && !dto.getPdf().isEmpty()) {
-
-      if (formation.getPdfUrl() != null) {
-        fileStorageService.deleteQuietly(formation.getPdfUrl());
-      }
-
-      formation.setPdfUrl(
-        fileStorageService.storeFormationContinuesPdf(dto.getPdf())
-      );
+    public FormationContinues getById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Formation introuvable"));
     }
 
-    return repository.save(formation);
-  }
+    /* ================= SEARCH ================= */
 
-  /* =====================================================
-     🔵 LISTE ADMIN PAGINÉE
-     ===================================================== */
+    public FormationContinues getByReference(Integer reference) {
 
-  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-  public Page<FormationContinues> getAll(int page, int size) {
+        FormationContinues f = repository.findByReference(reference);
 
-    Pageable pageable = PageRequest.of(
-      page,
-      size,
-      Sort.by(Sort.Direction.DESC, "id")
-    );
+        if (f == null) {
+            throw new RuntimeException("Formation introuvable");
+        }
 
-    return repository.findAll(pageable);
-  }
-
-  /* =====================================================
-     🟢 LISTE PUBLIQUE (ENABLED)
-     ===================================================== */
-
-  public Page<FormationContinues> getAllPublic(int page, int size) {
-
-    Pageable pageable = PageRequest.of(
-      page,
-      size,
-      Sort.by(Sort.Direction.DESC, "id")
-    );
-
-    return repository.findByEnabledTrue(pageable);
-  }
-
-  /* =====================================================
-     🔍 DÉTAIL
-     ===================================================== */
-
-  public FormationContinues getBySlug(String slug) {
-
-    return repository.findBySlug(slug)
-      .filter(FormationContinues::isEnabled)
-      .orElseThrow(() -> new RuntimeException("Formation introuvable"));
-  }
-
-  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-  public FormationContinues getById(Long id) {
-
-    return repository.findById(id)
-      .orElseThrow(() -> new RuntimeException("Formation introuvable"));
-  }
-
-  /* =====================================================
-     🔁 ACTIVER / DÉSACTIVER
-     ===================================================== */
-
-  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-  public void toggle(Long id) {
-
-    FormationContinues formation = repository.findById(id)
-      .orElseThrow(() -> new RuntimeException("Formation introuvable"));
-
-    formation.setEnabled(!formation.isEnabled());
-
-    repository.save(formation);
-  }
-
-  /* =====================================================
-     ❌ SUPPRESSION
-     ===================================================== */
-
-  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-  public void delete(Long id) {
-
-    FormationContinues formation = repository.findById(id)
-      .orElseThrow(() -> new RuntimeException("Formation introuvable"));
-
-    if (formation.getCoverUrl() != null) {
-      fileStorageService.deleteQuietly(formation.getCoverUrl());
+        return f;
     }
 
-    if (formation.getPdfUrl() != null) {
-      fileStorageService.deleteQuietly(formation.getPdfUrl());
+    /* ================= FILTER ================= */
+
+    public Page<FormationContinues> filter(
+            Long categorieId,
+            Long sousCategorieId,
+            int page,
+            int size
+    ) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        if (sousCategorieId != null) {
+            return repository.findBySousCategorieId(sousCategorieId, pageable);
+        }
+
+        if (categorieId != null) {
+            return repository.findBySousCategorieCategorieId(categorieId, pageable);
+        }
+
+        return repository.findAll(pageable);
     }
 
-    repository.delete(formation);
-  }
+    /* ================= DELETE ================= */
 
-  /* =====================================================
-     🧠 SLUG AUTO
-     ===================================================== */
+    public void delete(Long id) {
 
-  private String generateSlug(String titre) {
+        FormationContinues f = getById(id);
 
-    String base = StringUtils
-      .replace(titre.toLowerCase(), " ", "-")
-      .replaceAll("[^a-z0-9-]", "");
+        /* supprimer image */
+        fileStorageService.deleteQuietly(f.getLogo());
 
-    return base + "-" + UUID.randomUUID().toString().substring(0, 6);
-  }
+        repository.deleteById(id);
+    }
 }

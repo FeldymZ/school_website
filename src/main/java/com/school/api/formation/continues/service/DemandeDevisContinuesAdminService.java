@@ -1,142 +1,85 @@
 package com.school.api.formation.continues.service;
 
-import com.school.api.common.mail.MailService;
 import com.school.api.common.storage.FileStorageService;
 import com.school.api.formation.continues.dto.*;
 import com.school.api.formation.continues.entity.*;
 import com.school.api.formation.continues.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class DemandeDevisContinuesAdminService {
 
-  private final DemandeDevisFormationContinuesRepository demandeRepository;
-  private final DemandeDevisReponseContinuesRepository reponseRepository;
-  private final MailService mailService;
-  private final FileStorageService fileStorageService;
+    private final DemandeDevisFormationContinuesRepository repository;
+    private final DemandeDevisReponseContinuesRepository reponseRepository;
+    private final FileStorageService fileStorageService;
 
-  /* =====================================
-     RÉPONDRE À UNE DEMANDE
-     ===================================== */
-
-  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-  public void repondre(Long id, RepondreDemandeDevisContinuesDTO dto) {
-
-    var demande = demandeRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Demande introuvable"));
-
-    String fileUrl = null;
-
-    if (dto.getPieceJointe() != null && !dto.getPieceJointe().isEmpty()) {
-      fileUrl = fileStorageService
-              .storeDevisContinuesAttachment(dto.getPieceJointe());
+    public Page<DemandeDevisAdminDTO> getAll(int page, int size) {
+        return repository.findAll(PageRequest.of(page, size))
+                .map(this::mapToDTO);
     }
 
-    mailService.sendDevisResponse(
-            demande.getEmail(),
-            demande.getNomClient(),
-            dto.getMessage(),
-            fileUrl
-    );
+    public void repondre(Long demandeId, RepondreDemandeDTO dto) {
 
-    DemandeDevisReponseContinues reponse =
-            new DemandeDevisReponseContinues();
+        DemandeDevisFormationContinues demande = repository.findById(demandeId)
+                .orElseThrow(() -> new RuntimeException("Demande introuvable"));
 
-    reponse.setMessage(dto.getMessage());
-    reponse.setPieceJointeUrl(fileUrl);
-    reponse.setEnvoyePar("ADMIN");
-    reponse.setDateEnvoi(LocalDateTime.now());
-    reponse.setDemande(demande);
+        DemandeDevisReponseContinues reponse = new DemandeDevisReponseContinues();
 
-    reponseRepository.save(reponse);
-  }
+        reponse.setDemande(demande);
+        reponse.setMessage(dto.getMessage());
+        reponse.setEnvoyePar("ADMIN");
+        reponse.setDateEnvoi(LocalDateTime.now());
 
-  /* =====================================
-     MARQUER TRAITÉE
-     ===================================== */
+        if (dto.getPieceJointe() != null && !dto.getPieceJointe().isEmpty()) {
+            reponse.setPieceJointeUrl(
+                    fileStorageService.store(dto.getPieceJointe())
+            );
+        }
 
-  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-  public void marquerTraitee(Long id) {
+        reponseRepository.save(reponse);
 
-    var demande = demandeRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+        /* =========================
+           MAJ STATUT
+           ========================= */
+        demande.setStatut(StatutDemande.TRAITEE);
+        demande.setDateTraitement(LocalDateTime.now());
 
-    demande.setStatut(StatutDemande.TRAITEE);
-    demande.setDateTraitement(LocalDateTime.now());
-
-    demandeRepository.save(demande);
-  }
-
-  /* =====================================
-     LISTE PAGINÉE
-     ===================================== */
-
-  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-  public Page<DemandeDevisFormationContinues> getDemandes(
-          String statut,
-          int page,
-          int size
-  ) {
-
-    Pageable pageable = PageRequest.of(
-            page,
-            size,
-            Sort.by(Sort.Direction.DESC, "dateDemande")
-    );
-
-    if (statut != null && !statut.isBlank()) {
-
-      StatutDemande statutEnum =
-              StatutDemande.valueOf(statut.toUpperCase());
-
-      return demandeRepository.findByStatut(
-              statutEnum,
-              pageable
-      );
+        repository.save(demande);
     }
 
-    return demandeRepository.findAll(pageable);
-  }
+    private DemandeDevisAdminDTO mapToDTO(DemandeDevisFormationContinues d) {
 
-  /* =====================================
-     COMPTER NON TRAITÉES
-     ===================================== */
+        DemandeDevisAdminDTO dto = new DemandeDevisAdminDTO();
 
-  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-  public long countNonTraitees() {
-    return demandeRepository.countByStatut(
-            StatutDemande.PAS_ENCORE_TRAITEE
-    );
-  }
+        dto.setId(d.getId());
+        dto.setNomClient(d.getNomClient());
+        dto.setEmail(d.getEmail());
+        dto.setTelephone(d.getTelephone());
+        dto.setEntreprise(d.isEntreprise());
+        dto.setNomStructure(d.getNomStructure());
+        dto.setDateDemande(d.getDateDemande());
+        dto.setStatut(d.getStatut());
+        dto.setDateTraitement(d.getDateTraitement());
 
-  /* =====================================
-     RÉCUPÉRER LES RÉPONSES
-     ===================================== */
+        dto.setLignes(
+                d.getLignes().stream().map(l -> {
+                    LigneDemandeAdminDTO ligne = new LigneDemandeAdminDTO();
+                    ligne.setFormationLibelle(l.getFormationLibelle());
+                    ligne.setNombreParticipants(l.getNombreParticipants());
+                    ligne.setPrix(l.getPrix());
+                    ligne.setDuree(l.getDuree());
+                    ligne.setUniteDuree(
+                            l.getUniteDuree() != null ? l.getUniteDuree().name() : null
+                    );
+                    return ligne;
+                }).toList()
+        );
 
-  @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
-  public List<DemandeDevisReponseDTO> getReponses(Long id) {
-
-    if (!demandeRepository.existsById(id)) {
-      throw new RuntimeException("Demande introuvable");
+        return dto;
     }
-
-    return reponseRepository
-            .findByDemandeIdOrderByDateEnvoiAsc(id)
-            .stream()
-            .map(r -> new DemandeDevisReponseDTO(
-                    r.getId(),
-                    r.getMessage(),
-                    r.getPieceJointeUrl(),
-                    r.getEnvoyePar(),
-                    r.getDateEnvoi()
-            ))
-            .toList();
-  }
 }

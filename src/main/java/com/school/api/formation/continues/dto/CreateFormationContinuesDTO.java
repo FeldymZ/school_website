@@ -1,6 +1,7 @@
 package com.school.api.formation.continues.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,12 +10,28 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 public class CreateFormationContinuesDTO {
 
-  @NotBlank(message = "Le titre est obligatoire")
-  private String titre;
+    @NotBlank
+    private String libelle;
 
-  @NotBlank(message = "La description est obligatoire")
-  private String description;
+    @NotBlank
+    private String description;
 
-  private MultipartFile cover;
-  private MultipartFile pdf;
+    private String objectifs;
+
+    private String competences;
+
+    @NotNull
+    private Double prix;
+
+    @NotNull
+    private Integer duree;
+
+    @NotNull
+    private String uniteDuree; // JOURS / MOIS / ANNEES
+
+    private String lieu;
+
+    private String titreDelivre;
+
+    private MultipartFile cover;
 }

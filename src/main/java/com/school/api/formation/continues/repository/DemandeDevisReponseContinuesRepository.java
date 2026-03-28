@@ -10,5 +10,4 @@ public interface DemandeDevisReponseContinuesRepository
 
     List<DemandeDevisReponseContinues>
     findByDemandeIdOrderByDateEnvoiAsc(Long demandeId);
-
 }

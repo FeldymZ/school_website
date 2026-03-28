@@ -5,12 +5,12 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface DemandeDevisFormationContinuesRepository
-  extends JpaRepository<DemandeDevisFormationContinues, Long> {
+        extends JpaRepository<DemandeDevisFormationContinues, Long> {
 
-  Page<DemandeDevisFormationContinues> findByStatut(
-    StatutDemande statut,
-    Pageable pageable
-  );
+    Page<DemandeDevisFormationContinues> findByStatut(
+            StatutDemande statut,
+            Pageable pageable
+    );
 
-  long countByStatut(StatutDemande statut);
+    long countByStatut(StatutDemande statut);
 }
