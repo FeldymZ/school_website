@@ -16,41 +16,41 @@ public class CorsConfig {
 
     CorsConfiguration config = new CorsConfiguration();
 
-    // 🌍 ORIGINS AUTORISÉS
-    config.setAllowedOrigins(List.of(
-      "http://localhost:5173",          // Front public local
-      "http://localhost:5174",          // Back-office local
-      "https://test.esiitech-gabon.com",
-      "https://esiitech-gabon.com",
-      "https://www.esiitech-gabon.com",   // ✅ AJOUT IMPORTANT
-      "https://admin.esiitech-gabon.com"
+    // 🌍 ORIGINS AUTORISÉS (IMPORTANT: utiliser patterns pour credentials)
+    config.setAllowedOriginPatterns(List.of(
+            "http://localhost:5173",          // Front public local
+            "http://localhost:5174",          // Back-office local
+            "https://*.esiitech-gabon.com"    // Tous les sous-domaines
     ));
 
     // 🔓 MÉTHODES AUTORISÉES
     config.setAllowedMethods(List.of(
-      "GET",
-      "POST",
-      "PUT",
-      "DELETE",
-      "OPTIONS"
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "OPTIONS"
     ));
 
     // 🔓 HEADERS AUTORISÉS
     config.setAllowedHeaders(List.of("*"));
 
-    // 🔑 AUTH / JWT (cookies ou Authorization)
+    // 🔑 AUTORISER LES COOKIES / JWT
     config.setAllowCredentials(true);
 
     // 📤 HEADERS EXPOSÉS AU FRONT
     config.setExposedHeaders(List.of(
-      "Authorization",
-      "Content-Type"
+            "Authorization",
+            "Content-Type"
     ));
 
-    UrlBasedCorsConfigurationSource source =
-      new UrlBasedCorsConfigurationSource();
+    // ⏱️ Cache du preflight (optimisation)
+    config.setMaxAge(3600L);
 
-    // ⚠️ IMPORTANT : appliquer à toutes les routes
+    UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
+
+    // ⚠️ APPLIQUER À TOUTES LES ROUTES
     source.registerCorsConfiguration("/**", config);
 
     return source;
