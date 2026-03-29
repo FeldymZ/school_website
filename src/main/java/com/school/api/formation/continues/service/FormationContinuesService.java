@@ -183,7 +183,7 @@ public class FormationContinuesService {
         Integer ref;
 
         do {
-            ref = 100000 + random.nextInt(900000);
+            ref = 5000 + random.nextInt(2000); // 🔥 5000 → 6999
         } while (repository.findByReference(ref) != null);
 
         return ref;
