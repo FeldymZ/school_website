@@ -52,12 +52,16 @@ public class CatalogueMapper {
         dto.setId(sc.getId());
         dto.setLibelle(sc.getLibelle());
 
-        // 🔥 IMPORTANT : NE PAS CHARGER LES FORMATIONS ICI
+        // 🔥 CORRECTION CRITIQUE
+        if (sc.getCategorie() != null) {
+            dto.setCategorieId(sc.getCategorie().getId());
+        }
+
+        // 🔥 NE PAS CHARGER LES FORMATIONS
         dto.setFormations(List.of());
 
         return dto;
     }
-
     /* =========================
        FORMATION (UTILISÉ AILLEURS)
        ========================= */
