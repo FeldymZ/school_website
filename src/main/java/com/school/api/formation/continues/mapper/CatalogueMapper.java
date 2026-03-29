@@ -52,21 +52,14 @@ public class CatalogueMapper {
         dto.setId(sc.getId());
         dto.setLibelle(sc.getLibelle());
 
-        dto.setFormations(
-                sc.getFormations() != null
-                        ? sc.getFormations()
-                        .stream()
-                        .filter(FormationContinues::isEnabled)
-                        .map(this::toFormationDTO)
-                        .collect(Collectors.toList())
-                        : List.of()
-        );
+        // 🔥 IMPORTANT : NE PAS CHARGER LES FORMATIONS ICI
+        dto.setFormations(List.of());
 
         return dto;
     }
 
     /* =========================
-       FORMATION
+       FORMATION (UTILISÉ AILLEURS)
        ========================= */
 
     public FormationDTO toFormationDTO(FormationContinues f) {
