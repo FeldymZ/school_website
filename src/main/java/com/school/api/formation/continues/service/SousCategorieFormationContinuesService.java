@@ -21,23 +21,56 @@ public class SousCategorieFormationContinuesService {
 
     public SousCategorieDTO create(Long categorieId, String libelle) {
 
+        if (libelle == null || libelle.trim().isEmpty()) {
+            throw new RuntimeException("Le libellé est obligatoire");
+        }
+
         CategorieFormationContinues categorie = categorieRepository.findById(categorieId)
                 .orElseThrow(() -> new RuntimeException("Catégorie introuvable"));
 
         SousCategorieFormationContinues sc = new SousCategorieFormationContinues();
-        sc.setLibelle(libelle);
+        sc.setLibelle(libelle.trim());
         sc.setCategorie(categorie);
 
         return mapper.toSousCategorieDTO(repository.save(sc));
     }
 
-    /* ================= GET ================= */
+    /* ================= GET ALL ================= */
 
     public List<SousCategorieDTO> getAll() {
         return repository.findAll()
                 .stream()
                 .map(mapper::toSousCategorieDTO)
                 .toList();
+    }
+
+    /* ================= GET BY ID ================= */
+
+    public SousCategorieDTO getById(Long id) {
+        SousCategorieFormationContinues sc = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sous-catégorie introuvable"));
+
+        return mapper.toSousCategorieDTO(sc);
+    }
+
+    /* ================= UPDATE ================= */
+
+    public SousCategorieDTO update(Long id, String libelle, Long categorieId) {
+
+        SousCategorieFormationContinues sc = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sous-catégorie introuvable"));
+
+        if (libelle == null || libelle.trim().isEmpty()) {
+            throw new RuntimeException("Le libellé est obligatoire");
+        }
+
+        CategorieFormationContinues categorie = categorieRepository.findById(categorieId)
+                .orElseThrow(() -> new RuntimeException("Catégorie introuvable"));
+
+        sc.setLibelle(libelle.trim());
+        sc.setCategorie(categorie);
+
+        return mapper.toSousCategorieDTO(repository.save(sc));
     }
 
     /* ================= DELETE ================= */
@@ -47,10 +80,10 @@ public class SousCategorieFormationContinuesService {
         SousCategorieFormationContinues sc = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sous-catégorie introuvable"));
 
-        // 🔒 PROTECTION MÉTIER
+        // 🔒 sécurité : empêcher suppression si des formations existent
         if (sc.getFormations() != null && !sc.getFormations().isEmpty()) {
             throw new RuntimeException(
-                    "Impossible de supprimer une sous-catégorie contenant des formations"
+                    "Impossible de supprimer cette sous-catégorie car elle contient des formations"
             );
         }
 
