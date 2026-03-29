@@ -16,6 +16,7 @@ public interface CategorieFormationContinuesRepository
         SELECT DISTINCT c
         FROM CategorieFormationContinues c
         LEFT JOIN FETCH c.sousCategories sc
+        LEFT JOIN FETCH sc.formations f
     """)
     List<CategorieFormationContinues> findAllWithSousCategories();
 }

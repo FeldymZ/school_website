@@ -52,18 +52,25 @@ public class CatalogueMapper {
         dto.setId(sc.getId());
         dto.setLibelle(sc.getLibelle());
 
-        // 🔥 CORRECTION CRITIQUE
         if (sc.getCategorie() != null) {
             dto.setCategorieId(sc.getCategorie().getId());
         }
 
-        // 🔥 NE PAS CHARGER LES FORMATIONS
-        dto.setFormations(List.of());
+        /* 🔥 AJOUT IMPORTANT : FORMATIONS */
+        dto.setFormations(
+                sc.getFormations() != null
+                        ? sc.getFormations().stream()
+                        .filter(FormationContinues::isEnabled) // 🔥 uniquement visibles
+                        .map(this::toFormationDTO)
+                        .collect(Collectors.toList())
+                        : List.of()
+        );
 
         return dto;
     }
+
     /* =========================
-       FORMATION (UTILISÉ AILLEURS)
+       FORMATION
        ========================= */
 
     public FormationDTO toFormationDTO(FormationContinues f) {
@@ -77,10 +84,13 @@ public class CatalogueMapper {
         dto.setCompetences(f.getCompetences());
         dto.setPrix(f.getPrix());
         dto.setDuree(f.getDuree());
+
         dto.setUniteDuree(
                 f.getUniteDuree() != null ? f.getUniteDuree().name() : null
         );
+
         dto.setLogo(f.getLogo());
+        dto.setEnabled(f.isEnabled());
 
         return dto;
     }
