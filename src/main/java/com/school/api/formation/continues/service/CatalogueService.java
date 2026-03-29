@@ -18,7 +18,9 @@ public class CatalogueService {
 
     public List<CategorieDTO> getCatalogue() {
 
-        List<CategorieFormationContinues> categories = categorieRepository.findAll();
+        // 🔥 FIX LAZY LOADING + N+1
+        List<CategorieFormationContinues> categories =
+                categorieRepository.findAllWithSousCategories();
 
         return catalogueMapper.toCategorieDTOList(categories);
     }

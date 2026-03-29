@@ -8,13 +8,35 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface FormationContinuesRepository
         extends JpaRepository<FormationContinues, Long> {
 
+    /* ================= PUBLIC ================= */
+
     Page<FormationContinues> findByEnabledTrue(Pageable pageable);
 
-    /* 🔥 FILTRES */
-    Page<FormationContinues> findBySousCategorieId(Long sousCategorieId, Pageable pageable);
+    /* ================= FILTERS ================= */
 
-    Page<FormationContinues> findBySousCategorieCategorieId(Long categorieId, Pageable pageable);
+    Page<FormationContinues> findBySousCategorieIdAndEnabledTrue(
+            Long sousCategorieId,
+            Pageable pageable
+    );
 
-    /* 🔥 SEARCH */
+    Page<FormationContinues> findBySousCategorieCategorieIdAndEnabledTrue(
+            Long categorieId,
+            Pageable pageable
+    );
+
+    /* ================= ADMIN (OPTIONNEL) ================= */
+
+    Page<FormationContinues> findBySousCategorieId(
+            Long sousCategorieId,
+            Pageable pageable
+    );
+
+    Page<FormationContinues> findBySousCategorieCategorieId(
+            Long categorieId,
+            Pageable pageable
+    );
+
+    /* ================= SEARCH ================= */
+
     FormationContinues findByReference(Integer reference);
 }

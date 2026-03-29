@@ -1,7 +1,7 @@
 package com.school.api.formation.continues.service;
 
-import com.school.api.common.storage.FileStorageService;
 import com.school.api.common.exception.ResourceNotFoundException;
+import com.school.api.common.storage.FileStorageService;
 import com.school.api.formation.continues.dto.CreateFormationContinuesDTO;
 import com.school.api.formation.continues.dto.FormationDTO;
 import com.school.api.formation.continues.entity.*;
@@ -19,6 +19,7 @@ public class FormationContinuesService {
 
     private final FormationContinuesRepository repository;
     private final SousCategorieFormationContinuesRepository sousCategorieRepository;
+    private final DemandeDevisLigneFormationContinuesRepository ligneRepository;
     private final FileStorageService fileStorageService;
     private final FormationMapper mapper;
 
@@ -36,7 +37,6 @@ public class FormationContinuesService {
         FormationContinues f = new FormationContinues();
 
         f.setReference(generateReference());
-
         f.setLibelle(dto.getLibelle());
         f.setDescription(dto.getDescription());
         f.setObjectifs(dto.getObjectifs());
@@ -46,9 +46,7 @@ public class FormationContinuesService {
 
         if (dto.getUniteDuree() != null) {
             try {
-                f.setUniteDuree(
-                        UniteDuree.valueOf(dto.getUniteDuree().toUpperCase())
-                );
+                f.setUniteDuree(UniteDuree.valueOf(dto.getUniteDuree().toUpperCase()));
             } catch (Exception e) {
                 throw new RuntimeException("Unité de durée invalide (JOURS, MOIS, ANNEES)");
             }
@@ -84,9 +82,7 @@ public class FormationContinuesService {
 
         if (dto.getUniteDuree() != null) {
             try {
-                f.setUniteDuree(
-                        UniteDuree.valueOf(dto.getUniteDuree().toUpperCase())
-                );
+                f.setUniteDuree(UniteDuree.valueOf(dto.getUniteDuree().toUpperCase()));
             } catch (Exception e) {
                 throw new RuntimeException("Unité de durée invalide (JOURS, MOIS, ANNEES)");
             }
@@ -103,13 +99,15 @@ public class FormationContinuesService {
         return mapper.toDTO(repository.save(f));
     }
 
-    /* ================= GET ================= */
+    /* ================= GET ADMIN ================= */
 
     public Page<FormationDTO> getAll(int page, int size) {
         return repository.findAll(
                 PageRequest.of(page, size, Sort.by("id").descending())
         ).map(mapper::toDTO);
     }
+
+    /* ================= GET PUBLIC ================= */
 
     public Page<FormationDTO> getAllPublic(int page, int size) {
         return repository.findByEnabledTrue(
@@ -151,19 +149,20 @@ public class FormationContinuesService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
         if (sousCategorieId != null) {
-            return repository.findBySousCategorieId(sousCategorieId, pageable)
+            return repository.findBySousCategorieIdAndEnabledTrue(sousCategorieId, pageable)
                     .map(mapper::toDTO);
         }
 
         if (categorieId != null) {
-            return repository.findBySousCategorieCategorieId(categorieId, pageable)
+            return repository.findBySousCategorieCategorieIdAndEnabledTrue(categorieId, pageable)
                     .map(mapper::toDTO);
         }
 
-        return repository.findAll(pageable).map(mapper::toDTO);
+        return repository.findByEnabledTrue(pageable)
+                .map(mapper::toDTO);
     }
 
-    /* ================= DELETE ================= */
+    /* ================= DELETE MÉTIER ================= */
 
     public void delete(Long id) {
 
@@ -172,8 +171,29 @@ public class FormationContinuesService {
                         new ResourceNotFoundException("Formation", "id", id)
                 );
 
-        f.setEnabled(false);
-        repository.save(f);
+        boolean isUsed = ligneRepository.existsByFormationId(id);
+
+        if (isUsed) {
+            throw new RuntimeException(
+                    "Impossible de supprimer cette formation car elle est déjà utilisée dans des demandes de devis"
+            );
+        }
+
+        repository.delete(f);
+    }
+
+    /* ================= TOGGLE STATUS ================= */
+
+    public FormationDTO toggleStatus(Long id) {
+
+        FormationContinues f = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Formation", "id", id)
+                );
+
+        f.setEnabled(!f.isEnabled());
+
+        return mapper.toDTO(repository.save(f));
     }
 
     /* ================= UTIL ================= */
@@ -183,7 +203,7 @@ public class FormationContinuesService {
         Integer ref;
 
         do {
-            ref = 5000 + random.nextInt(2000); // 🔥 5000 → 6999
+            ref = 5000 + random.nextInt(2000);
         } while (repository.findByReference(ref) != null);
 
         return ref;

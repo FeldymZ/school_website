@@ -17,6 +17,8 @@ public class SousCategorieFormationContinuesService {
     private final CategorieFormationContinuesRepository categorieRepository;
     private final CatalogueMapper mapper;
 
+    /* ================= CREATE ================= */
+
     public SousCategorieDTO create(Long categorieId, String libelle) {
 
         CategorieFormationContinues categorie = categorieRepository.findById(categorieId)
@@ -29,6 +31,8 @@ public class SousCategorieFormationContinuesService {
         return mapper.toSousCategorieDTO(repository.save(sc));
     }
 
+    /* ================= GET ================= */
+
     public List<SousCategorieDTO> getAll() {
         return repository.findAll()
                 .stream()
@@ -36,7 +40,20 @@ public class SousCategorieFormationContinuesService {
                 .toList();
     }
 
+    /* ================= DELETE ================= */
+
     public void delete(Long id) {
-        repository.deleteById(id);
+
+        SousCategorieFormationContinues sc = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sous-catégorie introuvable"));
+
+        // 🔒 PROTECTION MÉTIER
+        if (sc.getFormations() != null && !sc.getFormations().isEmpty()) {
+            throw new RuntimeException(
+                    "Impossible de supprimer une sous-catégorie contenant des formations"
+            );
+        }
+
+        repository.delete(sc);
     }
 }

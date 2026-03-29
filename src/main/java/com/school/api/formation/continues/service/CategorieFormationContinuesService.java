@@ -30,7 +30,7 @@ public class CategorieFormationContinuesService {
 
     public List<CategorieDTO> getAll() {
 
-        // 🔥 FIX LAZY LOADING
+        // 🔥 FIX N+1 (chargement optimisé)
         List<CategorieFormationContinues> categories =
                 repository.findAllWithSousCategories();
 
@@ -52,6 +52,15 @@ public class CategorieFormationContinuesService {
     /* ================= DELETE ================= */
 
     public void delete(Long id) {
-        repository.deleteById(id);
+
+        CategorieFormationContinues c = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Catégorie introuvable"));
+
+        // 🔒 PROTECTION MÉTIER
+        if (c.getSousCategories() != null && !c.getSousCategories().isEmpty()) {
+            throw new RuntimeException("Impossible de supprimer une catégorie contenant des sous-catégories");
+        }
+
+        repository.delete(c);
     }
 }

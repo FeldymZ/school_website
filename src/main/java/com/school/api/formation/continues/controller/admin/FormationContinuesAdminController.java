@@ -58,6 +58,12 @@ public class FormationContinuesAdminController {
         return service.filter(categorieId, sousCategorieId, page, size);
     }
 
+    /* 🔁 TOGGLE ACTIF / INACTIF */
+    @PatchMapping("/{id}/toggle")
+    public FormationDTO toggleStatus(@PathVariable Long id) {
+        return service.toggleStatus(id);
+    }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);
