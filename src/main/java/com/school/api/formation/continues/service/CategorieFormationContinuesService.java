@@ -29,7 +29,12 @@ public class CategorieFormationContinuesService {
     /* ================= GET ================= */
 
     public List<CategorieDTO> getAll() {
-        return mapper.toCategorieDTOList(repository.findAll());
+
+        // 🔥 FIX LAZY LOADING
+        List<CategorieFormationContinues> categories =
+                repository.findAllWithSousCategories();
+
+        return mapper.toCategorieDTOList(categories);
     }
 
     /* ================= UPDATE ================= */
