@@ -1,8 +1,7 @@
 package com.school.api.formation.continues.service;
 
-import com.school.api.formation.continues.dto.CategorieDTO;
-import com.school.api.formation.continues.entity.CategorieFormationContinues;
-import com.school.api.formation.continues.mapper.CatalogueMapper;
+import com.school.api.formation.continues.dto.*;
+import com.school.api.formation.continues.entity.*;
 import com.school.api.formation.continues.repository.CategorieFormationContinuesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,15 +12,64 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CatalogueService {
 
-    private final CategorieFormationContinuesRepository categorieRepository;
-    private final CatalogueMapper catalogueMapper;
+    private final CategorieFormationContinuesRepository repository;
 
     public List<CategorieDTO> getCatalogue() {
 
-        // 🔥 FIX LAZY LOADING + N+1
-        List<CategorieFormationContinues> categories =
-                categorieRepository.findAllWithSousCategories();
+        List<CategorieFormationContinues> categories = repository.findAll();
 
-        return catalogueMapper.toCategorieDTOList(categories);
+        return categories.stream().map(c -> {
+
+            CategorieDTO catDTO = new CategorieDTO();
+            catDTO.setId(c.getId());
+            catDTO.setLibelle(c.getLibelle());
+
+            if (c.getSousCategories() != null) {
+                catDTO.setSousCategories(
+                        c.getSousCategories().stream().map(sc -> {
+
+                            SousCategorieDTO scDTO = new SousCategorieDTO();
+                            scDTO.setId(sc.getId());
+                            scDTO.setLibelle(sc.getLibelle());
+
+                            if (sc.getFormations() != null) {
+                                scDTO.setFormations(
+                                        sc.getFormations().stream()
+                                                .filter(FormationContinues::isEnabled)
+                                                .map(f -> {
+
+                                                    FormationDTO fDTO = new FormationDTO();
+                                                    fDTO.setId(f.getId());
+                                                    fDTO.setReference(f.getReference());
+                                                    fDTO.setSlug(f.getSlug());
+
+                                                    fDTO.setLibelle(f.getLibelle());
+                                                    fDTO.setDescription(f.getDescription());
+                                                    fDTO.setPrix(f.getPrix());
+                                                    fDTO.setDuree(f.getDuree());
+
+                                                    fDTO.setUniteDuree(
+                                                            f.getUniteDuree() != null
+                                                                    ? f.getUniteDuree().name()
+                                                                    : null
+                                                    );
+
+                                                    fDTO.setLogo(f.getLogo());
+                                                    fDTO.setEnabled(f.isEnabled());
+
+                                                    return fDTO;
+                                                }).toList()
+                                );
+                            }
+
+                            return scDTO;
+
+                        }).toList()
+                );
+            }
+
+            return catDTO;
+
+        }).toList();
     }
 }
