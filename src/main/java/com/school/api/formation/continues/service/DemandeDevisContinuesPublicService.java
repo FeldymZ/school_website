@@ -1,8 +1,10 @@
 package com.school.api.formation.continues.service;
 
-import com.school.api.formation.continues.dto.*;
+import com.school.api.formation.continues.dto.CreateDemandeDevisContinuesDTO;
+import com.school.api.formation.continues.dto.LigneDemandeDTO;
 import com.school.api.formation.continues.entity.*;
-import com.school.api.formation.continues.repository.*;
+import com.school.api.formation.continues.repository.DemandeDevisFormationContinuesRepository;
+import com.school.api.formation.continues.repository.FormationContinuesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +21,21 @@ public class DemandeDevisContinuesPublicService {
 
     public void create(CreateDemandeDevisContinuesDTO dto) {
 
-        if (dto.getLignes().isEmpty()) {
+        /* =========================
+           🔥 VALIDATION MÉTIER
+           ========================= */
+
+        if (dto.getLignes() == null || dto.getLignes().isEmpty()) {
             throw new RuntimeException("Panier vide");
         }
+
+        if (dto.isEntreprise() && (dto.getNomStructure() == null || dto.getNomStructure().isBlank())) {
+            throw new RuntimeException("Le nom de la structure est obligatoire pour une entreprise");
+        }
+
+        /* =========================
+           📄 CRÉATION DEMANDE
+           ========================= */
 
         DemandeDevisFormationContinues demande = new DemandeDevisFormationContinues();
 
@@ -32,12 +46,21 @@ public class DemandeDevisContinuesPublicService {
         demande.setNomStructure(dto.getNomStructure());
         demande.setDateDemande(LocalDate.now());
 
+        /* =========================
+           🛒 LIGNES
+           ========================= */
+
         List<DemandeDevisLigneFormationContinues> lignes = new ArrayList<>();
 
         for (LigneDemandeDTO l : dto.getLignes()) {
 
             FormationContinues f = formationRepository.findById(l.getFormationId())
                     .orElseThrow(() -> new RuntimeException("Formation introuvable"));
+
+            /* 🔥 OPTION : sécurité (formation désactivée) */
+            if (!f.isEnabled()) {
+                throw new RuntimeException("Cette formation n'est plus disponible");
+            }
 
             DemandeDevisLigneFormationContinues ligne = new DemandeDevisLigneFormationContinues();
 
@@ -53,6 +76,10 @@ public class DemandeDevisContinuesPublicService {
         }
 
         demande.setLignes(lignes);
+
+        /* =========================
+           💾 SAVE
+           ========================= */
 
         demandeRepository.save(demande);
     }

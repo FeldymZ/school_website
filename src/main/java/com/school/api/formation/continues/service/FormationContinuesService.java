@@ -37,7 +37,7 @@ public class FormationContinuesService {
         FormationContinues f = new FormationContinues();
 
         f.setReference(generateReference());
-        f.setSlug(generateSlug(dto.getLibelle()));
+        f.setSlug(generateSlugUnique(dto.getLibelle())); // 🔥 FIX
 
         f.setLibelle(dto.getLibelle());
         f.setDescription(dto.getDescription());
@@ -143,12 +143,18 @@ public class FormationContinuesService {
         return mapper.toDTO(repository.save(f));
     }
 
-    /* ================= DELETE ================= */
+    /* ================= DELETE SAFE ================= */
 
     public void delete(Long id) {
 
         if (!repository.existsById(id)) {
             throw new RuntimeException("Formation introuvable");
+        }
+
+        if (ligneRepository.existsByFormationId(id)) {
+            throw new RuntimeException(
+                    "Impossible de supprimer cette formation car elle est utilisée dans des devis"
+            );
         }
 
         repository.deleteById(id);
@@ -166,7 +172,7 @@ public class FormationContinuesService {
         return mapper.toDTO(repository.save(f));
     }
 
-    /* ================= GET PUBLIC ================= */
+    /* ================= PUBLIC ================= */
 
     public Page<FormationDTO> getAllPublic(int page, int size) {
         return repository.findByEnabledTrue(
@@ -192,6 +198,19 @@ public class FormationContinuesService {
                 .toLowerCase()
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("(^-|-$)", "");
+    }
+
+    private String generateSlugUnique(String libelle) {
+
+        String base = generateSlug(libelle);
+        String slug = base;
+        int i = 1;
+
+        while (repository.findBySlug(slug) != null) {
+            slug = base + "-" + i++;
+        }
+
+        return slug;
     }
 
     private Integer generateReference() {
