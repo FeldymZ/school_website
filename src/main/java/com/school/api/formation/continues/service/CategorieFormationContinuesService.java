@@ -1,8 +1,10 @@
 package com.school.api.formation.continues.service;
 
+import com.school.api.common.exception.ResourceNotFoundException;
 import com.school.api.formation.continues.dto.CategorieDTO;
+import com.school.api.formation.continues.dto.SousCategorieDTO;
 import com.school.api.formation.continues.entity.CategorieFormationContinues;
-import com.school.api.formation.continues.mapper.CatalogueMapper;
+import com.school.api.formation.continues.entity.SousCategorieFormationContinues;
 import com.school.api.formation.continues.repository.CategorieFormationContinuesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,53 +16,50 @@ import java.util.List;
 public class CategorieFormationContinuesService {
 
     private final CategorieFormationContinuesRepository repository;
-    private final CatalogueMapper mapper;
 
-    /* ================= CREATE ================= */
-
-    public CategorieDTO create(String libelle) {
-
-        CategorieFormationContinues c = new CategorieFormationContinues();
-        c.setLibelle(libelle);
-
-        return mapper.toCategorieDTO(repository.save(c));
-    }
-
-    /* ================= GET ================= */
+    /* ================= GET ALL ================= */
 
     public List<CategorieDTO> getAll() {
 
-        // 🔥 FIX N+1 (chargement optimisé)
-        List<CategorieFormationContinues> categories =
-                repository.findAllWithSousCategories();
+        return repository.findAll().stream().map(c -> {
 
-        return mapper.toCategorieDTOList(categories);
+            CategorieDTO dto = new CategorieDTO();
+            dto.setId(c.getId());
+            dto.setLibelle(c.getLibelle());
+
+            if (c.getSousCategories() != null) {
+                dto.setSousCategories(
+                        c.getSousCategories().stream().map(sc -> {
+
+                            SousCategorieDTO scDTO = new SousCategorieDTO();
+                            scDTO.setId(sc.getId());
+                            scDTO.setLibelle(sc.getLibelle());
+                            scDTO.setCategorieId(c.getId());
+
+                            return scDTO;
+
+                        }).toList()
+                );
+            }
+
+            return dto;
+
+        }).toList();
     }
 
-    /* ================= UPDATE ================= */
+    /* ================= GET BY ID ================= */
 
-    public CategorieDTO update(Long id, String libelle) {
-
-        CategorieFormationContinues c = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Catégorie introuvable"));
-
-        c.setLibelle(libelle);
-
-        return mapper.toCategorieDTO(repository.save(c));
-    }
-
-    /* ================= DELETE ================= */
-
-    public void delete(Long id) {
+    public CategorieDTO getById(Long id) {
 
         CategorieFormationContinues c = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Catégorie introuvable"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Categorie", "id", id)
+                );
 
-        // 🔒 PROTECTION MÉTIER
-        if (c.getSousCategories() != null && !c.getSousCategories().isEmpty()) {
-            throw new RuntimeException("Impossible de supprimer une catégorie contenant des sous-catégories");
-        }
+        CategorieDTO dto = new CategorieDTO();
+        dto.setId(c.getId());
+        dto.setLibelle(c.getLibelle());
 
-        repository.delete(c);
+        return dto;
     }
 }

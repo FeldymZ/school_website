@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface CategorieFormationContinuesRepository
         extends JpaRepository<CategorieFormationContinues, Long> {
 
-    // 🔥 PLUS DE FETCH ICI
+    // ✅ AUCUNE méthode custom
 }
