@@ -80,7 +80,7 @@ public class CatalogueMapper {
         dto.setReference(f.getReference());
         dto.setSlug(f.getSlug()); // 🔥 AJOUT
 
-        dto.setLibelle(f.getLibelle());
+
         dto.setDescription(f.getDescription());
         dto.setObjectifs(f.getObjectifs());
         dto.setCompetences(f.getCompetences());
@@ -91,7 +91,8 @@ public class CatalogueMapper {
                 f.getUniteDuree() != null ? f.getUniteDuree().name() : null
         );
 
-        dto.setLogo(f.getLogo());
+        dto.setTitre(f.getLibelle());     // ✅
+        dto.setCoverUrl(f.getLogo());     // ✅
         dto.setEnabled(f.isEnabled());
 
         return dto;
