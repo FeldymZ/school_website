@@ -1,11 +1,16 @@
 package com.school.api.formation.continues.controller.admin;
 
 import com.school.api.formation.continues.dto.DemandeDevisAdminDTO;
+import com.school.api.formation.continues.dto.DemandeDevisReponseDTO;
 import com.school.api.formation.continues.dto.RepondreDemandeDTO;
 import com.school.api.formation.continues.service.DemandeDevisContinuesAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/demandes-devis")
@@ -13,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 public class DemandeDevisContinuesAdminController {
 
     private final DemandeDevisContinuesAdminService service;
+
+    /* ================= LISTE PAGINÉE ================= */
 
     @GetMapping
     public Page<DemandeDevisAdminDTO> getAll(
@@ -22,15 +29,32 @@ public class DemandeDevisContinuesAdminController {
         return service.getAll(page, size);
     }
 
-    /* =========================
-       REPONDRE A UNE DEMANDE
-       ========================= */
+    /* ================= RÉPONDRE ================= */
+
     @PostMapping("/{id}/repondre")
-    public String repondre(
+    public ResponseEntity<?> repondre(
             @PathVariable Long id,
             @ModelAttribute RepondreDemandeDTO dto
     ) {
         service.repondre(id, dto);
-        return "Réponse envoyée";
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Réponse envoyée"
+        ));
+    }
+
+    /* ================= HISTORIQUE ================= */
+
+    @GetMapping("/{id}/reponses")
+    public List<DemandeDevisReponseDTO> getReponses(@PathVariable Long id) {
+        return service.getReponses(id);
+    }
+
+    /* ================= 🔥 COUNT NON TRAITÉES ================= */
+
+    @GetMapping("/count-non-traitees")
+    public Long countNonTraitees() {
+        return service.countNonTraitees();
     }
 }

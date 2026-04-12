@@ -37,6 +37,8 @@ public class FormationContinuesService {
         FormationContinues f = new FormationContinues();
 
         f.setReference(generateReference());
+        f.setSlug(generateSlug(dto.getLibelle())); // 🔥
+
         f.setLibelle(dto.getLibelle());
         f.setDescription(dto.getDescription());
         f.setObjectifs(dto.getObjectifs());
@@ -48,7 +50,7 @@ public class FormationContinuesService {
             try {
                 f.setUniteDuree(UniteDuree.valueOf(dto.getUniteDuree().toUpperCase()));
             } catch (Exception e) {
-                throw new RuntimeException("Unité de durée invalide (JOURS, MOIS, ANNEES)");
+                throw new RuntimeException("Unité de durée invalide");
             }
         }
 
@@ -64,49 +66,6 @@ public class FormationContinuesService {
         return mapper.toDTO(repository.save(f));
     }
 
-    /* ================= UPDATE ================= */
-
-    public FormationDTO update(Long id, CreateFormationContinuesDTO dto) {
-
-        FormationContinues f = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Formation", "id", id)
-                );
-
-        f.setLibelle(dto.getLibelle());
-        f.setDescription(dto.getDescription());
-        f.setObjectifs(dto.getObjectifs());
-        f.setCompetences(dto.getCompetences());
-        f.setPrix(dto.getPrix());
-        f.setDuree(dto.getDuree());
-
-        if (dto.getUniteDuree() != null) {
-            try {
-                f.setUniteDuree(UniteDuree.valueOf(dto.getUniteDuree().toUpperCase()));
-            } catch (Exception e) {
-                throw new RuntimeException("Unité de durée invalide (JOURS, MOIS, ANNEES)");
-            }
-        }
-
-        f.setLieu(dto.getLieu());
-        f.setTitreDelivre(dto.getTitreDelivre());
-
-        if (dto.getCover() != null && !dto.getCover().isEmpty()) {
-            fileStorageService.deleteQuietly(f.getLogo());
-            f.setLogo(fileStorageService.storeFormationContinuesCover(dto.getCover()));
-        }
-
-        return mapper.toDTO(repository.save(f));
-    }
-
-    /* ================= GET ADMIN ================= */
-
-    public Page<FormationDTO> getAll(int page, int size) {
-        return repository.findAll(
-                PageRequest.of(page, size, Sort.by("id").descending())
-        ).map(mapper::toDTO);
-    }
-
     /* ================= GET PUBLIC ================= */
 
     public Page<FormationDTO> getAllPublic(int page, int size) {
@@ -115,88 +74,25 @@ public class FormationContinuesService {
         ).map(mapper::toDTO);
     }
 
-    public FormationDTO getById(Long id) {
-        return mapper.toDTO(
-                repository.findById(id)
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException("Formation", "id", id)
-                        )
-        );
-    }
+    public FormationDTO getBySlug(String slug) {
 
-    /* ================= SEARCH ================= */
+        FormationContinues f = repository.findBySlug(slug);
 
-    public FormationDTO getByReference(Integer reference) {
-
-        FormationContinues f = repository.findByReference(reference);
-
-        if (f == null) {
-            throw new ResourceNotFoundException("Formation", "reference", reference);
+        if (f == null || !f.isEnabled()) {
+            throw new ResourceNotFoundException("Formation", "slug", slug);
         }
 
         return mapper.toDTO(f);
     }
 
-    /* ================= FILTER ================= */
-
-    public Page<FormationDTO> filter(
-            Long categorieId,
-            Long sousCategorieId,
-            int page,
-            int size
-    ) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-
-        if (sousCategorieId != null) {
-            return repository.findBySousCategorieIdAndEnabledTrue(sousCategorieId, pageable)
-                    .map(mapper::toDTO);
-        }
-
-        if (categorieId != null) {
-            return repository.findBySousCategorieCategorieIdAndEnabledTrue(categorieId, pageable)
-                    .map(mapper::toDTO);
-        }
-
-        return repository.findByEnabledTrue(pageable)
-                .map(mapper::toDTO);
-    }
-
-    /* ================= DELETE MÉTIER ================= */
-
-    public void delete(Long id) {
-
-        FormationContinues f = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Formation", "id", id)
-                );
-
-        boolean isUsed = ligneRepository.existsByFormationId(id);
-
-        if (isUsed) {
-            throw new RuntimeException(
-                    "Impossible de supprimer cette formation car elle est déjà utilisée dans des demandes de devis"
-            );
-        }
-
-        repository.delete(f);
-    }
-
-    /* ================= TOGGLE STATUS ================= */
-
-    public FormationDTO toggleStatus(Long id) {
-
-        FormationContinues f = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Formation", "id", id)
-                );
-
-        f.setEnabled(!f.isEnabled());
-
-        return mapper.toDTO(repository.save(f));
-    }
-
     /* ================= UTIL ================= */
+
+    private String generateSlug(String libelle) {
+        return libelle
+                .toLowerCase()
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("(^-|-$)", "");
+    }
 
     private Integer generateReference() {
 

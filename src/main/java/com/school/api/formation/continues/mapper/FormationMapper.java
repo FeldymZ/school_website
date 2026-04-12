@@ -14,6 +14,8 @@ public class FormationMapper {
 
         dto.setId(f.getId());
         dto.setReference(f.getReference());
+        dto.setSlug(f.getSlug()); // 🔥 IMPORTANT
+
         dto.setLibelle(f.getLibelle());
         dto.setDescription(f.getDescription());
         dto.setObjectifs(f.getObjectifs());
@@ -28,7 +30,6 @@ public class FormationMapper {
         dto.setLogo(f.getLogo());
         dto.setEnabled(f.isEnabled());
 
-        /* 🔥 IMPORTANT */
         if (f.getSousCategorie() != null) {
             SousCategorieDTO sc = new SousCategorieDTO();
             sc.setId(f.getSousCategorie().getId());

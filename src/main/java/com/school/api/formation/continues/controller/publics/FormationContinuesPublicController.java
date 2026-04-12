@@ -13,8 +13,6 @@ public class FormationContinuesPublicController {
 
     private final FormationContinuesService service;
 
-    /* ================= GET ALL ================= */
-
     @GetMapping
     public Page<FormationDTO> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -23,10 +21,9 @@ public class FormationContinuesPublicController {
         return service.getAllPublic(page, size);
     }
 
-    /* ================= GET BY ID ================= */
-
-    @GetMapping("/{id}")
-    public FormationDTO getById(@PathVariable Long id) {
-        return service.getById(id);
+    /* 🔥 ROUTE PROPRE */
+    @GetMapping("/slug/{slug}")
+    public FormationDTO getBySlug(@PathVariable String slug) {
+        return service.getBySlug(slug);
     }
 }

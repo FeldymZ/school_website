@@ -78,6 +78,8 @@ public class CatalogueMapper {
 
         dto.setId(f.getId());
         dto.setReference(f.getReference());
+        dto.setSlug(f.getSlug()); // 🔥 AJOUT
+
         dto.setLibelle(f.getLibelle());
         dto.setDescription(f.getDescription());
         dto.setObjectifs(f.getObjectifs());

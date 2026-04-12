@@ -12,5 +12,6 @@ public interface DemandeDevisFormationContinuesRepository
             Pageable pageable
     );
 
-    long countByStatut(StatutDemande statut);
+    /* 🔥 COUNT */
+    Long countByStatut(StatutDemande statut);
 }

@@ -24,10 +24,15 @@ public class FormationContinues {
     private Integer reference;
 
     /* =========================
+       🔥 NOUVEAU : SLUG PUBLIC
+       ========================= */
+    @Column(name = "slug", unique = true, nullable = false, length = 150)
+    private String slug;
+
+    /* =========================
        INFOS
        ========================= */
 
-    // 🔥 CORRECTION ICI
     @Column(name = "titre", nullable = false)
     private String libelle;
 

@@ -7,9 +7,11 @@ import lombok.Setter;
 @Setter
 public class FormationDTO {
 
-    private Long id;
+    private Long id; // ADMIN ONLY
 
     private Integer reference;
+
+    private String slug; // 🔥 AJOUT IMPORTANT
 
     private String libelle;
     private String description;
@@ -24,9 +26,7 @@ public class FormationDTO {
 
     private String logo;
 
-    /* 🔥 AJOUT IMPORTANT */
     private boolean enabled;
 
-    /* 🔥 AJOUT IMPORTANT */
     private SousCategorieDTO sousCategorie;
 }

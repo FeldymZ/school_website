@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -52,9 +53,6 @@ public class DemandeDevisContinuesAdminService {
         DemandeDevisFormationContinues demande = repository.findById(demandeId)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable"));
 
-        /* =========================
-           🔒 SÉCURITÉ MÉTIER
-           ========================= */
         if (demande.getStatut() == StatutDemande.TRAITEE) {
             throw new RuntimeException("Cette demande a déjà été traitée");
         }
@@ -66,9 +64,6 @@ public class DemandeDevisContinuesAdminService {
         reponse.setEnvoyePar("ADMIN");
         reponse.setDateEnvoi(LocalDateTime.now());
 
-        /* =========================
-           📎 PIECE JOINTE
-           ========================= */
         if (dto.getPieceJointe() != null && !dto.getPieceJointe().isEmpty()) {
 
             String fileUrl = fileStorageService
@@ -79,13 +74,40 @@ public class DemandeDevisContinuesAdminService {
 
         reponseRepository.save(reponse);
 
-        /* =========================
-           🔄 MAJ STATUT DEMANDE
-           ========================= */
+        /* 🔄 MAJ STATUT */
         demande.setStatut(StatutDemande.TRAITEE);
         demande.setDateTraitement(LocalDateTime.now());
 
         repository.save(demande);
+    }
+
+    /* =========================
+       📩 HISTORIQUE DES RÉPONSES
+       ========================= */
+    public List<DemandeDevisReponseDTO> getReponses(Long demandeId) {
+
+        DemandeDevisFormationContinues demande = repository.findById(demandeId)
+                .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+
+        return reponseRepository
+                .findByDemandeIdOrderByDateEnvoiAsc(demande.getId())
+                .stream()
+                .map(r -> new DemandeDevisReponseDTO(
+                        r.getId(),
+                        r.getMessage(),
+                        r.getPieceJointeUrl(),
+                        r.getEnvoyePar(),
+                        r.getDateEnvoi()
+                ))
+                .toList();
+    }
+
+
+    /* =========================
+   🔢 COUNT NON TRAITÉES
+   ========================= */
+    public Long countNonTraitees() {
+        return repository.countByStatut(StatutDemande.PAS_ENCORE_TRAITEE);
     }
 
     /* =========================
@@ -97,7 +119,6 @@ public class DemandeDevisContinuesAdminService {
         DemandeDevisFormationContinues demande = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable"));
 
-        // 🔥 suppression des pièces jointes associées aux réponses
         if (demande.getReponses() != null) {
             demande.getReponses().forEach(r -> {
                 if (r.getPieceJointeUrl() != null) {
@@ -126,9 +147,6 @@ public class DemandeDevisContinuesAdminService {
         dto.setStatut(d.getStatut());
         dto.setDateTraitement(d.getDateTraitement());
 
-        /* =========================
-           📦 LIGNES
-           ========================= */
         dto.setLignes(
                 d.getLignes().stream().map(l -> {
                     LigneDemandeAdminDTO ligne = new LigneDemandeAdminDTO();

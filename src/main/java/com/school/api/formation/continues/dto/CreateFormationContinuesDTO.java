@@ -1,7 +1,7 @@
 package com.school.api.formation.continues.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,27 +10,25 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 public class CreateFormationContinuesDTO {
 
-    @NotBlank
+    @NotBlank(message = "Le libellé est obligatoire")
     private String libelle;
 
-    @NotBlank
+    @NotBlank(message = "La description est obligatoire")
     private String description;
 
     private String objectifs;
-
     private String competences;
 
-    @NotNull
+    // ✅ validation intelligente (optionnel MAIS si présent → valide)
+    @Positive(message = "Le prix doit être positif")
     private Double prix;
 
-    @NotNull
+    @Positive(message = "La durée doit être positive")
     private Integer duree;
 
-    @NotNull
-    private String uniteDuree; // JOURS / MOIS / ANNEES
+    private String uniteDuree;
 
     private String lieu;
-
     private String titreDelivre;
 
     private MultipartFile cover;

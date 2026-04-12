@@ -24,7 +24,7 @@ public interface FormationContinuesRepository
             Pageable pageable
     );
 
-    /* ================= ADMIN (OPTIONNEL) ================= */
+    /* ================= ADMIN ================= */
 
     Page<FormationContinues> findBySousCategorieId(
             Long sousCategorieId,
@@ -39,4 +39,7 @@ public interface FormationContinuesRepository
     /* ================= SEARCH ================= */
 
     FormationContinues findByReference(Integer reference);
+
+    /* 🔥 AJOUT IMPORTANT */
+    FormationContinues findBySlug(String slug);
 }
