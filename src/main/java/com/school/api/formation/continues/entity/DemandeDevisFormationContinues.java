@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,9 +19,7 @@ public class DemandeDevisFormationContinues {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /* =========================
-       CLIENT
-       ========================= */
+    /* ================= CLIENT ================= */
     private String nomClient;
     private String email;
     private String telephone;
@@ -30,25 +27,19 @@ public class DemandeDevisFormationContinues {
     private boolean entreprise;
     private String nomStructure;
 
-    /* =========================
-       STATUT
-       ========================= */
-    private LocalDate dateDemande;
+    /* ================= STATUT ================= */
+    private LocalDateTime dateDemande; // 🔥 FIX
 
     @Enumerated(EnumType.STRING)
     private StatutDemande statut = StatutDemande.PAS_ENCORE_TRAITEE;
 
     private LocalDateTime dateTraitement;
 
-    /* =========================
-       LIGNES (PANIER)
-       ========================= */
+    /* ================= LIGNES ================= */
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DemandeDevisLigneFormationContinues> lignes;
 
-    /* =========================
-       RÉPONSES ADMIN
-       ========================= */
+    /* ================= REPONSES ================= */
     @JsonIgnore
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL)
     private List<DemandeDevisReponseContinues> reponses;

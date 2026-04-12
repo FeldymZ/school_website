@@ -21,8 +21,12 @@ public class CategorieFormationContinuesService {
 
     public CategorieDTO create(String libelle) {
 
+        if (libelle == null || libelle.trim().isEmpty()) {
+            throw new RuntimeException("Le libellé est obligatoire");
+        }
+
         CategorieFormationContinues c = new CategorieFormationContinues();
-        c.setLibelle(libelle);
+        c.setLibelle(libelle.trim());
 
         return toDTO(repository.save(c));
     }
@@ -36,28 +40,42 @@ public class CategorieFormationContinuesService {
                         new ResourceNotFoundException("Categorie", "id", id)
                 );
 
-        c.setLibelle(libelle);
+        if (libelle == null || libelle.trim().isEmpty()) {
+            throw new RuntimeException("Le libellé est obligatoire");
+        }
+
+        c.setLibelle(libelle.trim());
 
         return toDTO(repository.save(c));
     }
 
     /* ================= DELETE ================= */
 
+    @Transactional
     public void delete(Long id) {
 
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Categorie", "id", id);
+        CategorieFormationContinues c = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Categorie", "id", id)
+                );
+
+        if (!c.getSousCategories().isEmpty()) {
+            throw new RuntimeException(
+                    "Impossible de supprimer cette catégorie car elle contient des sous-catégories"
+            );
         }
 
-        repository.deleteById(id);
+        repository.delete(c);
     }
 
     /* ================= GET ALL ================= */
 
-    @Transactional(readOnly = true) // 🔥 FIX IMPORTANT
+    @Transactional(readOnly = true)
     public List<CategorieDTO> getAll() {
 
-        return repository.findAll().stream().map(this::toDTOWithSousCategories).toList();
+        return repository.findAll().stream()
+                .map(this::toDTOWithSousCategories)
+                .toList();
     }
 
     /* ================= GET BY ID ================= */
@@ -87,7 +105,7 @@ public class CategorieFormationContinuesService {
 
         CategorieDTO dto = toDTO(c);
 
-        if (c.getSousCategories() != null) {
+        if (!c.getSousCategories().isEmpty()) {
             dto.setSousCategories(
                     c.getSousCategories().stream().map(sc -> {
 

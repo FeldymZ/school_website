@@ -1,9 +1,11 @@
 package com.school.api.formation.continues.service;
 
 import com.school.api.formation.continues.dto.SousCategorieDTO;
-import com.school.api.formation.continues.entity.*;
+import com.school.api.formation.continues.entity.CategorieFormationContinues;
+import com.school.api.formation.continues.entity.SousCategorieFormationContinues;
 import com.school.api.formation.continues.mapper.CatalogueMapper;
-import com.school.api.formation.continues.repository.*;
+import com.school.api.formation.continues.repository.CategorieFormationContinuesRepository;
+import com.school.api.formation.continues.repository.SousCategorieFormationContinuesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +40,7 @@ public class SousCategorieFormationContinuesService {
 
     /* ================= GET ALL ================= */
 
-    @Transactional(readOnly = true) // 🔥 FIX CRITIQUE
+    @Transactional(readOnly = true)
     public List<SousCategorieDTO> getAll() {
         return repository.findAll()
                 .stream()
@@ -77,13 +79,12 @@ public class SousCategorieFormationContinuesService {
 
     /* ================= DELETE ================= */
 
-    @Transactional // 🔥 IMPORTANT
+    @Transactional
     public void delete(Long id) {
 
         SousCategorieFormationContinues sc = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sous-catégorie introuvable"));
 
-        // 🔥 FIX : on force le chargement dans une transaction
         if (sc.getFormations() != null && !sc.getFormations().isEmpty()) {
             throw new RuntimeException(
                     "Impossible de supprimer cette sous-catégorie car elle contient des formations"

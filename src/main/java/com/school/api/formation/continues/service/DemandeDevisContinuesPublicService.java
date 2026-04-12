@@ -8,7 +8,7 @@ import com.school.api.formation.continues.repository.FormationContinuesRepositor
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,21 +21,20 @@ public class DemandeDevisContinuesPublicService {
 
     public void create(CreateDemandeDevisContinuesDTO dto) {
 
-        /* =========================
-           🔥 VALIDATION MÉTIER
-           ========================= */
+        /* ================= VALIDATION ================= */
 
         if (dto.getLignes() == null || dto.getLignes().isEmpty()) {
             throw new RuntimeException("Panier vide");
         }
 
-        if (dto.isEntreprise() && (dto.getNomStructure() == null || dto.getNomStructure().isBlank())) {
-            throw new RuntimeException("Le nom de la structure est obligatoire pour une entreprise");
+        if (dto.isEntreprise() &&
+                (dto.getNomStructure() == null || dto.getNomStructure().isBlank())) {
+            throw new RuntimeException(
+                    "Le nom de la structure est obligatoire pour une entreprise"
+            );
         }
 
-        /* =========================
-           📄 CRÉATION DEMANDE
-           ========================= */
+        /* ================= CREATION ================= */
 
         DemandeDevisFormationContinues demande = new DemandeDevisFormationContinues();
 
@@ -44,22 +43,27 @@ public class DemandeDevisContinuesPublicService {
         demande.setTelephone(dto.getTelephone());
         demande.setEntreprise(dto.isEntreprise());
         demande.setNomStructure(dto.getNomStructure());
-        demande.setDateDemande(LocalDate.now());
 
-        /* =========================
-           🛒 LIGNES
-           ========================= */
+        demande.setDateDemande(LocalDateTime.now()); // 🔥 FIX
+        demande.setStatut(StatutDemande.PAS_ENCORE_TRAITEE); // 🔥 FIX
+
+        /* ================= LIGNES ================= */
 
         List<DemandeDevisLigneFormationContinues> lignes = new ArrayList<>();
 
         for (LigneDemandeDTO l : dto.getLignes()) {
 
-            FormationContinues f = formationRepository.findById(l.getFormationId())
-                    .orElseThrow(() -> new RuntimeException("Formation introuvable"));
+            if (l.getNombreParticipants() <= 0) {
+                throw new RuntimeException("Nombre de participants invalide");
+            }
 
-            /* 🔥 OPTION : sécurité (formation désactivée) */
+            FormationContinues f = formationRepository.findById(l.getFormationId())
+                    .orElseThrow(() ->
+                            new RuntimeException("Formation introuvable : " + l.getFormationId())
+                    );
+
             if (!f.isEnabled()) {
-                throw new RuntimeException("Cette formation n'est plus disponible");
+                throw new RuntimeException("Formation non disponible : " + f.getLibelle());
             }
 
             DemandeDevisLigneFormationContinues ligne = new DemandeDevisLigneFormationContinues();
@@ -77,9 +81,7 @@ public class DemandeDevisContinuesPublicService {
 
         demande.setLignes(lignes);
 
-        /* =========================
-           💾 SAVE
-           ========================= */
+        /* ================= SAVE ================= */
 
         demandeRepository.save(demande);
     }

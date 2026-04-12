@@ -4,7 +4,6 @@ import com.school.api.formation.continues.entity.StatutDemande;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class DemandeDevisAdminDTO {
     private boolean entreprise;
     private String nomStructure;
 
-    private LocalDate dateDemande;
+    private LocalDateTime dateDemande; // 🔥 FIX
     private StatutDemande statut;
     private LocalDateTime dateTraitement;
 
