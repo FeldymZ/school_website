@@ -14,12 +14,15 @@ public class FormationMapper {
 
         dto.setId(f.getId());
         dto.setReference(f.getReference());
-        dto.setSlug(f.getSlug()); // 🔥 IMPORTANT
+        dto.setSlug(f.getSlug());
 
-        dto.setLibelle(f.getLibelle());
+        /* 🔥 ALIGNEMENT FRONT */
+        dto.setTitre(f.getLibelle());
+
         dto.setDescription(f.getDescription());
         dto.setObjectifs(f.getObjectifs());
         dto.setCompetences(f.getCompetences());
+
         dto.setPrix(f.getPrix());
         dto.setDuree(f.getDuree());
 
@@ -27,7 +30,9 @@ public class FormationMapper {
                 f.getUniteDuree() != null ? f.getUniteDuree().name() : null
         );
 
-        dto.setLogo(f.getLogo());
+        /* 🔥 ALIGNEMENT FRONT */
+        dto.setCoverUrl(f.getLogo());
+
         dto.setEnabled(f.isEnabled());
 
         if (f.getSousCategorie() != null) {

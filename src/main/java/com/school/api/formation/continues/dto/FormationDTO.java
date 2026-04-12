@@ -11,9 +11,11 @@ public class FormationDTO {
 
     private Integer reference;
 
-    private String slug; // 🔥 AJOUT IMPORTANT
+    private String slug;
 
-    private String libelle;
+    /* 🔥 ALIGNÉ FRONT */
+    private String titre;
+
     private String description;
 
     private String objectifs;
@@ -24,7 +26,8 @@ public class FormationDTO {
     private Integer duree;
     private String uniteDuree;
 
-    private String logo;
+    /* 🔥 ALIGNÉ FRONT */
+    private String coverUrl;
 
     private boolean enabled;
 
