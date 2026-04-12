@@ -37,7 +37,7 @@ public class FormationContinuesService {
         FormationContinues f = new FormationContinues();
 
         f.setReference(generateReference());
-        f.setSlug(generateSlug(dto.getLibelle())); // 🔥
+        f.setSlug(generateSlug(dto.getLibelle()));
 
         f.setLibelle(dto.getLibelle());
         f.setDescription(dto.getDescription());
@@ -62,6 +62,106 @@ public class FormationContinuesService {
         if (dto.getCover() != null && !dto.getCover().isEmpty()) {
             f.setLogo(fileStorageService.storeFormationContinuesCover(dto.getCover()));
         }
+
+        return mapper.toDTO(repository.save(f));
+    }
+
+    /* ================= GET ADMIN ================= */
+
+    public Page<FormationDTO> getAll(int page, int size) {
+        return repository.findAll(
+                PageRequest.of(page, size, Sort.by("id").descending())
+        ).map(mapper::toDTO);
+    }
+
+    public FormationDTO getById(Long id) {
+        FormationContinues f = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Formation introuvable"));
+
+        return mapper.toDTO(f);
+    }
+
+    public FormationDTO getByReference(Integer reference) {
+        FormationContinues f = repository.findByReference(reference);
+
+        if (f == null) {
+            throw new RuntimeException("Formation introuvable");
+        }
+
+        return mapper.toDTO(f);
+    }
+
+    public Page<FormationDTO> filter(
+            Long categorieId,
+            Long sousCategorieId,
+            int page,
+            int size
+    ) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        if (sousCategorieId != null) {
+            return repository
+                    .findBySousCategorieId(sousCategorieId, pageable)
+                    .map(mapper::toDTO);
+        }
+
+        if (categorieId != null) {
+            return repository
+                    .findBySousCategorieCategorieId(categorieId, pageable)
+                    .map(mapper::toDTO);
+        }
+
+        return repository.findAll(pageable).map(mapper::toDTO);
+    }
+
+    /* ================= UPDATE ================= */
+
+    public FormationDTO update(Long id, CreateFormationContinuesDTO dto) {
+
+        FormationContinues f = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Formation introuvable"));
+
+        f.setLibelle(dto.getLibelle());
+        f.setDescription(dto.getDescription());
+        f.setObjectifs(dto.getObjectifs());
+        f.setCompetences(dto.getCompetences());
+        f.setPrix(dto.getPrix());
+        f.setDuree(dto.getDuree());
+
+        if (dto.getUniteDuree() != null) {
+            f.setUniteDuree(UniteDuree.valueOf(dto.getUniteDuree().toUpperCase()));
+        }
+
+        f.setLieu(dto.getLieu());
+        f.setTitreDelivre(dto.getTitreDelivre());
+
+        if (dto.getCover() != null && !dto.getCover().isEmpty()) {
+            f.setLogo(fileStorageService.storeFormationContinuesCover(dto.getCover()));
+        }
+
+        return mapper.toDTO(repository.save(f));
+    }
+
+    /* ================= DELETE ================= */
+
+    public void delete(Long id) {
+
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Formation introuvable");
+        }
+
+        repository.deleteById(id);
+    }
+
+    /* ================= TOGGLE ================= */
+
+    public FormationDTO toggleStatus(Long id) {
+
+        FormationContinues f = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Formation introuvable"));
+
+        f.setEnabled(!f.isEnabled());
 
         return mapper.toDTO(repository.save(f));
     }
