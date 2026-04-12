@@ -4,10 +4,10 @@ import com.school.api.common.exception.ResourceNotFoundException;
 import com.school.api.formation.continues.dto.CategorieDTO;
 import com.school.api.formation.continues.dto.SousCategorieDTO;
 import com.school.api.formation.continues.entity.CategorieFormationContinues;
-import com.school.api.formation.continues.entity.SousCategorieFormationContinues;
 import com.school.api.formation.continues.repository.CategorieFormationContinuesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -54,6 +54,7 @@ public class CategorieFormationContinuesService {
 
     /* ================= GET ALL ================= */
 
+    @Transactional(readOnly = true) // 🔥 FIX IMPORTANT
     public List<CategorieDTO> getAll() {
 
         return repository.findAll().stream().map(this::toDTOWithSousCategories).toList();
