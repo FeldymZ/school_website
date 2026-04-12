@@ -6,6 +6,7 @@ import com.school.api.formation.continues.mapper.CatalogueMapper;
 import com.school.api.formation.continues.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class SousCategorieFormationContinuesService {
 
     /* ================= GET ALL ================= */
 
+    @Transactional(readOnly = true) // 🔥 FIX CRITIQUE
     public List<SousCategorieDTO> getAll() {
         return repository.findAll()
                 .stream()
@@ -75,12 +77,13 @@ public class SousCategorieFormationContinuesService {
 
     /* ================= DELETE ================= */
 
+    @Transactional // 🔥 IMPORTANT
     public void delete(Long id) {
 
         SousCategorieFormationContinues sc = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sous-catégorie introuvable"));
 
-        // 🔒 sécurité : empêcher suppression si des formations existent
+        // 🔥 FIX : on force le chargement dans une transaction
         if (sc.getFormations() != null && !sc.getFormations().isEmpty()) {
             throw new RuntimeException(
                     "Impossible de supprimer cette sous-catégorie car elle contient des formations"
