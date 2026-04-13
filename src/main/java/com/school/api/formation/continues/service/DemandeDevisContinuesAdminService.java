@@ -23,20 +23,25 @@ public class DemandeDevisContinuesAdminService {
     /* =========================
        📄 LISTE PAGINÉE
        ========================= */
+    @Transactional(readOnly = true) // ✅ FIX PRINCIPAL
     public Page<DemandeDevisAdminDTO> getAll(int page, int size) {
-        return repository.findAll(
-                        PageRequest.of(
-                                page,
-                                size,
-                                Sort.by(Sort.Direction.DESC, "dateDemande")
-                        )
+
+        Page<DemandeDevisFormationContinues> result = repository.findAll(
+                PageRequest.of(
+                        page,
+                        size,
+                        Sort.by(Sort.Direction.DESC, "dateDemande")
                 )
-                .map(this::mapToDTO);
+        );
+
+        // ✅ mapping DANS la transaction (plus de lazy error)
+        return result.map(this::mapToDTO);
     }
 
     /* =========================
        🔍 DETAIL
        ========================= */
+    @Transactional(readOnly = true) // ✅ sécurité lazy
     public DemandeDevisAdminDTO getById(Long id) {
         return repository.findById(id)
                 .map(this::mapToDTO)
@@ -81,6 +86,7 @@ public class DemandeDevisContinuesAdminService {
     /* =========================
        📩 HISTORIQUE
        ========================= */
+    @Transactional(readOnly = true) // ✅ évite lazy bug
     public List<DemandeDevisReponseDTO> getReponses(Long demandeId) {
 
         return reponseRepository
@@ -138,9 +144,7 @@ public class DemandeDevisContinuesAdminService {
         dto.setNomStructure(d.getNomStructure());
         dto.setDateDemande(d.getDateDemande());
 
-        // ✅ ENUM → STRING
         dto.setStatut(d.getStatut().name());
-
         dto.setDateTraitement(d.getDateTraitement());
 
         /* ================= LIGNES ================= */
