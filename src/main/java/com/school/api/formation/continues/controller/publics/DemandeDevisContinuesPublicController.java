@@ -1,6 +1,7 @@
 package com.school.api.formation.continues.controller.publics;
 
 import com.school.api.formation.continues.dto.CreateDemandeDevisContinuesDTO;
+import com.school.api.formation.continues.dto.CreateDemandeDevisGlobalDTO;
 import com.school.api.formation.continues.service.DemandeDevisContinuesPublicService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,20 @@ public class DemandeDevisContinuesPublicController {
         return Map.of(
                 "success", true,
                 "message", "Demande envoyée avec succès"
+        );
+    }
+
+
+    @PostMapping("/global")
+    public Map<String, Object> createGlobal(
+            @RequestBody @Valid CreateDemandeDevisGlobalDTO dto
+    ) {
+
+        service.createGlobal(dto);
+
+        return Map.of(
+                "success", true,
+                "message", "Demande globale envoyée avec succès"
         );
     }
 }

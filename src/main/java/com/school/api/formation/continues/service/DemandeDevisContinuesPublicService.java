@@ -1,6 +1,7 @@
 package com.school.api.formation.continues.service;
 
 import com.school.api.formation.continues.dto.CreateDemandeDevisContinuesDTO;
+import com.school.api.formation.continues.dto.CreateDemandeDevisGlobalDTO;
 import com.school.api.formation.continues.entity.*;
 import com.school.api.formation.continues.repository.DemandeDevisFormationContinuesRepository;
 import com.school.api.formation.continues.repository.FormationContinuesRepository;
@@ -69,5 +70,14 @@ public class DemandeDevisContinuesPublicService {
         demande.setLignes(lignes);
 
         demandeRepository.save(demande);
+    }
+
+    public void createGlobal(CreateDemandeDevisGlobalDTO dto) {
+
+        dto.getFormations().forEach(f -> {
+            // récupérer formation via slug
+            // créer une demande pour chaque
+        });
+
     }
 }
