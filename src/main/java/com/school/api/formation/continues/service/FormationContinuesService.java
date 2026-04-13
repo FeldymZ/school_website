@@ -46,7 +46,6 @@ public class FormationContinuesService {
         f.setPrix(dto.getPrix());
         f.setDuree(dto.getDuree());
 
-        /* 🔒 Validation unité */
         if (dto.getUniteDuree() != null) {
             try {
                 f.setUniteDuree(UniteDuree.valueOf(dto.getUniteDuree().toUpperCase()));
@@ -60,7 +59,6 @@ public class FormationContinuesService {
         f.setSousCategorie(sc);
         f.setEnabled(true);
 
-        /* 🔒 Validation fichier */
         if (dto.getCover() != null && !dto.getCover().isEmpty()) {
 
             if (!dto.getCover().getContentType().startsWith("image/")) {
@@ -151,7 +149,6 @@ public class FormationContinuesService {
         f.setLieu(dto.getLieu());
         f.setTitreDelivre(dto.getTitreDelivre());
 
-        /* 🔒 Validation fichier */
         if (dto.getCover() != null && !dto.getCover().isEmpty()) {
 
             if (!dto.getCover().getContentType().startsWith("image/")) {
@@ -207,11 +204,11 @@ public class FormationContinuesService {
 
     public FormationDTO getBySlug(String slug) {
 
-        FormationContinues f = repository.findBySlug(slug);
-
-        if (f == null || !f.isEnabled()) {
-            throw new ResourceNotFoundException("Formation", "slug", slug);
-        }
+        FormationContinues f = repository.findBySlug(slug)
+                .filter(FormationContinues::isEnabled)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Formation", "slug", slug)
+                );
 
         return mapper.toDTO(f);
     }
@@ -231,7 +228,7 @@ public class FormationContinuesService {
         String slug = base;
         int i = 1;
 
-        while (repository.findBySlug(slug) != null) {
+        while (repository.findBySlug(slug).isPresent()) {
             slug = base + "-" + i++;
         }
 
