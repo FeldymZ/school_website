@@ -1,8 +1,6 @@
 package com.school.api.formation.continues.controller.admin;
 
-import com.school.api.formation.continues.dto.DemandeDevisAdminDTO;
-import com.school.api.formation.continues.dto.DemandeDevisReponseDTO;
-import com.school.api.formation.continues.dto.RepondreDemandeDTO;
+import com.school.api.formation.continues.dto.*;
 import com.school.api.formation.continues.service.DemandeDevisContinuesAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,8 +17,7 @@ public class DemandeDevisContinuesAdminController {
 
     private final DemandeDevisContinuesAdminService service;
 
-    /* ================= LISTE PAGINÉE ================= */
-
+    /* ================= LISTE ================= */
     @GetMapping
     public Page<DemandeDevisAdminDTO> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -29,8 +26,13 @@ public class DemandeDevisContinuesAdminController {
         return service.getAll(page, size);
     }
 
-    /* ================= RÉPONDRE ================= */
+    /* ================= DETAIL ================= */
+    @GetMapping("/{id}")
+    public DemandeDevisAdminDTO getById(@PathVariable Long id) {
+        return service.getById(id);
+    }
 
+    /* ================= REPONDRE ================= */
     @PostMapping("/{id}/repondre")
     public ResponseEntity<?> repondre(
             @PathVariable Long id,
@@ -45,16 +47,25 @@ public class DemandeDevisContinuesAdminController {
     }
 
     /* ================= HISTORIQUE ================= */
-
     @GetMapping("/{id}/reponses")
     public List<DemandeDevisReponseDTO> getReponses(@PathVariable Long id) {
         return service.getReponses(id);
     }
 
-    /* ================= 🔥 COUNT NON TRAITÉES ================= */
-
+    /* ================= COUNT ================= */
     @GetMapping("/count-non-traitees")
     public Long countNonTraitees() {
         return service.countNonTraitees();
+    }
+
+    /* ================= DELETE ================= */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        service.delete(id);
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Supprimé"
+        ));
     }
 }

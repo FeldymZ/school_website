@@ -35,17 +35,16 @@ public class DemandeDevisContinuesAdminService {
     }
 
     /* =========================
-       🔍 DETAIL D'UNE DEMANDE
+       🔍 DETAIL
        ========================= */
     public DemandeDevisAdminDTO getById(Long id) {
-        DemandeDevisFormationContinues demande = repository.findById(id)
+        return repository.findById(id)
+                .map(this::mapToDTO)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable"));
-
-        return mapToDTO(demande);
     }
 
     /* =========================
-       ✉️ RÉPONDRE À UNE DEMANDE
+       ✉️ RÉPONDRE
        ========================= */
     @Transactional
     public void repondre(Long demandeId, RepondreDemandeDTO dto) {
@@ -54,7 +53,7 @@ public class DemandeDevisContinuesAdminService {
                 .orElseThrow(() -> new RuntimeException("Demande introuvable"));
 
         if (demande.getStatut() == StatutDemande.TRAITEE) {
-            throw new RuntimeException("Cette demande a déjà été traitée");
+            throw new RuntimeException("Déjà traitée");
         }
 
         DemandeDevisReponseContinues reponse = new DemandeDevisReponseContinues();
@@ -65,16 +64,14 @@ public class DemandeDevisContinuesAdminService {
         reponse.setDateEnvoi(LocalDateTime.now());
 
         if (dto.getPieceJointe() != null && !dto.getPieceJointe().isEmpty()) {
-
-            String fileUrl = fileStorageService
+            String url = fileStorageService
                     .storeDevisContinuesAttachment(dto.getPieceJointe());
-
-            reponse.setPieceJointeUrl(fileUrl);
+            reponse.setPieceJointeUrl(url);
         }
 
         reponseRepository.save(reponse);
 
-        /* 🔄 MAJ STATUT */
+        /* 🔄 MAJ DEMANDE */
         demande.setStatut(StatutDemande.TRAITEE);
         demande.setDateTraitement(LocalDateTime.now());
 
@@ -82,15 +79,12 @@ public class DemandeDevisContinuesAdminService {
     }
 
     /* =========================
-       📩 HISTORIQUE DES RÉPONSES
+       📩 HISTORIQUE
        ========================= */
     public List<DemandeDevisReponseDTO> getReponses(Long demandeId) {
 
-        DemandeDevisFormationContinues demande = repository.findById(demandeId)
-                .orElseThrow(() -> new RuntimeException("Demande introuvable"));
-
         return reponseRepository
-                .findByDemandeIdOrderByDateEnvoiAsc(demande.getId())
+                .findByDemandeIdOrderByDateEnvoiAsc(demandeId)
                 .stream()
                 .map(r -> new DemandeDevisReponseDTO(
                         r.getId(),
@@ -102,22 +96,21 @@ public class DemandeDevisContinuesAdminService {
                 .toList();
     }
 
-
     /* =========================
-   🔢 COUNT NON TRAITÉES
-   ========================= */
+       🔢 COUNT
+       ========================= */
     public Long countNonTraitees() {
         return repository.countByStatut(StatutDemande.PAS_ENCORE_TRAITEE);
     }
 
     /* =========================
-       🗑️ SUPPRIMER UNE DEMANDE
+       🗑️ DELETE
        ========================= */
     @Transactional
     public void delete(Long id) {
 
         DemandeDevisFormationContinues demande = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+                .orElseThrow(() -> new RuntimeException("Introuvable"));
 
         if (demande.getReponses() != null) {
             demande.getReponses().forEach(r -> {
@@ -131,7 +124,7 @@ public class DemandeDevisContinuesAdminService {
     }
 
     /* =========================
-       🔁 MAPPING ENTITY → DTO
+       🔁 MAPPING
        ========================= */
     private DemandeDevisAdminDTO mapToDTO(DemandeDevisFormationContinues d) {
 
@@ -144,12 +137,18 @@ public class DemandeDevisContinuesAdminService {
         dto.setEntreprise(d.isEntreprise());
         dto.setNomStructure(d.getNomStructure());
         dto.setDateDemande(d.getDateDemande());
-        dto.setStatut(d.getStatut());
+
+        // ✅ ENUM → STRING
+        dto.setStatut(d.getStatut().name());
+
         dto.setDateTraitement(d.getDateTraitement());
 
+        /* ================= LIGNES ================= */
         dto.setLignes(
                 d.getLignes().stream().map(l -> {
-                    LigneDemandeAdminDTO ligne = new LigneDemandeAdminDTO();
+
+                    DemandeDevisAdminDTO.LigneDTO ligne =
+                            new DemandeDevisAdminDTO.LigneDTO();
 
                     ligne.setFormationLibelle(l.getFormationLibelle());
                     ligne.setNombreParticipants(l.getNombreParticipants());
@@ -163,7 +162,23 @@ public class DemandeDevisContinuesAdminService {
                     );
 
                     return ligne;
+
                 }).toList()
+        );
+
+        /* ================= REPONSES ================= */
+        dto.setReponses(
+                d.getReponses() != null
+                        ? d.getReponses().stream()
+                        .map(r -> new DemandeDevisReponseDTO(
+                                r.getId(),
+                                r.getMessage(),
+                                r.getPieceJointeUrl(),
+                                r.getEnvoyePar(),
+                                r.getDateEnvoi()
+                        ))
+                        .toList()
+                        : List.of()
         );
 
         return dto;
