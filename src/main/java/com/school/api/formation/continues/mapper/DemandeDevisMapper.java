@@ -59,7 +59,7 @@ public class DemandeDevisMapper {
                                 r.getId(),
                                 r.getMessage(),
                                 r.getPieceJointeUrl(),
-                                r.getEnvoyePar().name(),
+                                r.getEnvoyePar(),
                                 r.getDateEnvoi()
                         )
                 ).collect(Collectors.toList())
