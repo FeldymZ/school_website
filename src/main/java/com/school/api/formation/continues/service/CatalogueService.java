@@ -16,6 +16,8 @@ public class CatalogueService {
     private final CatalogueMapper mapper;
 
     public List<CategorieDTO> getCatalogue() {
-        return mapper.toCategorieDTOList(repository.findAll());
+        return mapper.toCategorieDTOList(
+                repository.findAllWithSousCategoriesAndFormations()
+        );
     }
 }

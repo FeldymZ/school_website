@@ -1,7 +1,6 @@
 package com.school.api.formation.continues.service;
 
 import com.school.api.formation.continues.dto.CreateDemandeDevisContinuesDTO;
-import com.school.api.formation.continues.dto.LigneDemandeDTO;
 import com.school.api.formation.continues.entity.*;
 import com.school.api.formation.continues.repository.DemandeDevisFormationContinuesRepository;
 import com.school.api.formation.continues.repository.FormationContinuesRepository;
@@ -21,20 +20,14 @@ public class DemandeDevisContinuesPublicService {
 
     public void create(CreateDemandeDevisContinuesDTO dto) {
 
-        /* ================= VALIDATION ================= */
-
         if (dto.getLignes() == null || dto.getLignes().isEmpty()) {
             throw new RuntimeException("Panier vide");
         }
 
         if (dto.isEntreprise() &&
                 (dto.getNomStructure() == null || dto.getNomStructure().isBlank())) {
-            throw new RuntimeException(
-                    "Le nom de la structure est obligatoire pour une entreprise"
-            );
+            throw new RuntimeException("Nom de structure obligatoire");
         }
-
-        /* ================= CREATION ================= */
 
         DemandeDevisFormationContinues demande = new DemandeDevisFormationContinues();
 
@@ -43,27 +36,21 @@ public class DemandeDevisContinuesPublicService {
         demande.setTelephone(dto.getTelephone());
         demande.setEntreprise(dto.isEntreprise());
         demande.setNomStructure(dto.getNomStructure());
-
-        demande.setDateDemande(LocalDateTime.now()); // 🔥 FIX
-        demande.setStatut(StatutDemande.PAS_ENCORE_TRAITEE); // 🔥 FIX
-
-        /* ================= LIGNES ================= */
+        demande.setDateDemande(LocalDateTime.now());
+        demande.setStatut(StatutDemande.PAS_ENCORE_TRAITEE);
 
         List<DemandeDevisLigneFormationContinues> lignes = new ArrayList<>();
 
-        for (LigneDemandeDTO l : dto.getLignes()) {
+        for (CreateDemandeDevisContinuesDTO.LigneDemandeDTO l : dto.getLignes()) {
+
+            FormationContinues f = formationRepository.findBySlug(l.getSlug());
+
+            if (f == null || !f.isEnabled()) {
+                throw new RuntimeException("Formation invalide : " + l.getSlug());
+            }
 
             if (l.getNombreParticipants() <= 0) {
                 throw new RuntimeException("Nombre de participants invalide");
-            }
-
-            FormationContinues f = formationRepository.findById(l.getFormationId())
-                    .orElseThrow(() ->
-                            new RuntimeException("Formation introuvable : " + l.getFormationId())
-                    );
-
-            if (!f.isEnabled()) {
-                throw new RuntimeException("Formation non disponible : " + f.getLibelle());
             }
 
             DemandeDevisLigneFormationContinues ligne = new DemandeDevisLigneFormationContinues();
@@ -80,8 +67,6 @@ public class DemandeDevisContinuesPublicService {
         }
 
         demande.setLignes(lignes);
-
-        /* ================= SAVE ================= */
 
         demandeRepository.save(demande);
     }

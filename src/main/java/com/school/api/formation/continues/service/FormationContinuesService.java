@@ -37,7 +37,7 @@ public class FormationContinuesService {
         FormationContinues f = new FormationContinues();
 
         f.setReference(generateReference());
-        f.setSlug(generateSlugUnique(dto.getLibelle())); // 🔥 FIX
+        f.setSlug(generateSlugUnique(dto.getLibelle()));
 
         f.setLibelle(dto.getLibelle());
         f.setDescription(dto.getDescription());
@@ -46,6 +46,7 @@ public class FormationContinuesService {
         f.setPrix(dto.getPrix());
         f.setDuree(dto.getDuree());
 
+        /* 🔒 Validation unité */
         if (dto.getUniteDuree() != null) {
             try {
                 f.setUniteDuree(UniteDuree.valueOf(dto.getUniteDuree().toUpperCase()));
@@ -59,7 +60,17 @@ public class FormationContinuesService {
         f.setSousCategorie(sc);
         f.setEnabled(true);
 
+        /* 🔒 Validation fichier */
         if (dto.getCover() != null && !dto.getCover().isEmpty()) {
+
+            if (!dto.getCover().getContentType().startsWith("image/")) {
+                throw new RuntimeException("Le fichier doit être une image");
+            }
+
+            if (dto.getCover().getSize() > 5 * 1024 * 1024) {
+                throw new RuntimeException("Image trop volumineuse (max 5MB)");
+            }
+
             f.setLogo(fileStorageService.storeFormationContinuesCover(dto.getCover()));
         }
 
@@ -76,7 +87,7 @@ public class FormationContinuesService {
 
     public FormationDTO getById(Long id) {
         FormationContinues f = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Formation introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Formation", "id", id));
 
         return mapper.toDTO(f);
     }
@@ -85,7 +96,7 @@ public class FormationContinuesService {
         FormationContinues f = repository.findByReference(reference);
 
         if (f == null) {
-            throw new RuntimeException("Formation introuvable");
+            throw new ResourceNotFoundException("Formation", "reference", reference);
         }
 
         return mapper.toDTO(f);
@@ -120,7 +131,7 @@ public class FormationContinuesService {
     public FormationDTO update(Long id, CreateFormationContinuesDTO dto) {
 
         FormationContinues f = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Formation introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Formation", "id", id));
 
         f.setLibelle(dto.getLibelle());
         f.setDescription(dto.getDescription());
@@ -130,13 +141,27 @@ public class FormationContinuesService {
         f.setDuree(dto.getDuree());
 
         if (dto.getUniteDuree() != null) {
-            f.setUniteDuree(UniteDuree.valueOf(dto.getUniteDuree().toUpperCase()));
+            try {
+                f.setUniteDuree(UniteDuree.valueOf(dto.getUniteDuree().toUpperCase()));
+            } catch (Exception e) {
+                throw new RuntimeException("Unité de durée invalide");
+            }
         }
 
         f.setLieu(dto.getLieu());
         f.setTitreDelivre(dto.getTitreDelivre());
 
+        /* 🔒 Validation fichier */
         if (dto.getCover() != null && !dto.getCover().isEmpty()) {
+
+            if (!dto.getCover().getContentType().startsWith("image/")) {
+                throw new RuntimeException("Le fichier doit être une image");
+            }
+
+            if (dto.getCover().getSize() > 5 * 1024 * 1024) {
+                throw new RuntimeException("Image trop volumineuse (max 5MB)");
+            }
+
             f.setLogo(fileStorageService.storeFormationContinuesCover(dto.getCover()));
         }
 
@@ -148,7 +173,7 @@ public class FormationContinuesService {
     public void delete(Long id) {
 
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Formation introuvable");
+            throw new ResourceNotFoundException("Formation", "id", id);
         }
 
         if (ligneRepository.existsByFormationId(id)) {
@@ -165,7 +190,7 @@ public class FormationContinuesService {
     public FormationDTO toggleStatus(Long id) {
 
         FormationContinues f = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Formation introuvable"));
+                .orElseThrow(() -> new ResourceNotFoundException("Formation", "id", id));
 
         f.setEnabled(!f.isEnabled());
 

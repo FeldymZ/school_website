@@ -45,4 +45,10 @@
         public void delete(@PathVariable Long id) {
             service.delete(id);
         }
+
+
+        @GetMapping("/{id}")
+        public CategorieDTO getById(@PathVariable Long id) {
+            return service.getById(id);
+        }
     }

@@ -26,4 +26,15 @@ public class CreateDemandeDevisContinuesDTO {
 
     @NotEmpty
     private List<LigneDemandeDTO> lignes;
+
+    @Getter
+    @Setter
+    public static class LigneDemandeDTO {
+
+        @NotBlank
+        private String slug;
+
+        @Min(1)
+        private int nombreParticipants;
+    }
 }
