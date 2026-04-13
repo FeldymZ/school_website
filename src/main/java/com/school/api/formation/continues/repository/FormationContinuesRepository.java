@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface FormationContinuesRepository
         extends JpaRepository<FormationContinues, Long> {
 
@@ -40,6 +42,6 @@ public interface FormationContinuesRepository
 
     FormationContinues findByReference(Integer reference);
 
-    /* 🔥 AJOUT IMPORTANT */
-    FormationContinues findBySlug(String slug);
+    /* ✅ FIX IMPORTANT */
+    Optional<FormationContinues> findBySlug(String slug);
 }

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class DemandeDevisContinuesPublicService {
@@ -19,6 +18,9 @@ public class DemandeDevisContinuesPublicService {
     private final DemandeDevisFormationContinuesRepository demandeRepository;
     private final FormationContinuesRepository formationRepository;
 
+    /* =========================
+       DEMANDE CLASSIQUE
+       ========================= */
     public void create(CreateDemandeDevisContinuesDTO dto) {
 
         if (dto.getLignes() == null || dto.getLignes().isEmpty()) {
@@ -40,38 +42,45 @@ public class DemandeDevisContinuesPublicService {
         demande.setDateDemande(LocalDateTime.now());
         demande.setStatut(StatutDemande.PAS_ENCORE_TRAITEE);
 
-        List<DemandeDevisLigneFormationContinues> lignes = new ArrayList<>();
+        List<DemandeDevisLigneFormationContinues> lignes = dto.getLignes()
+                .stream()
+                .map(l -> {
 
-        for (CreateDemandeDevisContinuesDTO.LigneDemandeDTO l : dto.getLignes()) {
+                    FormationContinues f = formationRepository.findBySlug(l.getSlug())
+                            .orElseThrow(() ->
+                                    new RuntimeException("Formation introuvable : " + l.getSlug())
+                            );
 
-            FormationContinues f = formationRepository.findBySlug(l.getSlug());
+                    if (!f.isEnabled()) {
+                        throw new RuntimeException("Formation désactivée : " + l.getSlug());
+                    }
 
-            if (f == null || !f.isEnabled()) {
-                throw new RuntimeException("Formation invalide : " + l.getSlug());
-            }
+                    if (l.getNombreParticipants() <= 0) {
+                        throw new RuntimeException("Nombre de participants invalide");
+                    }
 
-            if (l.getNombreParticipants() <= 0) {
-                throw new RuntimeException("Nombre de participants invalide");
-            }
+                    DemandeDevisLigneFormationContinues ligne = new DemandeDevisLigneFormationContinues();
 
-            DemandeDevisLigneFormationContinues ligne = new DemandeDevisLigneFormationContinues();
+                    ligne.setFormation(f);
+                    ligne.setFormationLibelle(f.getLibelle());
+                    ligne.setPrix(f.getPrix());
+                    ligne.setDuree(f.getDuree());
+                    ligne.setUniteDuree(f.getUniteDuree());
+                    ligne.setNombreParticipants(l.getNombreParticipants());
+                    ligne.setDemande(demande);
 
-            ligne.setFormation(f);
-            ligne.setFormationLibelle(f.getLibelle());
-            ligne.setPrix(f.getPrix());
-            ligne.setDuree(f.getDuree());
-            ligne.setUniteDuree(f.getUniteDuree());
-            ligne.setNombreParticipants(l.getNombreParticipants());
-            ligne.setDemande(demande);
-
-            lignes.add(ligne);
-        }
+                    return ligne;
+                })
+                .toList();
 
         demande.setLignes(lignes);
 
         demandeRepository.save(demande);
     }
 
+    /* =========================
+       DEMANDE GLOBALE (PANIER)
+       ========================= */
     public void createGlobal(CreateDemandeDevisGlobalDTO dto) {
 
         if (dto.getFormations() == null || dto.getFormations().isEmpty()) {
@@ -83,7 +92,6 @@ public class DemandeDevisContinuesPublicService {
             throw new RuntimeException("Nom de structure obligatoire");
         }
 
-        // 🔥 on construit UN SEUL DTO avec plusieurs lignes
         CreateDemandeDevisContinuesDTO demande = new CreateDemandeDevisContinuesDTO();
 
         demande.setNomClient(dto.getNomClient());
@@ -92,26 +100,24 @@ public class DemandeDevisContinuesPublicService {
         demande.setEntreprise(dto.isEntreprise());
         demande.setNomStructure(dto.getNomStructure());
 
-        List<CreateDemandeDevisContinuesDTO.LigneDemandeDTO> lignes = new ArrayList<>();
+        demande.setLignes(
+                dto.getFormations().stream().map(f -> {
 
-        for (CreateDemandeDevisGlobalDTO.DemandeDevisItemDTO f : dto.getFormations()) {
+                    if (f.getParticipants() <= 0) {
+                        throw new RuntimeException("Nombre de participants invalide");
+                    }
 
-            if (f.getParticipants() <= 0) {
-                throw new RuntimeException("Nombre de participants invalide");
-            }
+                    CreateDemandeDevisContinuesDTO.LigneDemandeDTO ligne =
+                            new CreateDemandeDevisContinuesDTO.LigneDemandeDTO();
 
-            CreateDemandeDevisContinuesDTO.LigneDemandeDTO ligne =
-                    new CreateDemandeDevisContinuesDTO.LigneDemandeDTO();
+                    ligne.setSlug(f.getSlug());
+                    ligne.setNombreParticipants(f.getParticipants());
 
-            ligne.setSlug(f.getSlug());
-            ligne.setNombreParticipants(f.getParticipants());
+                    return ligne;
 
-            lignes.add(ligne);
-        }
+                }).toList()
+        );
 
-        demande.setLignes(lignes);
-
-        // 🔥 UNE SEULE DEMANDE avec plusieurs formations
         create(demande);
     }
 }

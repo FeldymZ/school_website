@@ -2,7 +2,6 @@ package com.school.api.formation.continues.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 @Entity
 @Table(name = "demande_devis_ligne_formation_continues")
 @Getter
@@ -17,9 +16,7 @@ public class DemandeDevisLigneFormationContinues {
 
     private Integer nombreParticipants;
 
-    /* =========================
-       SNAPSHOT
-       ========================= */
+    /* SNAPSHOT */
     private String formationLibelle;
     private Double prix;
     private Integer duree;

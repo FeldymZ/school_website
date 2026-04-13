@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-
 @RestController
 @RequestMapping("/api/public/demandes-devis")
 @RequiredArgsConstructor
@@ -20,7 +19,6 @@ public class DemandeDevisContinuesPublicController {
     public Map<String, Object> create(
             @RequestBody @Valid CreateDemandeDevisContinuesDTO dto
     ) {
-
         service.create(dto);
 
         return Map.of(
@@ -29,12 +27,10 @@ public class DemandeDevisContinuesPublicController {
         );
     }
 
-
     @PostMapping("/global")
     public Map<String, Object> createGlobal(
             @RequestBody @Valid CreateDemandeDevisGlobalDTO dto
     ) {
-
         service.createGlobal(dto);
 
         return Map.of(

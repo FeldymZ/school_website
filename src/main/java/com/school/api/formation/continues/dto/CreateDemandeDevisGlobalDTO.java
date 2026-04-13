@@ -4,7 +4,6 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.List;
-
 @Data
 public class CreateDemandeDevisGlobalDTO {
 
@@ -21,10 +20,8 @@ public class CreateDemandeDevisGlobalDTO {
     private String telephone;
 
     private boolean entreprise;
-
     private String nomStructure;
 
-    /* ================= ITEM ================= */
     @Data
     public static class DemandeDevisItemDTO {
 
