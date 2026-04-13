@@ -1,19 +1,19 @@
 package com.school.api.formation.continues.dto;
 
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 public class CreateDemandeDevisGlobalDTO {
+
+    @NotEmpty
+    private List<DemandeDevisItemDTO> formations;
 
     @NotBlank
     private String nomClient;
 
-    @NotBlank
     @Email
     private String email;
 
@@ -24,12 +24,9 @@ public class CreateDemandeDevisGlobalDTO {
 
     private String nomStructure;
 
-    @NotEmpty
-    private List<LigneDemandeDTO> formations;
-
-    @Getter
-    @Setter
-    public static class LigneDemandeDTO {
+    /* ================= ITEM ================= */
+    @Data
+    public static class DemandeDevisItemDTO {
 
         @NotBlank
         private String slug;

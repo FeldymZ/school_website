@@ -74,10 +74,44 @@ public class DemandeDevisContinuesPublicService {
 
     public void createGlobal(CreateDemandeDevisGlobalDTO dto) {
 
-        dto.getFormations().forEach(f -> {
-            // récupérer formation via slug
-            // créer une demande pour chaque
-        });
+        if (dto.getFormations() == null || dto.getFormations().isEmpty()) {
+            throw new RuntimeException("Panier vide");
+        }
 
+        if (dto.isEntreprise() &&
+                (dto.getNomStructure() == null || dto.getNomStructure().isBlank())) {
+            throw new RuntimeException("Nom de structure obligatoire");
+        }
+
+        // 🔥 on construit UN SEUL DTO avec plusieurs lignes
+        CreateDemandeDevisContinuesDTO demande = new CreateDemandeDevisContinuesDTO();
+
+        demande.setNomClient(dto.getNomClient());
+        demande.setEmail(dto.getEmail());
+        demande.setTelephone(dto.getTelephone());
+        demande.setEntreprise(dto.isEntreprise());
+        demande.setNomStructure(dto.getNomStructure());
+
+        List<CreateDemandeDevisContinuesDTO.LigneDemandeDTO> lignes = new ArrayList<>();
+
+        for (CreateDemandeDevisGlobalDTO.DemandeDevisItemDTO f : dto.getFormations()) {
+
+            if (f.getParticipants() <= 0) {
+                throw new RuntimeException("Nombre de participants invalide");
+            }
+
+            CreateDemandeDevisContinuesDTO.LigneDemandeDTO ligne =
+                    new CreateDemandeDevisContinuesDTO.LigneDemandeDTO();
+
+            ligne.setSlug(f.getSlug());
+            ligne.setNombreParticipants(f.getParticipants());
+
+            lignes.add(ligne);
+        }
+
+        demande.setLignes(lignes);
+
+        // 🔥 UNE SEULE DEMANDE avec plusieurs formations
+        create(demande);
     }
 }
