@@ -19,7 +19,6 @@ public class DemandeDevisFormationContinues {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /* ================= CLIENT ================= */
     private String nomClient;
     private String email;
     private String telephone;
@@ -27,7 +26,6 @@ public class DemandeDevisFormationContinues {
     private boolean entreprise;
     private String nomStructure;
 
-    /* ================= STATUT ================= */
     private LocalDateTime dateDemande;
 
     @Enumerated(EnumType.STRING)
@@ -35,11 +33,9 @@ public class DemandeDevisFormationContinues {
 
     private LocalDateTime dateTraitement;
 
-    /* ================= LIGNES ================= */
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DemandeDevisLigneFormationContinues> lignes = new ArrayList<>();
 
-    /* ================= REPONSES ================= */
     @JsonIgnore
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL)
     private List<DemandeDevisReponseContinues> reponses;

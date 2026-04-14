@@ -3,20 +3,16 @@ package com.school.api.common.mail;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.InputStreamSource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.core.io.*;
+import org.springframework.mail.javamail.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.time.Year;
 
 @Slf4j
@@ -29,15 +25,15 @@ public class MailService {
   private final MailProperties mailProperties;
 
   /* =====================================================
-     EMAIL HTML SIMPLE
+     🔹 EMAIL HTML SIMPLE
      ===================================================== */
-
   @Async
   public void sendHtml(String to, String subject, String htmlContent) {
     try {
       MimeMessage message = mailSender.createMimeMessage();
+
       MimeMessageHelper helper =
-        new MimeMessageHelper(message, false, StandardCharsets.UTF_8.name());
+              new MimeMessageHelper(message, false, StandardCharsets.UTF_8.name());
 
       helper.setFrom(mailProperties.getFrom());
       helper.setTo(to);
@@ -45,59 +41,51 @@ public class MailService {
       helper.setText(htmlContent, true);
 
       mailSender.send(message);
-      log.info("Email HTML envoyé à {}", to);
+
+      log.info("📧 Email HTML envoyé à {}", to);
 
     } catch (Exception e) {
-      log.error("Erreur envoi email HTML", e);
+      log.error("❌ Erreur envoi email HTML", e);
     }
   }
 
   /* =====================================================
-     EMAIL HTML AVEC REPLY-TO
+     🔹 EMAIL TEMPLATE THYMELEAF
      ===================================================== */
-
   @Async
-  public void sendHtml(
-    String to,
-    String subject,
-    String htmlContent,
-    String replyTo
+  public void sendTemplateMail(
+          String to,
+          String subject,
+          String template,
+          Context context
   ) {
     try {
-      MimeMessage message = mailSender.createMimeMessage();
-      MimeMessageHelper helper =
-        new MimeMessageHelper(message, false, StandardCharsets.UTF_8.name());
 
-      helper.setFrom(mailProperties.getFrom());
-      helper.setTo(to);
-      helper.setReplyTo(replyTo);
-      helper.setSubject(subject);
-      helper.setText(htmlContent, true);
+      String html = templateEngine.process(template, context);
 
-      mailSender.send(message);
-      log.info("Email HTML envoyé à {} (reply-to {})", to, replyTo);
+      sendHtml(to, subject, html);
 
     } catch (Exception e) {
-      log.error("Erreur envoi email HTML avec Reply-To", e);
+      log.error("❌ Erreur email template", e);
     }
   }
 
   /* =====================================================
-     EMAIL HTML + PJ (MultipartFile)
+     🔹 EMAIL AVEC PJ (MultipartFile)
      ===================================================== */
-
   @Async
   public void sendHtmlWithAttachment(
-    String to,
-    String subject,
-    String htmlContent,
-    MultipartFile attachment
+          String to,
+          String subject,
+          String htmlContent,
+          MultipartFile file
   ) {
-
     try {
+
       MimeMessage message = mailSender.createMimeMessage();
+
       MimeMessageHelper helper =
-        new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+              new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
 
       helper.setFrom(mailProperties.getFrom());
       helper.setTo(to);
@@ -105,125 +93,102 @@ public class MailService {
       helper.setText(htmlContent, true);
 
       helper.addAttachment(
-        attachment.getOriginalFilename(),
-        new ByteArrayResource(attachment.getBytes())
+              file.getOriginalFilename(),
+              new ByteArrayResource(file.getBytes())
       );
 
       mailSender.send(message);
-      log.info("Email HTML + PJ envoyé à {}", to);
+
+      log.info("📎 Email avec PJ envoyé à {}", to);
 
     } catch (Exception e) {
-      log.error("Erreur email HTML + PJ", e);
+      log.error("❌ Erreur email PJ", e);
     }
   }
 
   /* =====================================================
-     EMAIL HTML + PJ (InputStreamSource)
+     🔹 EMAIL AVEC PJ (FICHIER DISQUE)
      ===================================================== */
-
   @Async
-  public void sendHtmlWithAttachment(
-    String to,
-    String subject,
-    String htmlContent,
-    String attachmentName,
-    InputStreamSource attachment
+  public void sendHtmlWithAttachmentFromPath(
+          String to,
+          String subject,
+          String htmlContent,
+          String filePath
   ) {
-
     try {
+
       MimeMessage message = mailSender.createMimeMessage();
+
       MimeMessageHelper helper =
-        new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+              new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
 
       helper.setFrom(mailProperties.getFrom());
       helper.setTo(to);
       helper.setSubject(subject);
       helper.setText(htmlContent, true);
 
-      helper.addAttachment(attachmentName, attachment);
+      Path path = Path.of(filePath);
+
+      if (Files.exists(path)) {
+        helper.addAttachment(
+                path.getFileName().toString(),
+                new FileSystemResource(path.toFile())
+        );
+      } else {
+        log.warn("⚠️ Fichier introuvable : {}", filePath);
+      }
 
       mailSender.send(message);
-      log.info("Email HTML + PJ envoyé à {}", to);
+
+      log.info("📎 Email (fichier disque) envoyé à {}", to);
 
     } catch (Exception e) {
-      log.error("Erreur email HTML + PJ", e);
+      log.error("❌ Erreur email fichier disque", e);
     }
   }
 
   /* =====================================================
-     EMAIL TEMPLATE THYMELEAF
+     🔹 CONFIRMATION DEMANDE (CLIENT)
      ===================================================== */
-
   @Async
-  public void sendTemplateMail(
-    String to,
-    String subject,
-    String template,
-    Context context
+  public void sendDemandeConfirmation(
+          String to,
+          String clientName
   ) {
-
     try {
-      String html = templateEngine.process(template, context);
 
-      MimeMessage message = mailSender.createMimeMessage();
-      MimeMessageHelper helper =
-        new MimeMessageHelper(message, false, StandardCharsets.UTF_8.name());
+      Context context = new Context();
+      context.setVariable("name", clientName);
+      context.setVariable("year", Year.now().getValue());
 
-      helper.setFrom(mailProperties.getFrom());
-      helper.setTo(to);
-      helper.setSubject(subject);
-      helper.setText(html, true);
+      String html = templateEngine.process("mail/demande-recue", context);
 
-      mailSender.send(message);
-      log.info("Email template envoyé à {}", to);
+      sendHtml(
+              to,
+              "Votre demande de devis a bien été reçue",
+              html
+      );
 
     } catch (Exception e) {
-      log.error("Erreur email template", e);
+      log.error("❌ Erreur confirmation demande", e);
     }
   }
 
   /* =====================================================
-     BROCHURE FORMATION
+     🔹 RÉPONSE ADMIN DEVIS
      ===================================================== */
-
-  @Async
-  public void sendFormationBrochure(
-    String to,
-    String studentName,
-    String formationName,
-    String pdfUrl
-  ) {
-
-    Context context = new Context();
-    context.setVariable("name", studentName);
-    context.setVariable("formationName", formationName);
-    context.setVariable("pdfUrl", pdfUrl);
-    context.setVariable("year", Year.now().getValue());
-
-    sendTemplateMail(
-      to,
-      "Maquette de la formation " + formationName,
-      "mail/formation-brochure",
-      context
-    );
-  }
-
-  /* =====================================================
-     RÉPONSE DEVIS CONTINUES
-     ===================================================== */
-
   @Async
   public void sendDevisResponse(
-    String to,
-    String clientName,
-    String message,
-    String pieceJointeUrl
+          String to,
+          String clientName,
+          String message,
+          String pieceJointePath
   ) {
-
     try {
 
       boolean hasAttachment =
-        pieceJointeUrl != null && !pieceJointeUrl.isBlank();
+              pieceJointePath != null && !pieceJointePath.isBlank();
 
       Context context = new Context();
       context.setVariable("name", clientName);
@@ -232,41 +197,43 @@ public class MailService {
       context.setVariable("hasAttachment", hasAttachment);
 
       String html =
-        templateEngine.process("mail/devis-reponse", context);
+              templateEngine.process("mail/devis-reponse", context);
 
       MimeMessage mimeMessage = mailSender.createMimeMessage();
 
       MimeMessageHelper helper =
-        new MimeMessageHelper(
-          mimeMessage,
-          hasAttachment,
-          StandardCharsets.UTF_8.name()
-        );
+              new MimeMessageHelper(
+                      mimeMessage,
+                      hasAttachment,
+                      StandardCharsets.UTF_8.name()
+              );
 
       helper.setFrom(mailProperties.getFrom());
       helper.setTo(to);
       helper.setSubject("Réponse à votre demande de devis");
       helper.setText(html, true);
 
+      /* 📎 PJ */
       if (hasAttachment) {
 
-        Path path = Path.of(pieceJointeUrl);
+        Path path = Path.of(pieceJointePath);
 
         if (Files.exists(path)) {
           helper.addAttachment(
-            path.getFileName().toString(),
-            new FileSystemResource(path.toFile())
+                  path.getFileName().toString(),
+                  new FileSystemResource(path.toFile())
           );
         } else {
-          log.warn("Pièce jointe introuvable : {}", pieceJointeUrl);
+          log.warn("⚠️ PJ introuvable : {}", pieceJointePath);
         }
       }
 
       mailSender.send(mimeMessage);
-      log.info("Email devis envoyé à {}", to);
+
+      log.info("📨 Réponse devis envoyée à {}", to);
 
     } catch (Exception e) {
-      log.error("Erreur envoi devis", e);
+      log.error("❌ Erreur envoi réponse devis", e);
     }
   }
 }

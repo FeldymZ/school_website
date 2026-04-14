@@ -1,5 +1,6 @@
 package com.school.api.formation.continues.service;
 
+import com.school.api.common.mail.MailService;
 import com.school.api.common.storage.FileStorageService;
 import com.school.api.formation.continues.dto.*;
 import com.school.api.formation.continues.entity.*;
@@ -19,29 +20,27 @@ public class DemandeDevisContinuesAdminService {
     private final DemandeDevisFormationContinuesRepository repository;
     private final DemandeDevisReponseContinuesRepository reponseRepository;
     private final FileStorageService fileStorageService;
+    private final MailService mailService;
 
     /* =========================
        📄 LISTE PAGINÉE
        ========================= */
-    @Transactional(readOnly = true) // ✅ FIX PRINCIPAL
+    @Transactional(readOnly = true)
     public Page<DemandeDevisAdminDTO> getAll(int page, int size) {
 
-        Page<DemandeDevisFormationContinues> result = repository.findAll(
+        return repository.findAll(
                 PageRequest.of(
                         page,
                         size,
                         Sort.by(Sort.Direction.DESC, "dateDemande")
                 )
-        );
-
-        // ✅ mapping DANS la transaction (plus de lazy error)
-        return result.map(this::mapToDTO);
+        ).map(this::mapToDTO);
     }
 
     /* =========================
        🔍 DETAIL
        ========================= */
-    @Transactional(readOnly = true) // ✅ sécurité lazy
+    @Transactional(readOnly = true)
     public DemandeDevisAdminDTO getById(Long id) {
         return repository.findById(id)
                 .map(this::mapToDTO)
@@ -57,8 +56,9 @@ public class DemandeDevisContinuesAdminService {
         DemandeDevisFormationContinues demande = repository.findById(demandeId)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable"));
 
-        if (demande.getStatut() == StatutDemande.TRAITEE) {
-            throw new RuntimeException("Déjà traitée");
+        /* ❌ bloqué uniquement si FERMEE */
+        if (demande.getStatut() == StatutDemande.FERMEE) {
+            throw new RuntimeException("Demande clôturée");
         }
 
         DemandeDevisReponseContinues reponse = new DemandeDevisReponseContinues();
@@ -68,6 +68,7 @@ public class DemandeDevisContinuesAdminService {
         reponse.setEnvoyePar("ADMIN");
         reponse.setDateEnvoi(LocalDateTime.now());
 
+        /* 📎 PJ */
         if (dto.getPieceJointe() != null && !dto.getPieceJointe().isEmpty()) {
             String url = fileStorageService
                     .storeDevisContinuesAttachment(dto.getPieceJointe());
@@ -76,17 +77,28 @@ public class DemandeDevisContinuesAdminService {
 
         reponseRepository.save(reponse);
 
-        /* 🔄 MAJ DEMANDE */
-        demande.setStatut(StatutDemande.TRAITEE);
+        /* 🔄 MAJ STATUT */
+        if (demande.getStatut() == StatutDemande.PAS_ENCORE_TRAITEE) {
+            demande.setStatut(StatutDemande.EN_COURS);
+        }
+
         demande.setDateTraitement(LocalDateTime.now());
 
         repository.save(demande);
+
+        /* 📧 EMAIL CLIENT */
+        mailService.sendDevisResponse(
+                demande.getEmail(),
+                demande.getNomClient(),
+                dto.getMessage(),
+                reponse.getPieceJointeUrl()
+        );
     }
 
     /* =========================
        📩 HISTORIQUE
        ========================= */
-    @Transactional(readOnly = true) // ✅ évite lazy bug
+    @Transactional(readOnly = true)
     public List<DemandeDevisReponseDTO> getReponses(Long demandeId) {
 
         return reponseRepository
@@ -143,11 +155,9 @@ public class DemandeDevisContinuesAdminService {
         dto.setEntreprise(d.isEntreprise());
         dto.setNomStructure(d.getNomStructure());
         dto.setDateDemande(d.getDateDemande());
-
         dto.setStatut(d.getStatut().name());
         dto.setDateTraitement(d.getDateTraitement());
 
-        /* ================= LIGNES ================= */
         dto.setLignes(
                 d.getLignes().stream().map(l -> {
 
@@ -170,7 +180,6 @@ public class DemandeDevisContinuesAdminService {
                 }).toList()
         );
 
-        /* ================= REPONSES ================= */
         dto.setReponses(
                 d.getReponses() != null
                         ? d.getReponses().stream()
@@ -186,5 +195,20 @@ public class DemandeDevisContinuesAdminService {
         );
 
         return dto;
+    }
+
+    /* =========================
+       🔒 CLOTURER
+       ========================= */
+    @Transactional
+    public void cloturer(Long id) {
+
+        DemandeDevisFormationContinues demande = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Introuvable"));
+
+        demande.setStatut(StatutDemande.FERMEE);
+        demande.setDateTraitement(LocalDateTime.now());
+
+        repository.save(demande);
     }
 }

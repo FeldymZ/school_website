@@ -68,4 +68,14 @@ public class DemandeDevisContinuesAdminController {
                 "message", "Supprimé"
         ));
     }
+
+    @PostMapping("/{id}/cloturer")
+    public ResponseEntity<?> cloturer(@PathVariable Long id) {
+        service.cloturer(id);
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Demande clôturée"
+        ));
+    }
 }
