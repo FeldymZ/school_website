@@ -81,10 +81,9 @@ public class ContactService {
     );
 
     mailService.sendHtml(
-      "noreply@esiitech-gabon.com",
-      "[CONTACT SITE] Nouveau message",
-      adminHtml,
-      saved.getSenderEmail()
+            "noreply@esiitech-gabon.com",
+            "[CONTACT SITE] Nouveau message",
+            adminHtml
     );
 
     Context ctx = new Context();
