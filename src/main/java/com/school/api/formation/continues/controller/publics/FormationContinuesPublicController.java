@@ -16,12 +16,13 @@ public class FormationContinuesPublicController {
     @GetMapping
     public Page<FormationDTO> getAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long categorieId,
+            @RequestParam(required = false) Long sousCategorieId
     ) {
-        return service.getAllPublic(page, size);
+        return service.getAllPublic(page, size, categorieId, sousCategorieId);
     }
 
-    /* 🔥 ROUTE PROPRE */
     @GetMapping("/slug/{slug}")
     public FormationDTO getBySlug(@PathVariable String slug) {
         return service.getBySlug(slug);

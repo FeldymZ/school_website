@@ -7,41 +7,31 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface FormationContinuesRepository
-        extends JpaRepository<FormationContinues, Long> {
+public interface FormationContinuesRepository extends JpaRepository<FormationContinues, Long> {
 
-    /* ================= PUBLIC ================= */
+    /* ================= EXISTANT ================= */
 
     Page<FormationContinues> findByEnabledTrue(Pageable pageable);
 
-    /* ================= FILTERS ================= */
-
-    Page<FormationContinues> findBySousCategorieIdAndEnabledTrue(
-            Long sousCategorieId,
-            Pageable pageable
-    );
-
-    Page<FormationContinues> findBySousCategorieCategorieIdAndEnabledTrue(
-            Long categorieId,
-            Pageable pageable
-    );
-
-    /* ================= ADMIN ================= */
-
-    Page<FormationContinues> findBySousCategorieId(
-            Long sousCategorieId,
-            Pageable pageable
-    );
-
-    Page<FormationContinues> findBySousCategorieCategorieId(
-            Long categorieId,
-            Pageable pageable
-    );
-
-    /* ================= SEARCH ================= */
-
     FormationContinues findByReference(Integer reference);
 
-    /* ✅ FIX IMPORTANT */
     Optional<FormationContinues> findBySlug(String slug);
+
+    /* ================= FILTRES ================= */
+
+    Page<FormationContinues> findByEnabledTrueAndSousCategorieIdAndSousCategorieCategorieId(
+            Long sousCategorieId,
+            Long categorieId,
+            Pageable pageable
+    );
+
+    Page<FormationContinues> findByEnabledTrueAndSousCategorieCategorieId(
+            Long categorieId,
+            Pageable pageable
+    );
+
+    Page<FormationContinues> findByEnabledTrueAndSousCategorieId(
+            Long sousCategorieId,
+            Pageable pageable
+    );
 }

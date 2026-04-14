@@ -92,9 +92,7 @@ public class FormationContinuesService {
         f.setLieu(dto.getLieu());
         f.setTitreDelivre(dto.getTitreDelivre());
 
-        /* 🔥 CHANGEMENT SOUS-CATEGORIE */
         if (dto.getSousCategorieId() != null) {
-
             SousCategorieFormationContinues sc =
                     sousCategorieRepository.findById(dto.getSousCategorieId())
                             .orElseThrow(() ->
@@ -108,7 +106,6 @@ public class FormationContinuesService {
             f.setSousCategorie(sc);
         }
 
-        /* 🔥 IMAGE */
         if (dto.getCover() != null && !dto.getCover().isEmpty()) {
             validateImage(dto.getCover());
             f.setLogo(fileStorageService.storeFormationContinuesCover(dto.getCover()));
@@ -160,6 +157,53 @@ public class FormationContinuesService {
         return mapper.toDTO(repository.save(f));
     }
 
+    /* ================= PUBLIC ================= */
+
+    public Page<FormationDTO> getAllPublic(
+            int page,
+            int size,
+            Long categorieId,
+            Long sousCategorieId
+    ) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        Page<FormationContinues> result;
+
+        if (categorieId != null && sousCategorieId != null) {
+            result = repository.findByEnabledTrueAndSousCategorieIdAndSousCategorieCategorieId(
+                    sousCategorieId,
+                    categorieId,
+                    pageable
+            );
+        } else if (categorieId != null) {
+            result = repository.findByEnabledTrueAndSousCategorieCategorieId(
+                    categorieId,
+                    pageable
+            );
+        } else if (sousCategorieId != null) {
+            result = repository.findByEnabledTrueAndSousCategorieId(
+                    sousCategorieId,
+                    pageable
+            );
+        } else {
+            result = repository.findByEnabledTrue(pageable);
+        }
+
+        return result.map(mapper::toDTO);
+    }
+
+    public FormationDTO getBySlug(String slug) {
+
+        FormationContinues f = repository.findBySlug(slug)
+                .filter(FormationContinues::isEnabled)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Formation", "slug", slug)
+                );
+
+        return mapper.toDTO(f);
+    }
+
     /* ================= UTILS ================= */
 
     private void validateImage(org.springframework.web.multipart.MultipartFile file) {
@@ -202,24 +246,5 @@ public class FormationContinuesService {
         } while (repository.findByReference(ref) != null);
 
         return ref;
-    }
-
-    /* ================= PUBLIC ================= */
-
-    public Page<FormationDTO> getAllPublic(int page, int size) {
-        return repository.findByEnabledTrue(
-                PageRequest.of(page, size, Sort.by("id").descending())
-        ).map(mapper::toDTO);
-    }
-
-    public FormationDTO getBySlug(String slug) {
-
-        FormationContinues f = repository.findBySlug(slug)
-                .filter(FormationContinues::isEnabled)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Formation", "slug", slug)
-                );
-
-        return mapper.toDTO(f);
     }
 }

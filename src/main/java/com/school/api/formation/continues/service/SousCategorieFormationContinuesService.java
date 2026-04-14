@@ -93,4 +93,11 @@ public class SousCategorieFormationContinuesService {
 
         repository.delete(sc);
     }
+
+    public List<SousCategorieDTO> getByCategorieId(Long categorieId) {
+        return repository.findByCategorieId(categorieId)
+                .stream()
+                .map(mapper::toSousCategorieDTO)
+                .toList();
+    }
 }
