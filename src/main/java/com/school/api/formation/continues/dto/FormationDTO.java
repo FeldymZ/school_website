@@ -7,14 +7,14 @@ import lombok.Setter;
 @Setter
 public class FormationDTO {
 
-    private Long id; // ADMIN ONLY
+    private Long id;
 
     private Integer reference;
 
     private String slug;
 
-    /* 🔥 ALIGNÉ FRONT */
-    private String titre;
+    /* 🔥 ON UTILISE LIBELLE */
+    private String libelle;
 
     private String description;
 
@@ -26,7 +26,6 @@ public class FormationDTO {
     private Integer duree;
     private String uniteDuree;
 
-    /* 🔥 ALIGNÉ FRONT */
     private String coverUrl;
 
     private boolean enabled;

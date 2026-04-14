@@ -16,8 +16,8 @@ public class FormationMapper {
         dto.setReference(f.getReference());
         dto.setSlug(f.getSlug());
 
-        /* 🔥 ALIGNEMENT FRONT */
-        dto.setTitre(f.getLibelle());
+        /* 🔥 CORRECTION ICI */
+        dto.setLibelle(f.getLibelle());
 
         dto.setDescription(f.getDescription());
         dto.setObjectifs(f.getObjectifs());
@@ -30,7 +30,6 @@ public class FormationMapper {
                 f.getUniteDuree() != null ? f.getUniteDuree().name() : null
         );
 
-        /* 🔥 ALIGNEMENT FRONT */
         dto.setCoverUrl(f.getLogo());
 
         dto.setEnabled(f.isEnabled());
