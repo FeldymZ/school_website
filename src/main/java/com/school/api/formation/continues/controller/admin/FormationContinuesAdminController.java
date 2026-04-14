@@ -43,22 +43,6 @@ public class FormationContinuesAdminController {
         return service.getById(id);
     }
 
-    @GetMapping("/search")
-    public FormationDTO searchByReference(@RequestParam Integer reference) {
-        return service.getByReference(reference);
-    }
-
-    @GetMapping("/filter")
-    public Page<FormationDTO> filter(
-            @RequestParam(required = false) Long categorieId,
-            @RequestParam(required = false) Long sousCategorieId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        return service.filter(categorieId, sousCategorieId, page, size);
-    }
-
-    /* 🔁 TOGGLE ACTIF / INACTIF */
     @PatchMapping("/{id}/toggle")
     public FormationDTO toggleStatus(@PathVariable Long id) {
         return service.toggleStatus(id);

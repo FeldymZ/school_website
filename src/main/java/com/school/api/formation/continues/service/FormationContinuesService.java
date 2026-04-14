@@ -60,68 +60,11 @@ public class FormationContinuesService {
         f.setEnabled(true);
 
         if (dto.getCover() != null && !dto.getCover().isEmpty()) {
-
-            if (!dto.getCover().getContentType().startsWith("image/")) {
-                throw new RuntimeException("Le fichier doit être une image");
-            }
-
-            if (dto.getCover().getSize() > 5 * 1024 * 1024) {
-                throw new RuntimeException("Image trop volumineuse (max 5MB)");
-            }
-
+            validateImage(dto.getCover());
             f.setLogo(fileStorageService.storeFormationContinuesCover(dto.getCover()));
         }
 
         return mapper.toDTO(repository.save(f));
-    }
-
-    /* ================= GET ADMIN ================= */
-
-    public Page<FormationDTO> getAll(int page, int size) {
-        return repository.findAll(
-                PageRequest.of(page, size, Sort.by("id").descending())
-        ).map(mapper::toDTO);
-    }
-
-    public FormationDTO getById(Long id) {
-        FormationContinues f = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Formation", "id", id));
-
-        return mapper.toDTO(f);
-    }
-
-    public FormationDTO getByReference(Integer reference) {
-        FormationContinues f = repository.findByReference(reference);
-
-        if (f == null) {
-            throw new ResourceNotFoundException("Formation", "reference", reference);
-        }
-
-        return mapper.toDTO(f);
-    }
-
-    public Page<FormationDTO> filter(
-            Long categorieId,
-            Long sousCategorieId,
-            int page,
-            int size
-    ) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-
-        if (sousCategorieId != null) {
-            return repository
-                    .findBySousCategorieId(sousCategorieId, pageable)
-                    .map(mapper::toDTO);
-        }
-
-        if (categorieId != null) {
-            return repository
-                    .findBySousCategorieCategorieId(categorieId, pageable)
-                    .map(mapper::toDTO);
-        }
-
-        return repository.findAll(pageable).map(mapper::toDTO);
     }
 
     /* ================= UPDATE ================= */
@@ -149,23 +92,46 @@ public class FormationContinuesService {
         f.setLieu(dto.getLieu());
         f.setTitreDelivre(dto.getTitreDelivre());
 
+        /* 🔥 CHANGEMENT SOUS-CATEGORIE */
+        if (dto.getSousCategorieId() != null) {
+
+            SousCategorieFormationContinues sc =
+                    sousCategorieRepository.findById(dto.getSousCategorieId())
+                            .orElseThrow(() ->
+                                    new ResourceNotFoundException(
+                                            "SousCategorie",
+                                            "id",
+                                            dto.getSousCategorieId()
+                                    )
+                            );
+
+            f.setSousCategorie(sc);
+        }
+
+        /* 🔥 IMAGE */
         if (dto.getCover() != null && !dto.getCover().isEmpty()) {
-
-            if (!dto.getCover().getContentType().startsWith("image/")) {
-                throw new RuntimeException("Le fichier doit être une image");
-            }
-
-            if (dto.getCover().getSize() > 5 * 1024 * 1024) {
-                throw new RuntimeException("Image trop volumineuse (max 5MB)");
-            }
-
+            validateImage(dto.getCover());
             f.setLogo(fileStorageService.storeFormationContinuesCover(dto.getCover()));
         }
 
         return mapper.toDTO(repository.save(f));
     }
 
-    /* ================= DELETE SAFE ================= */
+    /* ================= GET ================= */
+
+    public Page<FormationDTO> getAll(int page, int size) {
+        return repository.findAll(
+                PageRequest.of(page, size, Sort.by("id").descending())
+        ).map(mapper::toDTO);
+    }
+
+    public FormationDTO getById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Formation", "id", id));
+    }
+
+    /* ================= DELETE ================= */
 
     public void delete(Long id) {
 
@@ -194,26 +160,18 @@ public class FormationContinuesService {
         return mapper.toDTO(repository.save(f));
     }
 
-    /* ================= PUBLIC ================= */
+    /* ================= UTILS ================= */
 
-    public Page<FormationDTO> getAllPublic(int page, int size) {
-        return repository.findByEnabledTrue(
-                PageRequest.of(page, size, Sort.by("id").descending())
-        ).map(mapper::toDTO);
+    private void validateImage(org.springframework.web.multipart.MultipartFile file) {
+
+        if (!file.getContentType().startsWith("image/")) {
+            throw new RuntimeException("Le fichier doit être une image");
+        }
+
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new RuntimeException("Image trop volumineuse (max 5MB)");
+        }
     }
-
-    public FormationDTO getBySlug(String slug) {
-
-        FormationContinues f = repository.findBySlug(slug)
-                .filter(FormationContinues::isEnabled)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Formation", "slug", slug)
-                );
-
-        return mapper.toDTO(f);
-    }
-
-    /* ================= UTIL ================= */
 
     private String generateSlug(String libelle) {
         return libelle

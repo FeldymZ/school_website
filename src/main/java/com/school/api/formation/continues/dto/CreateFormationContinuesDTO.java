@@ -19,7 +19,6 @@ public class CreateFormationContinuesDTO {
     private String objectifs;
     private String competences;
 
-    // ✅ validation intelligente (optionnel MAIS si présent → valide)
     @Positive(message = "Le prix doit être positif")
     private Double prix;
 
@@ -32,4 +31,7 @@ public class CreateFormationContinuesDTO {
     private String titreDelivre;
 
     private MultipartFile cover;
+
+    // 🔥 AJOUT CRITIQUE
+    private Long sousCategorieId;
 }
