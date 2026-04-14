@@ -241,14 +241,7 @@ public class FormationPreinscriptionService {
       ByteArrayResource attachment =
         new ByteArrayResource(Files.readAllBytes(fiche.toPath()));
 
-      mailService.sendHtmlWithAttachment(
-        p.getEmail(),
-        "Préinscription enregistrée – ESIITECH",
-        "<p>Bonjour <strong>%s %s</strong>,</p>"
-          .formatted(p.getPrenom(), p.getNom()),
-        fiche.getName(),
-        attachment
-      );
+
 
     } catch (Exception e) {
       throw new RuntimeException("Erreur envoi email candidat", e);
