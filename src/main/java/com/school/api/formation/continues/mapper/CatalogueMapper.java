@@ -91,7 +91,7 @@ public class CatalogueMapper {
                 f.getUniteDuree() != null ? f.getUniteDuree().name() : null
         );
 
-        dto.setTitre(f.getLibelle());     // ✅
+        dto.setLibelle(f.getLibelle());    // ✅
         dto.setCoverUrl(f.getLogo());     // ✅
         dto.setEnabled(f.isEnabled());
 

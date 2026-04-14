@@ -203,4 +203,23 @@ public class FormationContinuesService {
 
         return ref;
     }
+
+    /* ================= PUBLIC ================= */
+
+    public Page<FormationDTO> getAllPublic(int page, int size) {
+        return repository.findByEnabledTrue(
+                PageRequest.of(page, size, Sort.by("id").descending())
+        ).map(mapper::toDTO);
+    }
+
+    public FormationDTO getBySlug(String slug) {
+
+        FormationContinues f = repository.findBySlug(slug)
+                .filter(FormationContinues::isEnabled)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Formation", "slug", slug)
+                );
+
+        return mapper.toDTO(f);
+    }
 }
