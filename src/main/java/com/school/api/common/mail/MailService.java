@@ -60,11 +60,8 @@ public class MailService {
           Context context
   ) {
     try {
-
       String html = templateEngine.process(template, context);
-
       sendHtml(to, subject, html);
-
     } catch (Exception e) {
       log.error("❌ Erreur email template", e);
     }
@@ -234,6 +231,39 @@ public class MailService {
 
     } catch (Exception e) {
       log.error("❌ Erreur envoi réponse devis", e);
+    }
+  }
+
+  /* =====================================================
+     🔹 BROCHURE FORMATION
+     ===================================================== */
+  @Async
+  public void sendFormationBrochure(
+          String to,
+          String name,
+          String formation,
+          String pdfUrl
+  ) {
+    try {
+
+      Context context = new Context();
+      context.setVariable("name", name);
+      context.setVariable("formation", formation);
+      context.setVariable("pdfUrl", pdfUrl);
+      context.setVariable("year", Year.now().getValue());
+
+      String html = templateEngine.process("mail/brochure", context);
+
+      sendHtml(
+              to,
+              "Votre brochure de formation",
+              html
+      );
+
+      log.info("📘 Brochure envoyée à {}", to);
+
+    } catch (Exception e) {
+      log.error("❌ Erreur envoi brochure", e);
     }
   }
 }
