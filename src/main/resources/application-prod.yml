@@ -31,13 +31,20 @@ spring:
           starttls:
             enable: true
             required: true
+
+          # 🔥 FIX PROBLÈME CERTIFICAT
+          ssl:
+            trust: "*"
+            checkserveridentity: false
+
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
 
-spring.servlet.multipart:
-  max-file-size: 50MB
-  max-request-size: 50MB
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 
 storage:
   upload-dir: uploads
