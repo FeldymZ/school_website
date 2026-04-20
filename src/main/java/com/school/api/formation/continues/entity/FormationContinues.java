@@ -17,21 +17,11 @@ public class FormationContinues {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /* =========================
-       REFERENCE UNIQUE
-       ========================= */
     @Column(name = "reference", unique = true, nullable = false)
     private Integer reference;
 
-    /* =========================
-       🔥 NOUVEAU : SLUG PUBLIC
-       ========================= */
     @Column(name = "slug", unique = true, nullable = false, length = 150)
     private String slug;
-
-    /* =========================
-       INFOS
-       ========================= */
 
     @Column(name = "titre", nullable = false)
     private String libelle;
@@ -47,6 +37,10 @@ public class FormationContinues {
 
     @Column(name = "prix")
     private Double prix;
+
+    // ✅ NOUVEAU
+    @Column(name = "afficher_prix")
+    private boolean afficherPrix = true;
 
     @Column(name = "duree")
     private Integer duree;
@@ -66,10 +60,6 @@ public class FormationContinues {
 
     @Column(name = "enabled")
     private boolean enabled = true;
-
-    /* =========================
-       RELATION
-       ========================= */
 
     @ManyToOne
     @JoinColumn(name = "sous_categorie_id", nullable = false)

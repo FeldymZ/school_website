@@ -22,6 +22,9 @@ public class CreateFormationContinuesDTO {
     @Positive(message = "Le prix doit être positif")
     private Double prix;
 
+    // ✅ NOUVEAU
+    private Boolean afficherPrix;
+
     @Positive(message = "La durée doit être positive")
     private Integer duree;
 
@@ -32,6 +35,5 @@ public class CreateFormationContinuesDTO {
 
     private MultipartFile cover;
 
-    // 🔥 AJOUT CRITIQUE
     private Long sousCategorieId;
 }
