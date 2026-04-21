@@ -44,6 +44,12 @@ public class FormationContinuesService {
         f.setObjectifs(dto.getObjectifs());
         f.setCompetences(dto.getCompetences());
         f.setPrix(dto.getPrix());
+
+        // ✅ NOUVEAU : afficher prix
+        f.setAfficherPrix(
+                dto.getAfficherPrix() != null ? dto.getAfficherPrix() : true
+        );
+
         f.setDuree(dto.getDuree());
 
         if (dto.getUniteDuree() != null) {
@@ -79,6 +85,12 @@ public class FormationContinuesService {
         f.setObjectifs(dto.getObjectifs());
         f.setCompetences(dto.getCompetences());
         f.setPrix(dto.getPrix());
+
+        // ✅ NOUVEAU : afficher prix
+        if (dto.getAfficherPrix() != null) {
+            f.setAfficherPrix(dto.getAfficherPrix());
+        }
+
         f.setDuree(dto.getDuree());
 
         if (dto.getUniteDuree() != null) {

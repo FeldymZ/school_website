@@ -8,14 +8,10 @@ import lombok.Setter;
 public class FormationDTO {
 
     private Long id;
-
     private Integer reference;
-
     private String slug;
 
-    /* 🔥 ON UTILISE LIBELLE */
     private String libelle;
-
     private String description;
 
     private String objectifs;
@@ -23,11 +19,13 @@ public class FormationDTO {
 
     private Double prix;
 
+    // ✅ NOUVEAU
+    private boolean afficherPrix;
+
     private Integer duree;
     private String uniteDuree;
 
     private String coverUrl;
-
     private boolean enabled;
 
     private SousCategorieDTO sousCategorie;

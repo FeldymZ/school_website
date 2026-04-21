@@ -17,20 +17,18 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         /* ================= ORIGINS ================= */
-        // ⚠️ Utiliser allowedOriginPatterns avec credentials = true
         config.setAllowedOriginPatterns(List.of(
-                "http://localhost:5173",          // Front public local
-                "http://localhost:5174",          // Back-office local
-                "https://*.esiitech-gabon.com"    // Domaine prod
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "https://*.esiitech-gabon.com"
         ));
 
         /* ================= METHODS ================= */
-        // 🔥 CORRECTION ICI : AJOUT PATCH
         config.setAllowedMethods(List.of(
                 "GET",
                 "POST",
                 "PUT",
-                "PATCH",   // ✅ IMPORTANT (ton bug venait d’ici)
+                "PATCH",
                 "DELETE",
                 "OPTIONS"
         ));
@@ -39,7 +37,6 @@ public class CorsConfig {
         config.setAllowedHeaders(List.of("*"));
 
         /* ================= AUTH ================= */
-        // 🔑 Obligatoire pour JWT / cookies
         config.setAllowCredentials(true);
 
         /* ================= EXPOSED HEADERS ================= */
