@@ -19,8 +19,8 @@ public class AdminController {
   @AuditLog(action = "CREATION_ADMIN", target = "#request.email", failureAction = "CREATION_ADMIN_ECHEC")
   @PostMapping("/create")
   public ResponseEntity<?> createAdmin(
-          @RequestBody @Valid CreateAdminRequest request,
-          Authentication auth
+    @RequestBody @Valid CreateAdminRequest request,
+    Authentication auth
   ) {
     adminService.createAdmin(request);
     return ResponseEntity.ok("Admin créé avec succès");
