@@ -14,38 +14,40 @@ public class AdminService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final AdminAuditService auditService; // ✅ FIX : injecté
 
-  public void createAdmin(CreateAdminRequest request) {
+  public void createAdmin(CreateAdminRequest request, String actorEmail) { // ✅ FIX : actorEmail ajouté
 
     if (userRepository.findByEmail(request.email()).isPresent()) {
       throw new IllegalStateException("Email déjà utilisé");
     }
 
     User admin = User.builder()
-      .email(request.email())
-      .password(passwordEncoder.encode(request.password()))
-      .role(Role.ADMIN)          // ✅ ENUM
-      .enabled(true)             // ✅ jamais null
-      .build();
+            .email(request.email())
+            .password(passwordEncoder.encode(request.password()))
+            .role(Role.ADMIN)
+            .enabled(true)
+            .build();
 
     userRepository.save(admin);
+
+    auditService.log(actorEmail, "CREATION_ADMIN", request.email()); // ✅ FIX : log ajouté
   }
 
   public void changeRole(Long userId, Role newRole) {
 
     User user = userRepository.findById(userId)
-      .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+            .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
     if (user.getRole() == Role.SUPERADMIN) {
-      throw new IllegalStateException("Impossible de modifier le rôle d’un SUPERADMIN");
+      throw new IllegalStateException("Impossible de modifier le rôle d'un SUPERADMIN");
     }
 
     if (newRole == Role.SUPERADMIN) {
-      throw new IllegalStateException("Impossible d’attribuer le rôle SUPERADMIN");
+      throw new IllegalStateException("Impossible d'attribuer le rôle SUPERADMIN");
     }
 
     user.setRole(newRole);
     userRepository.save(user);
   }
-
 }

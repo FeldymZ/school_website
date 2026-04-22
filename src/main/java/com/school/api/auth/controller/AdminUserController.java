@@ -1,5 +1,6 @@
 package com.school.api.auth.controller;
 
+import com.school.api.auth.dto.ChangePasswordRequest;
 import com.school.api.auth.dto.ChangeRoleRequest;
 import com.school.api.auth.dto.UserResponse;
 import com.school.api.auth.entity.Role;
@@ -29,8 +30,8 @@ public class AdminUserController {
 
   @PatchMapping("/{id}/desactiver")
   public ResponseEntity<Void> disable(
-    @PathVariable Long id,
-    Authentication auth
+          @PathVariable Long id,
+          Authentication auth
   ) {
     userService.disable(id, auth.getName());
     return ResponseEntity.noContent().build();
@@ -40,8 +41,8 @@ public class AdminUserController {
 
   @PatchMapping("/{id}/activer")
   public ResponseEntity<Void> enable(
-    @PathVariable Long id,
-    Authentication auth
+          @PathVariable Long id,
+          Authentication auth
   ) {
     userService.enable(id, auth.getName());
     return ResponseEntity.noContent().build();
@@ -51,8 +52,8 @@ public class AdminUserController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
-    @PathVariable Long id,
-    Authentication auth
+          @PathVariable Long id,
+          Authentication auth
   ) {
     userService.delete(id, auth.getName());
     return ResponseEntity.noContent().build();
@@ -62,11 +63,24 @@ public class AdminUserController {
 
   @PatchMapping("/{id}/role")
   public ResponseEntity<Void> changeRole(
-    @PathVariable Long id,
-    @RequestBody ChangeRoleRequest request,
-    Authentication auth
+          @PathVariable Long id,
+          @RequestBody ChangeRoleRequest request,
+          Authentication auth
   ) {
     userService.changeRole(id, request.role(), auth.getName());
+    return ResponseEntity.noContent().build();
+  }
+
+  /* ===================== CHANGER MOT DE PASSE ===================== */
+
+  // ✅ FIX : endpoint manquant, créé ici
+  @PatchMapping("/{id}/password")
+  public ResponseEntity<Void> changePassword(
+          @PathVariable Long id,
+          @RequestBody ChangePasswordRequest request,
+          Authentication auth
+  ) {
+    userService.changePassword(id, request.password(), auth.getName());
     return ResponseEntity.noContent().build();
   }
 
@@ -74,8 +88,8 @@ public class AdminUserController {
 
   @GetMapping("/filter")
   public List<UserResponse> filter(
-    @RequestParam(required = false) Role role,
-    @RequestParam(required = false) Boolean enabled
+          @RequestParam(required = false) Role role,
+          @RequestParam(required = false) Boolean enabled
   ) {
     return userService.filter(role, enabled);
   }

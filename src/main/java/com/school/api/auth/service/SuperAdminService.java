@@ -14,35 +14,36 @@ public class SuperAdminService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final AdminAuditService auditService; // ✅ FIX : injecté
 
   /**
    * Création UNIQUE du second SUPERADMIN
    * - Le premier est créé au bootstrap
    * - Maximum autorisé : 2 SUPERADMIN
    */
-  public void createSecondSuperAdmin(CreateSecondSuperAdminRequest request) {
+  public void createSecondSuperAdmin(CreateSecondSuperAdminRequest request, String actorEmail) { // ✅ FIX : actorEmail ajouté
 
     long superAdminCount = userRepository.countByRole(Role.SUPERADMIN);
 
-    // 🔒 VERROU MÉTIER ABSOLU
     if (superAdminCount >= 2) {
       throw new IllegalStateException(
-        "Impossible de créer un autre SUPERADMIN : la limite de 2 est atteinte"
+              "Impossible de créer un autre SUPERADMIN : la limite de 2 est atteinte"
       );
     }
 
-    // 🔒 Sécurité supplémentaire (email unique)
     if (userRepository.findByEmail(request.email()).isPresent()) {
       throw new IllegalStateException("Cet email est déjà utilisé");
     }
 
     User superAdmin = User.builder()
-      .email(request.email())
-      .password(passwordEncoder.encode(request.password()))
-      .role(Role.SUPERADMIN)
-      .enabled(true)
-      .build();
+            .email(request.email())
+            .password(passwordEncoder.encode(request.password()))
+            .role(Role.SUPERADMIN)
+            .enabled(true)
+            .build();
 
     userRepository.save(superAdmin);
+
+    auditService.log(actorEmail, "CREATION_SUPERADMIN", request.email()); // ✅ FIX : log ajouté
   }
 }
