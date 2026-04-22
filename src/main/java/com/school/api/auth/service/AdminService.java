@@ -14,9 +14,9 @@ public class AdminService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  private final AdminAuditService auditService; // ✅ FIX : injecté
+  // ✅ Plus besoin d'AdminAuditService ici : l'AOP s'en charge via @AuditLog
 
-  public void createAdmin(CreateAdminRequest request, String actorEmail) { // ✅ FIX : actorEmail ajouté
+  public void createAdmin(CreateAdminRequest request) {
 
     if (userRepository.findByEmail(request.email()).isPresent()) {
       throw new IllegalStateException("Email déjà utilisé");
@@ -30,8 +30,6 @@ public class AdminService {
             .build();
 
     userRepository.save(admin);
-
-    auditService.log(actorEmail, "CREATION_ADMIN", request.email()); // ✅ FIX : log ajouté
   }
 
   public void changeRole(Long userId, Role newRole) {

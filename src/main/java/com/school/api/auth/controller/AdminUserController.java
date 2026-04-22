@@ -1,5 +1,6 @@
 package com.school.api.auth.controller;
 
+import com.school.api.auth.audit.AuditLog;
 import com.school.api.auth.dto.ChangePasswordRequest;
 import com.school.api.auth.dto.ChangeRoleRequest;
 import com.school.api.auth.dto.UserResponse;
@@ -21,6 +22,7 @@ public class AdminUserController {
 
   /* ===================== LISTE ===================== */
 
+  @AuditLog(action = "CONSULTATION_UTILISATEURS")
   @GetMapping
   public List<UserResponse> all() {
     return userService.getAll();
@@ -28,6 +30,7 @@ public class AdminUserController {
 
   /* ===================== DESACTIVER ===================== */
 
+  @AuditLog(action = "DESACTIVATION_UTILISATEUR", target = "#id.toString()", failureAction = "DESACTIVATION_ECHEC")
   @PatchMapping("/{id}/desactiver")
   public ResponseEntity<Void> disable(
           @PathVariable Long id,
@@ -39,6 +42,7 @@ public class AdminUserController {
 
   /* ===================== ACTIVER ===================== */
 
+  @AuditLog(action = "ACTIVATION_UTILISATEUR", target = "#id.toString()", failureAction = "ACTIVATION_ECHEC")
   @PatchMapping("/{id}/activer")
   public ResponseEntity<Void> enable(
           @PathVariable Long id,
@@ -50,6 +54,7 @@ public class AdminUserController {
 
   /* ===================== SUPPRIMER ===================== */
 
+  @AuditLog(action = "SUPPRESSION_UTILISATEUR", target = "#id.toString()", failureAction = "SUPPRESSION_ECHEC")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
           @PathVariable Long id,
@@ -61,6 +66,7 @@ public class AdminUserController {
 
   /* ===================== CHANGER ROLE ===================== */
 
+  @AuditLog(action = "CHANGEMENT_ROLE", target = "#id.toString()", failureAction = "CHANGEMENT_ROLE_ECHEC")
   @PatchMapping("/{id}/role")
   public ResponseEntity<Void> changeRole(
           @PathVariable Long id,
@@ -73,7 +79,7 @@ public class AdminUserController {
 
   /* ===================== CHANGER MOT DE PASSE ===================== */
 
-  // ✅ FIX : endpoint manquant, créé ici
+  @AuditLog(action = "CHANGEMENT_MOT_DE_PASSE", target = "#id.toString()", failureAction = "CHANGEMENT_MOT_DE_PASSE_ECHEC")
   @PatchMapping("/{id}/password")
   public ResponseEntity<Void> changePassword(
           @PathVariable Long id,
@@ -86,6 +92,7 @@ public class AdminUserController {
 
   /* ===================== FILTRES ===================== */
 
+  @AuditLog(action = "FILTRE_UTILISATEURS")
   @GetMapping("/filter")
   public List<UserResponse> filter(
           @RequestParam(required = false) Role role,
@@ -96,6 +103,7 @@ public class AdminUserController {
 
   /* ===================== RECHERCHE ===================== */
 
+  @AuditLog(action = "RECHERCHE_UTILISATEUR", target = "#email")
   @GetMapping("/search")
   public List<UserResponse> search(@RequestParam String email) {
     return userService.searchByEmail(email);

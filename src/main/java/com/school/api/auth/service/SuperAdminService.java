@@ -14,14 +14,9 @@ public class SuperAdminService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  private final AdminAuditService auditService; // ✅ FIX : injecté
+  // ✅ Plus besoin d'AdminAuditService ici : l'AOP s'en charge via @AuditLog
 
-  /**
-   * Création UNIQUE du second SUPERADMIN
-   * - Le premier est créé au bootstrap
-   * - Maximum autorisé : 2 SUPERADMIN
-   */
-  public void createSecondSuperAdmin(CreateSecondSuperAdminRequest request, String actorEmail) { // ✅ FIX : actorEmail ajouté
+  public void createSecondSuperAdmin(CreateSecondSuperAdminRequest request) {
 
     long superAdminCount = userRepository.countByRole(Role.SUPERADMIN);
 
@@ -43,7 +38,5 @@ public class SuperAdminService {
             .build();
 
     userRepository.save(superAdmin);
-
-    auditService.log(actorEmail, "CREATION_SUPERADMIN", request.email()); // ✅ FIX : log ajouté
   }
 }

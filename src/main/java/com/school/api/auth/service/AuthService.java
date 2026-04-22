@@ -16,18 +16,19 @@ public class AuthService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
+  // ✅ Plus besoin d'AdminAuditService ici : l'AOP s'en charge via @AuditLog
 
   public LoginResponse login(LoginRequest request) {
 
     User user = userRepository.findByEmail(request.email())
-      .orElseThrow(() -> new RuntimeException("Identifiants invalides"));
+            .orElseThrow(() -> new RuntimeException("Identifiants invalides"));
 
     if (!user.getEnabled()) {
       throw new RuntimeException("Compte désactivé");
     }
 
     if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-      throw new RuntimeException("Identifiants invalides");
+      throw new RuntimeException("Mot de passe incorrect");
     }
 
     String accessToken = jwtService.generateAccessToken(user);

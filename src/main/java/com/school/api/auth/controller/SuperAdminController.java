@@ -1,5 +1,6 @@
 package com.school.api.auth.controller;
 
+import com.school.api.auth.audit.AuditLog;
 import com.school.api.auth.dto.CreateSecondSuperAdminRequest;
 import com.school.api.auth.service.SuperAdminService;
 import jakarta.validation.Valid;
@@ -16,13 +17,14 @@ public class SuperAdminController {
 
   private final SuperAdminService superAdminService;
 
+  @AuditLog(action = "CREATION_SUPERADMIN", target = "#request.email", failureAction = "CREATION_SUPERADMIN_ECHEC")
   @PostMapping("/superadmin/create")
   @PreAuthorize("hasRole('SUPERADMIN')")
   public ResponseEntity<String> createSecondSuperAdmin(
           @RequestBody @Valid CreateSecondSuperAdminRequest request,
-          Authentication auth                                         // ✅ FIX : acteur récupéré
+          Authentication auth
   ) {
-    superAdminService.createSecondSuperAdmin(request, auth.getName()); // ✅ FIX : email transmis
+    superAdminService.createSecondSuperAdmin(request);
     return ResponseEntity.ok("Deuxième SUPERADMIN créé avec succès");
   }
 }
