@@ -31,12 +31,9 @@ spring:
           starttls:
             enable: true
             required: true
-
-          # 🔥 FIX PROBLÈME CERTIFICAT
           ssl:
             trust: "*"
             checkserveridentity: false
-
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
