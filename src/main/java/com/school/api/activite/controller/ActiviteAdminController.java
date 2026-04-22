@@ -3,6 +3,7 @@ package com.school.api.activite.controller;
 import com.school.api.activite.dto.ActiviteRequest;
 import com.school.api.activite.dto.ActiviteResponse;
 import com.school.api.activite.service.ActiviteService;
+import com.school.api.auth.audit.AuditLog;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,63 +23,58 @@ public class ActiviteAdminController {
     this.activiteService = activiteService;
   }
 
-  /* ================= CREATE ================= */
+  @AuditLog(action = "CREATION_ACTIVITE", target = "#titre", failureAction = "CREATION_ACTIVITE_ECHEC")
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ActiviteResponse create(
-    @RequestParam @NotBlank String titre,
-    @RequestParam @NotBlank String contenu,
-    @RequestParam("photos") MultipartFile[] photos,
-    @RequestParam(value = "video", required = false) MultipartFile video
+          @RequestParam @NotBlank String titre,
+          @RequestParam @NotBlank String contenu,
+          @RequestParam("photos") MultipartFile[] photos,
+          @RequestParam(value = "video", required = false) MultipartFile video
   ) {
     ActiviteRequest request = new ActiviteRequest();
     request.setTitre(titre);
     request.setContenu(contenu);
-
     return activiteService.create(request, photos, video);
   }
 
-  /* ================= UPDATE ================= */
+  @AuditLog(action = "MODIFICATION_ACTIVITE", target = "#id.toString()", failureAction = "MODIFICATION_ACTIVITE_ECHEC")
   @PutMapping("/{id}")
   public ActiviteResponse update(
-    @PathVariable Long id,
-    @RequestBody ActiviteRequest request
+          @PathVariable Long id,
+          @RequestBody ActiviteRequest request
   ) {
     return activiteService.update(id, request);
   }
 
-  /* ================= ADD MEDIAS ================= */
-  @PostMapping(
-    value = "/{id}/medias",
-    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-  )
+  @AuditLog(action = "AJOUT_MEDIAS_ACTIVITE", target = "#id.toString()")
+  @PostMapping(value = "/{id}/medias", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ActiviteResponse addMedias(
-    @PathVariable Long id,
-    @RequestParam(value = "photos", required = false)
-    MultipartFile[] photos,
-    @RequestParam(value = "video", required = false)
-    MultipartFile video
+          @PathVariable Long id,
+          @RequestParam(value = "photos", required = false) MultipartFile[] photos,
+          @RequestParam(value = "video", required = false) MultipartFile video
   ) {
     return activiteService.addMedias(id, photos, video);
   }
 
-  /* ================= READ ================= */
+  @AuditLog(action = "CONSULTATION_ACTIVITES")
   @GetMapping
   public List<ActiviteResponse> getAll() {
     return activiteService.getAll();
   }
 
+  @AuditLog(action = "CONSULTATION_ACTIVITE", target = "#id.toString()")
   @GetMapping("/{id}")
   public ActiviteResponse getById(@PathVariable Long id) {
     return activiteService.getById(id);
   }
 
-  /* ================= DELETE ================= */
+  @AuditLog(action = "SUPPRESSION_ACTIVITE", target = "#id.toString()", failureAction = "SUPPRESSION_ACTIVITE_ECHEC")
   @DeleteMapping("/{id}")
   public void delete(@PathVariable Long id) {
     activiteService.delete(id);
   }
 
-  /* ================= DELETE MEDIA ================= */
+  @AuditLog(action = "SUPPRESSION_MEDIA_ACTIVITE", target = "#mediaId.toString()", failureAction = "SUPPRESSION_MEDIA_ECHEC")
   @PreAuthorize("hasRole('SUPERADMIN')")
   @DeleteMapping("/medias/{mediaId}")
   public void deleteMedia(@PathVariable Long mediaId) {
