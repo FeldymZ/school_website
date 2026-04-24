@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -31,9 +32,14 @@ public class PreinscriptionService {
     private final PreinscriptionJasperService jasperService;
     private final FileStorageService fileStorageService;
 
+    /* ================= TIMEZONE CENTRALISÉ ================= */
+    private LocalDateTime now() {
+        return LocalDateTime.now(ZoneId.of("Africa/Libreville"));
+    }
+
     /* =====================================================
        🔹 PUBLIC
-       ===================================================== */
+    ===================================================== */
     @Transactional
     public PreinscriptionDemandeResponse submit(PreinscriptionDemandeRequest req) {
 
@@ -84,7 +90,7 @@ public class PreinscriptionService {
 
     /* =====================================================
        🔹 ADMIN — DEMANDES
-       ===================================================== */
+    ===================================================== */
     public List<PreinscriptionDemandeResponse> getAll() {
         return demandeRepo.findAllByOrderByCreatedAtDesc()
                 .stream()
@@ -119,7 +125,7 @@ public class PreinscriptionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
 
         d.setStatut(StatutDemande.VALIDEE);
-        d.setValidatedAt(LocalDateTime.now());
+        d.setValidatedAt(now()); // ✅ FIX TIMEZONE
 
         byte[] pdf = jasperService.generatePdf(d);
 
@@ -143,7 +149,7 @@ public class PreinscriptionService {
 
     /* =====================================================
        🔹 ADMIN — PÉRIODES
-       ===================================================== */
+    ===================================================== */
     @Transactional
     public void deletePeriode(Long id) {
 
@@ -152,7 +158,7 @@ public class PreinscriptionService {
                         "PreinscriptionPeriode", "id", id
                 ));
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = now(); // ✅ FIX
 
         boolean isActive =
                 periode.getDateDebut().isBefore(now) &&
@@ -167,7 +173,7 @@ public class PreinscriptionService {
 
     /* =====================================================
        🔹 ADMIN — SESSION
-       ===================================================== */
+    ===================================================== */
     @Transactional
     public void deleteSession(Long id) {
 
@@ -187,7 +193,7 @@ public class PreinscriptionService {
 
     /* =====================================================
        🔹 ADMIN — ÉMETTEURS
-       ===================================================== */
+    ===================================================== */
     public List<PreinscriptionEmetteur> getAllEmetteurs() {
         return emetteurRepo.findAll();
     }
@@ -220,7 +226,7 @@ public class PreinscriptionService {
 
     /* =====================================================
        🔹 ACTIVE SESSION (PUBLIC)
-       ===================================================== */
+    ===================================================== */
     public SessionPublicResponse getActiveSession() {
 
         PreinscriptionPeriode p = getActivePeriode();
@@ -248,9 +254,11 @@ public class PreinscriptionService {
 
     /* =====================================================
        🔹 PRIVATE
-       ===================================================== */
+    ===================================================== */
     private PreinscriptionPeriode getActivePeriode() {
-        LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime now = now(); // ✅ FIX CENTRAL
+
         return periodeRepo
                 .findFirstByDateDebutBeforeAndDateFinAfterOrderByDateDebutDesc(now, now)
                 .orElse(null);

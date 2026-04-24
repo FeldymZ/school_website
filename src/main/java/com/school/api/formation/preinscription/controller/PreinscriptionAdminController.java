@@ -137,4 +137,11 @@ public class PreinscriptionAdminController {
     ) {
         periodeService.updatePeriode(id, req);
     }
+
+    @AuditLog(action = "DESACTIVATION_PERIODE", target = "#id.toString()")
+    @PutMapping("/periodes/{id}/desactiver")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public void deactivatePeriode(@PathVariable Long id) {
+        periodeService.deactivatePeriode(id);
+    }
 }
