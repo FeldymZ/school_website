@@ -1,204 +1,310 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="preinscription" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="09cdd05c-7cce-4234-ab29-cabf5a5b9986">
-    <parameter name="LOGO" class="java.io.InputStream"/>
-    <parameter name="SIGNATURE" class="java.io.InputStream"/>
-    <parameter name="NUMERO_DEMANDE" class="java.lang.String"/>
-    <parameter name="ANNEE_UNIV" class="java.lang.String"/>
-    <parameter name="CIVILITE" class="java.lang.String"/>
-    <parameter name="NOM" class="java.lang.String"/>
-    <parameter name="PRENOM" class="java.lang.String"/>
-    <parameter name="DATE_NAISSANCE" class="java.lang.String"/>
-    <parameter name="LIEU_NAISSANCE" class="java.lang.String"/>
-    <parameter name="NATIONALITE" class="java.lang.String"/>
-    <parameter name="EMAIL" class="java.lang.String"/>
-    <parameter name="TELEPHONE" class="java.lang.String"/>
-    <parameter name="WHATSAPP" class="java.lang.String"/>
-    <parameter name="NIVEAU" class="java.lang.String"/>
-    <parameter name="FORMATION_TITRE" class="java.lang.String"/>
-    <parameter name="SPECIALITE" class="java.lang.String"/>
-    <parameter name="EMETTEUR_NOM" class="java.lang.String"/>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+                http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="preinscription"
+              pageWidth="595" pageHeight="842"
+              columnWidth="555"
+              leftMargin="20" rightMargin="20"
+              topMargin="20" bottomMargin="20"
+              uuid="09cdd05c-7cce-4234-ab29-cabf5a5b9986">
+
+    <parameter name="LOGO"              class="java.io.InputStream"/>
+    <parameter name="SIGNATURE"         class="java.io.InputStream"/>
+    <parameter name="NUMERO_DEMANDE"    class="java.lang.String"/>
+    <parameter name="ANNEE_UNIV"        class="java.lang.String"/>
+    <parameter name="CIVILITE"          class="java.lang.String"/>
+    <parameter name="NOM"               class="java.lang.String"/>
+    <parameter name="PRENOM"            class="java.lang.String"/>
+    <parameter name="DATE_NAISSANCE"    class="java.lang.String"/>
+    <parameter name="LIEU_NAISSANCE"    class="java.lang.String"/>
+    <parameter name="NATIONALITE"       class="java.lang.String"/>
+    <parameter name="EMAIL"             class="java.lang.String"/>
+    <parameter name="TELEPHONE"         class="java.lang.String"/>
+    <parameter name="WHATSAPP"          class="java.lang.String"/>
+    <parameter name="NIVEAU"            class="java.lang.String"/>
+    <parameter name="FORMATION_TITRE"   class="java.lang.String"/>
+    <parameter name="SPECIALITE"        class="java.lang.String"/>
+    <parameter name="EMETTEUR_NOM"      class="java.lang.String"/>
     <parameter name="EMETTEUR_FONCTION" class="java.lang.String"/>
-    <parameter name="DATE_EMISSION" class="java.lang.String"/>
-    <queryString>
-        <![CDATA[]]>
-    </queryString>
+    <parameter name="DATE_EMISSION"     class="java.lang.String"/>
+
+    <queryString><![CDATA[]]></queryString>
+
     <title>
         <band height="629">
+
+            <!-- ══ LOGO ══ -->
             <image>
-                <reportElement x="0" y="3" width="130" height="46" uuid="fb3650f4-90a9-4efd-be26-e36bf55ec424"/>
+                <reportElement x="0" y="3" width="130" height="46"
+                               uuid="fb3650f4-90a9-4efd-be26-e36bf55ec424"/>
                 <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
             </image>
+
+            <!-- ══ ÉTABLISSEMENT ══ -->
             <staticText>
-                <reportElement x="285" y="10" width="270" height="19" uuid="b6641226-c269-4536-8471-6209eb08439f"/>
+                <reportElement x="285" y="10" width="270" height="19"
+                               uuid="b6641226-c269-4536-8471-6209eb08439f"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Maiandra GD"/>
                 </textElement>
                 <text><![CDATA[ECOLE SUPERIEURE PRIVEE RECONNUE PAR L'ETAT]]></text>
             </staticText>
+
             <staticText>
-                <reportElement x="300" y="30" width="230" height="16" uuid="adb97a6d-ef77-48e4-acdc-84e6cbb2e37f"/>
+                <reportElement x="300" y="30" width="230" height="16"
+                               uuid="adb97a6d-ef77-48e4-acdc-84e6cbb2e37f"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Maiandra GD"/>
                 </textElement>
                 <text><![CDATA[Décrets N°071/PR/MESRSIT & 072/PR/MESRSIT]]></text>
             </staticText>
+
+            <!-- ══ LIGNE BLEUE HEADER ══ -->
             <rectangle>
-                <reportElement x="22" y="55" width="515" height="2" forecolor="#00AEEF" backcolor="#00AEEF" uuid="41b07221-4454-4c50-b148-ee3647083369"/>
+                <reportElement x="22" y="55" width="515" height="2"
+                               forecolor="#00AEEF" backcolor="#00AEEF"
+                               uuid="41b07221-4454-4c50-b148-ee3647083369"/>
             </rectangle>
+
+            <!-- ══ ANNÉE UNIVERSITAIRE ══ -->
             <textField>
-                <reportElement x="0" y="65" width="555" height="20" uuid="b281cc6f-d67d-40bd-bc55-dbabb012b9b9"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle" markup="styled">
-                    <font fontName="Maiandra GD" size="12"/>
+                <reportElement x="0" y="62" width="555" height="20"
+                               uuid="b281cc6f-d67d-40bd-bc55-dbabb012b9b9"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="Maiandra GD" size="12" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Année universitaire : <style isBold=\"true\">" + $P{ANNEE_UNIV} + "</style>"]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["Année universitaire : " + $P{ANNEE_UNIV}]]>
+                </textFieldExpression>
             </textField>
+
+            <!-- ══ ENCADRÉ TITRE ══ -->
             <rectangle>
-                <reportElement x="22" y="94" width="515" height="22" uuid="619223e9-ba1b-42db-bfaa-5616fb8d654a">
-                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
-                </reportElement>
+                <reportElement x="22" y="91" width="515" height="28"
+                               uuid="619223e9-ba1b-42db-bfaa-5616fb8d654a"/>
             </rectangle>
+
+            <!-- ══ TITRE ATTESTATION ══ -->
             <textField>
-                <reportElement x="120" y="96" width="330" height="18" uuid="a9f69575-8999-4cea-b752-8a1a6c72375c">
-                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
-                </reportElement>
+                <reportElement x="120" y="93" width="330" height="24"
+                               uuid="a9f69575-8999-4cea-b752-8a1a6c72375c"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Maiandra GD" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA["ATTESTATION DE PREINSCRIPTION N°" + $P{NUMERO_DEMANDE}]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["ATTESTATION DE PREINSCRIPTION N°" + $P{NUMERO_DEMANDE}]]>
+                </textFieldExpression>
             </textField>
+
+            <!-- ══ INTRO ÉMETTEUR ══ -->
             <textField>
-                <reportElement x="21" y="145" width="515" height="19" uuid="f84636a6-6b7a-4d14-b9b8-57ba6c395b57"/>
-                <textElement verticalAlignment="Middle" markup="styled">
+                <reportElement x="21" y="145" width="515" height="19"
+                               uuid="f84636a6-6b7a-4d14-b9b8-57ba6c395b57"/>
+                <textElement verticalAlignment="Middle">
                     <font fontName="Maiandra GD" size="12"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Je soussigné(e), <style isBold=\"true\">" + $P{EMETTEUR_NOM}
-            + "</style>, <style isBold=\"true\">" + $P{EMETTEUR_FONCTION}
-            + "</style>, atteste que :"]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["Je soussigné(e), " + $P{EMETTEUR_NOM} + ", " + $P{EMETTEUR_FONCTION} + ", atteste que :"]]>
+                </textFieldExpression>
             </textField>
+
+            <!-- ══ CIVILITÉ / NOM / PRÉNOM ══ -->
             <textField>
-                <reportElement x="21" y="168" width="515" height="19" uuid="07f934b6-737c-4cb1-b2ab-1e0cc3312132"/>
-                <textElement verticalAlignment="Middle" markup="styled">
+                <reportElement x="21" y="168" width="515" height="19"
+                               uuid="07f934b6-737c-4cb1-b2ab-1e0cc3312132"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Maiandra GD" size="12" isBold="true"/>
+                </textElement>
+                <textFieldExpression>
+                    <![CDATA["M./Mme/Mlle : " + $P{CIVILITE} + " " + $P{NOM} + " " + $P{PRENOM}]]>
+                </textFieldExpression>
+            </textField>
+
+            <!-- ══ DATE ET LIEU DE NAISSANCE ══ -->
+            <textField>
+                <reportElement x="21" y="191" width="515" height="19"
+                               uuid="55cfca89-bdd4-448d-8e25-49e4dc15a91a"/>
+                <textElement verticalAlignment="Middle">
                     <font fontName="Maiandra GD" size="12"/>
                 </textElement>
-                <textFieldExpression><![CDATA["M./Mme/Mlle : <style isBold=\"true\">"
-            + $P{CIVILITE} + " " + $P{NOM} + " " + $P{PRENOM}
-            + "</style>"]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["Né(e) le : " + $P{DATE_NAISSANCE} + " à " + $P{LIEU_NAISSANCE}]]>
+                </textFieldExpression>
             </textField>
+
+            <!-- ══ NATIONALITÉ ══ -->
             <textField>
-                <reportElement x="21" y="191" width="515" height="19" uuid="55cfca89-bdd4-448d-8e25-49e4dc15a91a"/>
-                <textElement verticalAlignment="Middle" markup="styled">
+                <reportElement x="21" y="214" width="515" height="19"
+                               uuid="53d42f23-6b0d-4fbf-a394-9d95fae5f882"/>
+                <textElement verticalAlignment="Middle">
                     <font fontName="Maiandra GD" size="12"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Né(e) le : <style isBold=\"true\">" + $P{DATE_NAISSANCE}
-            + "</style> à <style isBold=\"true\">" + $P{LIEU_NAISSANCE}
-            + "</style>"]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["Nationalité : " + $P{NATIONALITE}]]>
+                </textFieldExpression>
             </textField>
+
+            <!-- ══ EMAIL ══ -->
             <textField>
-                <reportElement x="21" y="214" width="515" height="19" uuid="53d42f23-6b0d-4fbf-a394-9d95fae5f882"/>
-                <textElement verticalAlignment="Middle" markup="styled">
+                <reportElement x="21" y="237" width="515" height="19"
+                               uuid="57e52d51-03f5-4a13-b0fd-e981687b1dfe"/>
+                <textElement verticalAlignment="Middle">
                     <font fontName="Maiandra GD" size="12"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Nationalité : <style isBold=\"true\">" + $P{NATIONALITE} + "</style>"]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["Adresse email : " + $P{EMAIL}]]>
+                </textFieldExpression>
             </textField>
+
+            <!-- ══ TÉLÉPHONE ══ -->
             <textField>
-                <reportElement x="21" y="237" width="515" height="19" uuid="57e52d51-03f5-4a13-b0fd-e981687b1dfe"/>
-                <textElement verticalAlignment="Middle" markup="styled">
+                <reportElement x="21" y="260" width="515" height="19"
+                               uuid="ee19444f-9de4-4624-834d-c36c21181b0d"/>
+                <textElement verticalAlignment="Middle">
                     <font fontName="Maiandra GD" size="12"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Adresse email : <style isBold=\"true\">" + $P{EMAIL} + "</style>"]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["Téléphone : " + $P{TELEPHONE}]]>
+                </textFieldExpression>
             </textField>
+
+            <!-- ══ WHATSAPP ══ -->
             <textField>
-                <reportElement x="21" y="260" width="515" height="19" uuid="ee19444f-9de4-4624-834d-c36c21181b0d"/>
-                <textElement verticalAlignment="Middle" markup="styled">
+                <reportElement x="21" y="283" width="515" height="19"
+                               uuid="e5a1f405-2472-4bb5-8c53-058cf1c87371"/>
+                <textElement verticalAlignment="Middle">
                     <font fontName="Maiandra GD" size="12"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Téléphone : <style isBold=\"true\">" + $P{TELEPHONE} + "</style>"]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["WhatsApp : " + $P{WHATSAPP}]]>
+                </textFieldExpression>
             </textField>
+
+            <!-- ══ INTRO FORMATION ══ -->
             <textField>
-                <reportElement x="21" y="283" width="515" height="19" uuid="e5a1f405-2472-4bb5-8c53-058cf1c87371"/>
-                <textElement verticalAlignment="Middle" markup="styled">
+                <reportElement x="21" y="307" width="515" height="19"
+                               uuid="a0670973-1dfc-461b-9593-9708be6c78ea"/>
+                <textElement verticalAlignment="Middle">
                     <font fontName="Maiandra GD" size="12"/>
                 </textElement>
-                <textFieldExpression><![CDATA["WhatsApp : <style isBold=\"true\">" + $P{WHATSAPP} + "</style>"]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["Est préinscrit(e) pour l'année universitaire " + $P{ANNEE_UNIV}]]>
+                </textFieldExpression>
             </textField>
+
+            <!-- ══ √ NIVEAU ══ -->
             <textField>
-                <reportElement x="21" y="307" width="515" height="19" uuid="a0670973-1dfc-461b-9593-9708be6c78ea"/>
-                <textElement verticalAlignment="Middle" markup="styled">
-                    <font fontName="Maiandra GD" size="12"/>
-                </textElement>
-                <textFieldExpression><![CDATA["Est préinscrit(e) pour l'année universitaire <style isBold=\"true\">"
-            + $P{ANNEE_UNIV} + "</style>"]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="31" y="331" width="500" height="19" forecolor="#037199" uuid="1b5ff69b-883f-4223-9c5a-912cdc6b1f9a"/>
+                <reportElement x="31" y="331" width="500" height="19"
+                               forecolor="#037199"
+                               uuid="1b5ff69b-883f-4223-9c5a-912cdc6b1f9a"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Maiandra GD" size="12" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["√ " + $P{NIVEAU}]]></textFieldExpression>
             </textField>
+
+            <!-- ══ √ FORMATION ══ -->
             <textField>
-                <reportElement x="31" y="355" width="500" height="19" forecolor="#037199" uuid="e0b20c5e-af26-45bb-a5ab-befc40f78592"/>
+                <reportElement x="31" y="355" width="500" height="19"
+                               forecolor="#037199"
+                               uuid="e0b20c5e-af26-45bb-a5ab-befc40f78592"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Maiandra GD" size="12" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["√ " + $P{FORMATION_TITRE}]]></textFieldExpression>
             </textField>
+
+            <!-- ══ √ SPÉCIALITÉ ══ -->
             <textField>
-                <reportElement x="31" y="379" width="500" height="19" forecolor="#037199" uuid="224f106b-5a92-4023-bddb-404590ff8946"/>
+                <reportElement x="31" y="379" width="500" height="19"
+                               forecolor="#037199"
+                               uuid="224f106b-5a92-4023-bddb-404590ff8946"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Maiandra GD" size="12" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA["√ Spécialité : " + $P{SPECIALITE}]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["√ Spécialité : " + $P{SPECIALITE}]]>
+                </textFieldExpression>
             </textField>
+
+            <!-- ══ DATE ÉMISSION ══ -->
             <textField>
-                <reportElement x="302" y="429" width="200" height="19" uuid="144150b3-f635-4275-9646-b9786b98f1b2"/>
-                <textElement markup="styled">
+                <reportElement x="302" y="429" width="200" height="19"
+                               uuid="144150b3-f635-4275-9646-b9786b98f1b2"/>
+                <textElement>
                     <font fontName="Maiandra GD"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Fait à Libreville le <style isBold=\"true\">" + $P{DATE_EMISSION} + "</style>"]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["Fait à Libreville le " + $P{DATE_EMISSION}]]>
+                </textFieldExpression>
             </textField>
+
+            <!-- ══ FONCTION ÉMETTEUR ══ -->
             <textField>
-                <reportElement x="301" y="458" width="200" height="19" uuid="9cd6c459-68c1-445d-ac41-fa2ca0da90e4"/>
+                <reportElement x="301" y="459" width="200" height="19"
+                               uuid="9cd6c459-68c1-445d-ac41-fa2ca0da90e4"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Maiandra GD" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$P{EMETTEUR_FONCTION}]]></textFieldExpression>
             </textField>
+
+            <!-- ══ SIGNATURE ══ -->
             <image>
-                <reportElement x="350" y="478" width="95" height="94" uuid="8e54bc6e-ab68-4b97-a588-aa04668fbfc2"/>
+                <reportElement x="350" y="478" width="95" height="94"
+                               uuid="8e54bc6e-ab68-4b97-a588-aa04668fbfc2"/>
                 <imageExpression><![CDATA[$P{SIGNATURE}]]></imageExpression>
             </image>
+
+            <!-- ══ NOM ÉMETTEUR ══ -->
             <textField>
-                <reportElement x="303" y="551" width="200" height="19" uuid="c7f07141-c0ec-45d0-8987-813cd6caf274"/>
+                <reportElement x="303" y="551" width="200" height="19"
+                               uuid="c7f07141-c0ec-45d0-8987-813cd6caf274"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Maiandra GD" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$P{EMETTEUR_NOM}]]></textFieldExpression>
             </textField>
+
+            <!-- ══ LIGNE BLEUE FOOTER ══ -->
             <rectangle>
-                <reportElement x="21" y="580" width="515" height="2" forecolor="#00AEEF" backcolor="#00AEEF" uuid="29423ba9-ec96-4ff4-a6b3-f9c452c9ed18"/>
+                <reportElement x="21" y="580" width="515" height="2"
+                               forecolor="#00AEEF" backcolor="#00AEEF"
+                               uuid="29423ba9-ec96-4ff4-a6b3-f9c452c9ed18"/>
             </rectangle>
+
+            <!-- ══ ADRESSE + TÉLÉPHONE ══ -->
             <textField>
-                <reportElement x="61" y="587" width="440" height="19" uuid="a805f3c7-6b63-4be8-9644-895505127081">
+                <reportElement x="61" y="587" width="440" height="19"
+                               uuid="a805f3c7-6b63-4be8-9644-895505127081">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Maiandra GD" size="10"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Derrière le Palais de justice-BP 20308 Libreville-Gabon   Téléphone +241 7623 7638"]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["Derrière le Palais de justice-BP 20308 Libreville-Gabon   Téléphone +241 7623 7638"]]>
+                </textFieldExpression>
             </textField>
+
+            <!-- ══ EMAIL + SITE WEB ══ -->
             <textField>
-                <reportElement x="61" y="607" width="440" height="19" uuid="351f9d5c-b3ce-425f-b2fb-079f066a8ae3">
+                <reportElement x="61" y="607" width="440" height="19"
+                               uuid="351f9d5c-b3ce-425f-b2fb-079f066a8ae3">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                     <property name="com.jaspersoft.studio.unit.x" value="px"/>
                 </reportElement>
-                <textElement textAlignment="Center" verticalAlignment="Middle" markup="styled">
+                <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Maiandra GD" size="10"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Email : <style forecolor=\"#00AEEF\">contact@esiitech-gabon.com</style>"
-            + "   Site officiel : <style forecolor=\"#00AEEF\">www.esiitech-gabon.com</style>"]]></textFieldExpression>
+                <textFieldExpression>
+                    <![CDATA["Email : contact@esiitech-gabon.com   Site officiel : www.esiitech-gabon.com"]]>
+                </textFieldExpression>
             </textField>
+
         </band>
     </title>
+
 </jasperReport>
