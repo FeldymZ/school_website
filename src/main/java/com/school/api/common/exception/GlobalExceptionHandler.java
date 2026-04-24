@@ -16,14 +16,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<?> handleNotFound(ResourceNotFoundException ex) {
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                Map.of(
-                        "timestamp", LocalDateTime.now(),
-                        "status", 404,
-                        "error", "NOT_FOUND",
-                        "message", ex.getMessage()
-                )
-        );
+        return buildResponse(HttpStatus.NOT_FOUND, "NOT_FOUND", ex.getMessage());
     }
 
     /* =========================
@@ -32,14 +25,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleBadRequest(IllegalArgumentException ex) {
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                Map.of(
-                        "timestamp", LocalDateTime.now(),
-                        "status", 400,
-                        "error", "BAD_REQUEST",
-                        "message", ex.getMessage()
-                )
-        );
+        return buildResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage());
+    }
+
+    /* =========================
+       🔐 UNAUTHORIZED
+       ========================= */
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<?> handleUnauthorized(SecurityException ex) {
+
+        return buildResponse(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", ex.getMessage());
     }
 
     /* =========================
@@ -48,12 +43,27 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneric(Exception ex) {
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+        return buildResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "INTERNAL_SERVER_ERROR",
+                "Une erreur interne est survenue"
+        );
+    }
+
+    /* =========================
+       🧠 BUILDER CENTRAL
+       ========================= */
+    private ResponseEntity<Map<String, Object>> buildResponse(
+            HttpStatus status,
+            String error,
+            String message
+    ) {
+        return ResponseEntity.status(status).body(
                 Map.of(
                         "timestamp", LocalDateTime.now(),
-                        "status", 500,
-                        "error", "INTERNAL_SERVER_ERROR",
-                        "message", "Une erreur interne est survenue"
+                        "status", status.value(),
+                        "error", error,
+                        "message", message
                 )
         );
     }
