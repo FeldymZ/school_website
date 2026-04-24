@@ -16,13 +16,13 @@ public class PreinscriptionEmetteur {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 150)
     private String nom;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 150)
     private String fonction; // ex: "Le Directeur Général"
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 500)
     private String signatureUrl; // chemin vers image signature
 
     @Builder.Default
