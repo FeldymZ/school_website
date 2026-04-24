@@ -269,8 +269,8 @@ public class MailService {
 
 
   /* =====================================================
-   🔹 PRÉINSCRIPTION — ACCUSÉ DE RÉCEPTION
-   ===================================================== */
+     🔹 PRÉINSCRIPTION — ACCUSÉ DE RÉCEPTION
+     ===================================================== */
   @Async
   public void sendPreinscriptionRecue(
           String to,
@@ -282,9 +282,14 @@ public class MailService {
   ) {
     try {
       Context context = new Context();
+
+      /* 🔥 NOUVEAU : séparation propre */
+      String level = formation.split(" ")[0]; // Licence / Master
+
       context.setVariable("civilite",  civilite);
       context.setVariable("nom",       nom.toUpperCase());
       context.setVariable("formation", formation);
+      context.setVariable("level",     level); // ✅ AJOUT
       context.setVariable("niveau",    niveau);
       context.setVariable("anneeUniv", anneeUniv);
       context.setVariable("year",      Year.now().getValue());
@@ -321,9 +326,14 @@ public class MailService {
   ) {
     try {
       Context context = new Context();
+
+      /* 🔥 NOUVEAU */
+      String level = formation.split(" ")[0];
+
       context.setVariable("civilite",  civilite);
       context.setVariable("nom",       nom.toUpperCase());
       context.setVariable("formation", formation);
+      context.setVariable("level",     level); // ✅ AJOUT
       context.setVariable("niveau",    niveau);
       context.setVariable("anneeUniv", anneeUniv);
       context.setVariable("year",      Year.now().getValue());

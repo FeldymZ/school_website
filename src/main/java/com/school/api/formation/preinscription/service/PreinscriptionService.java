@@ -73,11 +73,12 @@ public class PreinscriptionService {
 
         PreinscriptionDemande saved = demandeRepo.save(demande);
 
+        /* ✅ FIX : AJOUT LICENCE / MASTER */
         mailService.sendPreinscriptionRecue(
                 saved.getEmail(),
                 saved.getCivilite().getLabel(),
                 saved.getNom(),
-                formation.getName(),
+                formation.getLevel().getLabel() + " " + formation.getName(), // 🔥 ICI
                 saved.getNiveauSouhaite().getLabel(),
                 periode.getSession().getAnnee()
         );
@@ -113,7 +114,7 @@ public class PreinscriptionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
     }
 
-    /* 🔥 VALIDATION + PDF + MAIL */
+    /* ================= VALIDATION ================= */
     @Transactional
     public PreinscriptionDemandeResponse validate(Long id) {
 
@@ -131,15 +132,15 @@ public class PreinscriptionService {
 
         d.setPdfUrl(path);
 
-        /* ✅ CORRECTION ICI */
+        /* ✅ FIX : LICENCE / MASTER */
         mailService.sendPreinscriptionValidee(
                 d.getEmail(),
                 d.getCivilite().getLabel(),
                 d.getNom(),
-                d.getFormation().getName(),
+                d.getFormation().getLevel().getLabel() + " " + d.getFormation().getName(), // 🔥 ICI
                 d.getNiveauSouhaite().getLabel(),
                 d.getPeriode().getSession().getAnnee(),
-                path   // ✅ IMPORTANT
+                path
         );
 
         return toDto(demandeRepo.save(d));

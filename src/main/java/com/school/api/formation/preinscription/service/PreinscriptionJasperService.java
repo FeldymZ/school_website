@@ -3,14 +3,15 @@ package com.school.api.formation.preinscription.service;
 import com.school.api.formation.preinscription.entity.PreinscriptionDemande;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.JREmptyDataSource; // ✅ CORRIGÉ ICI
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -29,12 +30,10 @@ public class PreinscriptionJasperService {
 
             JasperReport report = JasperCompileManager.compileReport(template);
 
-            JRDataSource emptyDs = new JRBeanCollectionDataSource(List.of());
-
             JasperPrint print = JasperFillManager.fillReport(
                     report,
                     buildParams(demande),
-                    emptyDs
+                    new JREmptyDataSource(1) // ✅ OK
             );
 
             return JasperExportManager.exportReportToPdf(print);
@@ -57,12 +56,12 @@ public class PreinscriptionJasperService {
         /* ================= LOGO ================= */
         try {
             InputStream logoStream = new FileInputStream(LOGO_PATH);
-            p.put("LOGO_PATH", logoStream);
+            p.put("LOGO", logoStream);
         } catch (Exception e) {
             log.warn("⚠️ Logo non trouvé : {}", LOGO_PATH);
         }
 
-        /* ================= INFOS DEMANDE ================= */
+        /* ================= INFOS ================= */
         p.put("NUMERO_DEMANDE", genererNumero(d.getId()));
         p.put("ANNEE_UNIV", session.getAnnee());
 
@@ -86,7 +85,6 @@ public class PreinscriptionJasperService {
         p.put("EMETTEUR_NOM", emetteur.getNom());
         p.put("EMETTEUR_FONCTION", emetteur.getFonction());
 
-        /* 🔥 IMPORTANT : signature en InputStream */
         try {
             InputStream signatureStream = new FileInputStream(emetteur.getSignatureUrl());
             p.put("SIGNATURE", signatureStream);
