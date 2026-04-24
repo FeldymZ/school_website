@@ -73,6 +73,7 @@ public class PreinscriptionService {
 
         PreinscriptionDemande saved = demandeRepo.save(demande);
 
+        /* ✅ MAIL DE CONFIRMATION */
         mailService.sendPreinscriptionRecue(
                 saved.getEmail(),
                 saved.getCivilite().getLabel(),
@@ -107,17 +108,16 @@ public class PreinscriptionService {
                 .toList();
     }
 
-    /* 🔥 FIX CRITIQUE */
     public PreinscriptionDemandeResponse getById(Long id) {
         return demandeRepo.findByIdWithRelations(id)
                 .map(this::toDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
     }
 
+    /* 🔥 VALIDATION + MAIL + PDF */
     @Transactional
     public PreinscriptionDemandeResponse validate(Long id) {
 
-        /* 🔥 FIX CRITIQUE */
         PreinscriptionDemande d = demandeRepo.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
 
@@ -126,12 +126,26 @@ public class PreinscriptionService {
 
         byte[] pdf = jasperService.generatePdf(d);
 
+        String filename = "preinscription_" + d.getId() + ".pdf";
+
         String path = fileStorageService.storePreinscriptionPdf(
                 pdf,
-                "preinscription_" + d.getId() + ".pdf"
+                filename
         );
 
         d.setPdfUrl(path);
+
+        /* 🔥 AJOUT CRITIQUE : ENVOI DU MAIL AVEC PDF */
+        mailService.sendPreinscriptionValidee(
+                d.getEmail(),
+                d.getCivilite().getLabel(),
+                d.getNom(),
+                d.getFormation().getName(),
+                d.getNiveauSouhaite().getLabel(),
+                d.getPeriode().getSession().getAnnee(),
+                pdf,
+                filename
+        );
 
         return toDto(demandeRepo.save(d));
     }
@@ -139,7 +153,6 @@ public class PreinscriptionService {
     @Transactional
     public void reject(Long id) {
 
-        /* 🔥 FIX CRITIQUE */
         PreinscriptionDemande d = demandeRepo.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
 
