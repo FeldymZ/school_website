@@ -16,6 +16,11 @@ java {
 
 repositories {
   mavenCentral()
+
+  // 🔥 AJOUT CRITIQUE (Jasper)
+  maven {
+    url "https://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts/"
+  }
 }
 
 dependencies {
@@ -23,10 +28,10 @@ dependencies {
   // 🌐 Web API
   implementation 'org.springframework.boot:spring-boot-starter-web'
 
-  // 🔤 Slug / suppression des accents
+  // 🔤 Utils
   implementation 'org.apache.commons:commons-lang3:3.14.0'
 
-  // 🗄️ JPA + Hibernate
+  // 🗄️ JPA
   implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
   // 🔐 Security
@@ -38,7 +43,7 @@ dependencies {
   // 📧 Mail
   implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-  // 🩺 Actuator (monitoring)
+  // 🩺 Actuator
   implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
   // 🐘 PostgreSQL
@@ -48,10 +53,9 @@ dependencies {
   compileOnly 'org.projectlombok:lombok'
   annotationProcessor 'org.projectlombok:lombok'
 
-  // 🔧 Configuration properties (autocomplete IDE)
   annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
-  // 📖 Swagger / OpenAPI
+  // 📖 Swagger
   implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
   // 🔑 JWT
@@ -59,18 +63,22 @@ dependencies {
   runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
   runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-  // 🌱 Thymeleaf (emails)
+  // 🌱 Thymeleaf
   implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
-  // 📄 Apache POI (Word - préinscriptions)
+  // 📄 Apache POI
   implementation 'org.apache.poi:poi-ooxml:5.2.5'
 
   // 📄 JasperReports
   implementation 'net.sf.jasperreports:jasperreports:6.19.1'
 
+  // 🔥 OPTION RECOMMANDÉE (remplace iText)
+  implementation 'com.github.librepdf:openpdf:1.3.30'
+
   // 🧪 Tests
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.springframework.security:spring-security-test'
+
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
