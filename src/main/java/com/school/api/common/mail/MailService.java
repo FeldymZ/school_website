@@ -266,4 +266,83 @@ public class MailService {
       log.error("❌ Erreur envoi brochure", e);
     }
   }
+
+
+  /* =====================================================
+   🔹 PRÉINSCRIPTION — ACCUSÉ DE RÉCEPTION
+   ===================================================== */
+  @Async
+  public void sendPreinscriptionRecue(
+          String to,
+          String civilite,
+          String nom,
+          String formation,
+          String niveau,
+          String anneeUniv
+  ) {
+    try {
+      Context context = new Context();
+      context.setVariable("civilite",  civilite);
+      context.setVariable("nom",       nom.toUpperCase());
+      context.setVariable("formation", formation);
+      context.setVariable("niveau",    niveau);
+      context.setVariable("anneeUniv", anneeUniv);
+      context.setVariable("year",      Year.now().getValue());
+
+      String html = templateEngine.process(
+              "mail/preinscription-recue", context
+      );
+
+      sendHtml(
+              to,
+              "Demande de préinscription reçue – " + anneeUniv,
+              html
+      );
+
+      log.info("📩 Accusé préinscription envoyé à {}", to);
+
+    } catch (Exception e) {
+      log.error("❌ Erreur accusé préinscription", e);
+    }
+  }
+
+  /* =====================================================
+     🔹 PRÉINSCRIPTION — ATTESTATION VALIDÉE + PDF
+     ===================================================== */
+  @Async
+  public void sendPreinscriptionValidee(
+          String to,
+          String civilite,
+          String nom,
+          String formation,
+          String niveau,
+          String anneeUniv,
+          String pdfPath
+  ) {
+    try {
+      Context context = new Context();
+      context.setVariable("civilite",  civilite);
+      context.setVariable("nom",       nom.toUpperCase());
+      context.setVariable("formation", formation);
+      context.setVariable("niveau",    niveau);
+      context.setVariable("anneeUniv", anneeUniv);
+      context.setVariable("year",      Year.now().getValue());
+
+      String html = templateEngine.process(
+              "mail/preinscription-validee", context
+      );
+
+      sendHtmlWithAttachmentFromPath(
+              to,
+              "Votre attestation de préinscription – " + anneeUniv,
+              html,
+              pdfPath
+      );
+
+      log.info("📨 Attestation préinscription envoyée à {}", to);
+
+    } catch (Exception e) {
+      log.error("❌ Erreur envoi attestation préinscription", e);
+    }
+  }
 }
