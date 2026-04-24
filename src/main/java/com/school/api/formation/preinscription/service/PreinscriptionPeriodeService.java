@@ -18,8 +18,8 @@ public class PreinscriptionPeriodeService {
     private final SessionUniversitaireRepository sessionRepo;
     private final PreinscriptionEmetteurRepository emetteurRepo;
 
-    /* ================= CREATE SESSION ================= */
-    public void createSession(SessionRequest req) {
+    /* ================= SESSION ================= */
+    public void createSession(SessionUniversitaireRequest req) {
 
         if (sessionRepo.findByAnnee(req.annee()).isPresent()) {
             throw new IllegalStateException("Session déjà existante");
@@ -32,7 +32,7 @@ public class PreinscriptionPeriodeService {
         );
     }
 
-    /* ================= CREATE PERIODE ================= */
+    /* ================= PERIODE ================= */
     @Transactional
     public void createPeriode(PeriodeRequest req) {
 
@@ -60,7 +60,7 @@ public class PreinscriptionPeriodeService {
         );
     }
 
-    /* ================= ACTIVE PERIODE ================= */
+    /* ================= ACTIVE ================= */
     public PreinscriptionPeriode getActivePeriode() {
         LocalDateTime now = LocalDateTime.now();
 

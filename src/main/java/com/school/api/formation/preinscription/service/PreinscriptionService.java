@@ -11,6 +11,7 @@ import com.school.api.formation.preinscription.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,9 +29,9 @@ public class PreinscriptionService {
     private final PreinscriptionJasperService jasperService;
     private final FileStorageService fileStorageService;
 
-    /* =========================
+    /* =====================================================
        🔹 PUBLIC
-       ========================= */
+       ===================================================== */
     @Transactional
     public PreinscriptionDemandeResponse submit(PreinscriptionDemandeRequest req) {
 
@@ -40,7 +41,7 @@ public class PreinscriptionService {
             throw new IllegalStateException("Les préinscriptions sont fermées.");
         }
 
-        if (demandeRepo.existsByEmailAndPeriodeId(req.email(), periode.getId())) {
+        if (demandeRepo.existsByEmailAndPeriode_Id(req.email(), periode.getId())) {
             throw new IllegalStateException("Demande déjà existante.");
         }
 
@@ -62,6 +63,7 @@ public class PreinscriptionService {
                 .niveauSouhaite(req.niveauSouhaite())
                 .formation(formation)
                 .periode(periode)
+                .statut(StatutDemande.EN_ATTENTE)
                 .build();
 
         PreinscriptionDemande saved = demandeRepo.save(demande);
@@ -78,9 +80,103 @@ public class PreinscriptionService {
         return toDto(saved);
     }
 
-    /* =========================
+    /* =====================================================
+       🔹 ADMIN — DEMANDES
+       ===================================================== */
+    public List<PreinscriptionDemandeResponse> getAll() {
+        return demandeRepo.findAllByOrderByCreatedAtDesc()
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    public List<PreinscriptionDemandeResponse> getByStatut(StatutDemande statut) {
+        return demandeRepo.findByStatutOrderByCreatedAtDesc(statut)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    public List<PreinscriptionDemandeResponse> getByFormation(Long formationId) {
+        return demandeRepo.findByFormation_IdOrderByCreatedAtDesc(formationId)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    public PreinscriptionDemandeResponse getById(Long id) {
+        return demandeRepo.findById(id)
+                .map(this::toDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
+    }
+
+    @Transactional
+    public PreinscriptionDemandeResponse validate(Long id) {
+
+        PreinscriptionDemande d = demandeRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
+
+        d.setStatut(StatutDemande.VALIDEE);
+        d.setValidatedAt(LocalDateTime.now());
+
+        byte[] pdf = jasperService.generatePdf(d);
+
+        String path = fileStorageService.storePreinscriptionPdf(
+                pdf,
+                "preinscription_" + d.getId() + ".pdf"
+        );
+
+        d.setPdfUrl(path);
+
+        return toDto(demandeRepo.save(d));
+    }
+
+    @Transactional
+    public void reject(Long id) {
+        PreinscriptionDemande d = demandeRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
+
+        d.setStatut(StatutDemande.REJETEE);
+        demandeRepo.save(d);
+    }
+
+    /* =====================================================
+       🔹 ADMIN — ÉMETTEURS
+       ===================================================== */
+    public List<PreinscriptionEmetteur> getAllEmetteurs() {
+        return emetteurRepo.findAll();
+    }
+
+    @Transactional
+    public void createEmetteur(String nom, String fonction, MultipartFile signature) {
+
+        String path = fileStorageService.storeSignature(signature);
+
+        emetteurRepo.save(
+                PreinscriptionEmetteur.builder()
+                        .nom(nom)
+                        .fonction(fonction)
+                        .signatureUrl(path)
+                        .actif(false)
+                        .build()
+        );
+    }
+
+    @Transactional
+    public void activateEmetteur(Long id) {
+
+        emetteurRepo.findAll().forEach(e -> e.setActif(false));
+
+        PreinscriptionEmetteur em = emetteurRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Emetteur", "id", id));
+
+        em.setActif(true);
+        emetteurRepo.save(em);
+    }
+
+    /* =====================================================
        🔹 SESSION UNIVERSITAIRE
-       ========================= */
+       ===================================================== */
     @Transactional
     public void createSession(SessionUniversitaireRequest req) {
 
@@ -105,9 +201,9 @@ public class PreinscriptionService {
                 .toList();
     }
 
-    /* =========================
+    /* =====================================================
        🔹 PERIODE
-       ========================= */
+       ===================================================== */
     @Transactional
     public void createPeriode(PeriodeRequest req) {
 
@@ -139,9 +235,9 @@ public class PreinscriptionService {
         return periodeRepo.findAll();
     }
 
-    /* =========================
+    /* =====================================================
        🔹 ACTIVE
-       ========================= */
+       ===================================================== */
     public SessionPublicResponse getActiveSession() {
 
         PreinscriptionPeriode p = getActivePeriode();
@@ -160,6 +256,10 @@ public class PreinscriptionService {
                 .build();
     }
 
+    public boolean isSessionOuverte() {
+        return getActivePeriode() != null;
+    }
+
     private PreinscriptionPeriode getActivePeriode() {
         LocalDateTime now = LocalDateTime.now();
         return periodeRepo
@@ -167,16 +267,21 @@ public class PreinscriptionService {
                 .orElse(null);
     }
 
-    /* =========================
+    /* =====================================================
        🔹 DTO
-       ========================= */
+       ===================================================== */
     private PreinscriptionDemandeResponse toDto(PreinscriptionDemande d) {
         return PreinscriptionDemandeResponse.builder()
                 .id(d.getId())
+                .civilite(d.getCivilite().getLabel())
                 .nom(d.getNom())
                 .prenom(d.getPrenom())
                 .email(d.getEmail())
+                .telephone(d.getTelephone())
+                .whatsapp(d.getWhatsapp())
+                .niveau(d.getNiveauSouhaite().getLabel())
                 .formation(d.getFormation().getName())
+                .nationalite(d.getNationalite())
                 .anneeUniversitaire(d.getPeriode().getSession().getAnnee())
                 .statut(d.getStatut())
                 .createdAt(d.getCreatedAt())

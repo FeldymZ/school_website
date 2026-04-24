@@ -9,9 +9,14 @@ import java.util.List;
 public interface PreinscriptionDemandeRepository
         extends JpaRepository<PreinscriptionDemande, Long> {
 
-    List<PreinscriptionDemande> findAllByOrderByCreatedAtDesc();
+    List<PreinscriptionDemande>
+    findAllByOrderByCreatedAtDesc();
 
-    List<PreinscriptionDemande> findByStatutOrderByCreatedAtDesc(StatutDemande statut);
+    List<PreinscriptionDemande>
+    findByStatutOrderByCreatedAtDesc(StatutDemande statut);
 
-    boolean existsByEmailAndPeriodeId(String email, Long periodeId);
+    List<PreinscriptionDemande>
+    findByFormation_IdOrderByCreatedAtDesc(Long formationId);
+
+    boolean existsByEmailAndPeriode_Id(String email, Long periodeId);
 }
