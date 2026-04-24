@@ -231,8 +231,19 @@ public class PreinscriptionService {
         );
     }
 
-    public List<PreinscriptionPeriode> getAllPeriodes() {
-        return periodeRepo.findAll();
+    public List<PeriodeResponse> getAllPeriodes() {
+        return periodeRepo.findAll()
+                .stream()
+                .map(p -> PeriodeResponse.builder()
+                        .id(p.getId())
+                        .annee(p.getSession().getAnnee())
+                        .emetteurId(p.getEmetteur().getId())
+                        .emetteurNom(p.getEmetteur().getNom())
+                        .dateDebut(p.getDateDebut())
+                        .dateFin(p.getDateFin())
+                        .build()
+                )
+                .toList();
     }
 
     /* =====================================================
