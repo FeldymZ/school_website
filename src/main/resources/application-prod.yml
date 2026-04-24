@@ -16,6 +16,13 @@ spring:
       ddl-auto: update
     show-sql: false
     open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Europe/Paris   # 🔥 FORCE GMT+1 DB
+
+  jackson:
+    time-zone: Europe/Paris        # 🔥 FORCE GMT+1 JSON
 
   mail:
     host: ${SPRING_MAIL_HOST}

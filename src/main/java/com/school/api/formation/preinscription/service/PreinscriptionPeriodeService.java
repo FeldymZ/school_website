@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -142,5 +143,15 @@ public class PreinscriptionPeriodeService {
                 .ouverte(true)
                 .anneeUniversitaire(p.getSession().getAnnee())
                 .build();
+    }
+
+
+    /* ================= VERIFIER SI OUVERT ================= */
+    public boolean isOuverte(PreinscriptionPeriode periode) {
+
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Europe/Paris"));
+
+        return now.isAfter(periode.getDateDebut())
+                && now.isBefore(periode.getDateFin());
     }
 }
