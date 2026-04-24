@@ -21,11 +21,13 @@ public class PreinscriptionPeriode {
     @Column(nullable = false)
     private LocalDateTime dateFin;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    /* 🔥 FIX ICI */
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "session_id", nullable = false)
     private SessionUniversitaire session;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    /* 🔥 FIX ICI */
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "emetteur_id", nullable = false)
     private PreinscriptionEmetteur emetteur;
 }
