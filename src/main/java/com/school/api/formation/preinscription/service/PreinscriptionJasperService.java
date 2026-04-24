@@ -19,9 +19,7 @@ public class PreinscriptionJasperService {
     private static final DateTimeFormatter DATE_FR =
             DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    // ✅ CHEMIN CORRECT DANS DOCKER
-    private static final String LOGO_PATH =
-            "/app/assets/logo.png";
+    private static final String LOGO_PATH = "/app/assets/logo.png";
 
     public byte[] generatePdf(PreinscriptionDemande demande) {
         try {
@@ -56,14 +54,15 @@ public class PreinscriptionJasperService {
 
         Map<String, Object> p = new HashMap<>();
 
+        /* ================= LOGO ================= */
         try {
-            // ✅ ON PASSE UN STREAM (FIABLE)
             InputStream logoStream = new FileInputStream(LOGO_PATH);
             p.put("LOGO_PATH", logoStream);
         } catch (Exception e) {
             log.warn("⚠️ Logo non trouvé : {}", LOGO_PATH);
         }
 
+        /* ================= INFOS DEMANDE ================= */
         p.put("NUMERO_DEMANDE", genererNumero(d.getId()));
         p.put("ANNEE_UNIV", session.getAnnee());
 
@@ -77,16 +76,25 @@ public class PreinscriptionJasperService {
         p.put("TELEPHONE", d.getTelephone());
         p.put("WHATSAPP", d.getWhatsapp() != null ? d.getWhatsapp() : "—");
 
+        /* ================= FORMATION ================= */
         p.put("NIVEAU", d.getNiveauSouhaite().getLabel());
         p.put("FORMATION_TITRE",
                 formation.getLevel().getLabel() + " " + formation.getName());
         p.put("SPECIALITE", formation.getName());
 
+        /* ================= EMETTEUR ================= */
         p.put("EMETTEUR_NOM", emetteur.getNom());
         p.put("EMETTEUR_FONCTION", emetteur.getFonction());
 
-        p.put("SIGNATURE_PATH", emetteur.getSignatureUrl());
+        /* 🔥 IMPORTANT : signature en InputStream */
+        try {
+            InputStream signatureStream = new FileInputStream(emetteur.getSignatureUrl());
+            p.put("SIGNATURE", signatureStream);
+        } catch (Exception e) {
+            log.warn("⚠️ Signature non trouvée : {}", emetteur.getSignatureUrl());
+        }
 
+        /* ================= DATE ================= */
         p.put("DATE_EMISSION",
                 d.getValidatedAt().toLocalDate().format(DATE_FR));
 
