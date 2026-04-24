@@ -1,5 +1,6 @@
 package com.school.api.common.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -15,6 +17,8 @@ public class GlobalExceptionHandler {
        ========================= */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<?> handleNotFound(ResourceNotFoundException ex) {
+
+        log.warn("❌ NOT FOUND: {}", ex.getMessage());
 
         return buildResponse(HttpStatus.NOT_FOUND, "NOT_FOUND", ex.getMessage());
     }
@@ -25,6 +29,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleBadRequest(IllegalArgumentException ex) {
 
+        log.warn("⚠️ BAD REQUEST: {}", ex.getMessage());
+
         return buildResponse(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage());
     }
 
@@ -34,19 +40,24 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SecurityException.class)
     public ResponseEntity<?> handleUnauthorized(SecurityException ex) {
 
+        log.warn("🔐 UNAUTHORIZED: {}", ex.getMessage());
+
         return buildResponse(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", ex.getMessage());
     }
 
     /* =========================
-       🔴 GENERIC
+       🔴 GENERIC (IMPORTANT)
        ========================= */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneric(Exception ex) {
 
+        // 🔥 LOG COMPLET
+        log.error("🔥 INTERNAL ERROR", ex);
+
         return buildResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "INTERNAL_SERVER_ERROR",
-                "Une erreur interne est survenue"
+                ex.getMessage() // 🔥 temporaire pour debug
         );
     }
 
