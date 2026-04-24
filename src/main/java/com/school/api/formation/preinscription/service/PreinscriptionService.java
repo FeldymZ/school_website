@@ -32,16 +32,11 @@ public class PreinscriptionService {
     private final PreinscriptionJasperService jasperService;
     private final FileStorageService fileStorageService;
 
-    /* =====================================================
-       🔹 TIMEZONE CENTRALISÉ
-    ===================================================== */
     private LocalDateTime now() {
         return LocalDateTime.now(ZoneId.of("Africa/Libreville"));
     }
 
-    /* =====================================================
-       🔹 PUBLIC — SUBMIT
-    ===================================================== */
+    /* ================= PUBLIC ================= */
     @Transactional
     public PreinscriptionDemandeResponse submit(PreinscriptionDemandeRequest req) {
 
@@ -90,9 +85,7 @@ public class PreinscriptionService {
         return toDto(saved);
     }
 
-    /* =====================================================
-       🔹 ADMIN — DEMANDES (FIX ICI 🔥)
-    ===================================================== */
+    /* ================= ADMIN ================= */
     public List<PreinscriptionDemandeResponse> getAll() {
         return demandeRepo.findAllWithRelations()
                 .stream()
@@ -114,8 +107,9 @@ public class PreinscriptionService {
                 .toList();
     }
 
+    /* 🔥 FIX CRITIQUE */
     public PreinscriptionDemandeResponse getById(Long id) {
-        return demandeRepo.findById(id)
+        return demandeRepo.findByIdWithRelations(id)
                 .map(this::toDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
     }
@@ -123,7 +117,8 @@ public class PreinscriptionService {
     @Transactional
     public PreinscriptionDemandeResponse validate(Long id) {
 
-        PreinscriptionDemande d = demandeRepo.findById(id)
+        /* 🔥 FIX CRITIQUE */
+        PreinscriptionDemande d = demandeRepo.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
 
         d.setStatut(StatutDemande.VALIDEE);
@@ -143,15 +138,15 @@ public class PreinscriptionService {
 
     @Transactional
     public void reject(Long id) {
-        PreinscriptionDemande d = demandeRepo.findById(id)
+
+        /* 🔥 FIX CRITIQUE */
+        PreinscriptionDemande d = demandeRepo.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
 
         d.setStatut(StatutDemande.REJETEE);
     }
 
-    /* =====================================================
-       🔹 ADMIN — PÉRIODES
-    ===================================================== */
+    /* ================= AUTRES ================= */
     @Transactional
     public void deletePeriode(Long id) {
 
@@ -161,17 +156,12 @@ public class PreinscriptionService {
                 ));
 
         if (periode.isActive()) {
-            throw new IllegalStateException(
-                    "Désactivez la période avant suppression"
-            );
+            throw new IllegalStateException("Désactivez la période avant suppression");
         }
 
         periodeRepo.delete(periode);
     }
 
-    /* =====================================================
-       🔹 ADMIN — SESSION
-    ===================================================== */
     @Transactional
     public void deleteSession(Long id) {
 
@@ -189,9 +179,6 @@ public class PreinscriptionService {
         sessionRepo.delete(session);
     }
 
-    /* =====================================================
-       🔹 ADMIN — ÉMETTEURS
-    ===================================================== */
     public List<PreinscriptionEmetteur> getAllEmetteurs() {
         return emetteurRepo.findAll();
     }
@@ -222,9 +209,6 @@ public class PreinscriptionService {
         em.setActif(true);
     }
 
-    /* =====================================================
-       🔹 PUBLIC — SESSION ACTIVE
-    ===================================================== */
     public SessionPublicResponse getActiveSession() {
 
         PreinscriptionPeriode p = getActivePeriode();
@@ -250,9 +234,6 @@ public class PreinscriptionService {
         return getActivePeriode() != null;
     }
 
-    /* =====================================================
-       🔹 PRIVATE
-    ===================================================== */
     private PreinscriptionPeriode getActivePeriode() {
 
         LocalDateTime now = now();
@@ -262,9 +243,6 @@ public class PreinscriptionService {
                 .orElse(null);
     }
 
-    /* =====================================================
-       🔹 DTO
-    ===================================================== */
     private PreinscriptionDemandeResponse toDto(PreinscriptionDemande d) {
         return PreinscriptionDemandeResponse.builder()
                 .id(d.getId())
