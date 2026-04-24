@@ -231,8 +231,10 @@ public class PreinscriptionService {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<PeriodeResponse> getAllPeriodes() {
-        return periodeRepo.findAll()
+
+        return periodeRepo.findAllWithRelations()
                 .stream()
                 .map(p -> PeriodeResponse.builder()
                         .id(p.getId())

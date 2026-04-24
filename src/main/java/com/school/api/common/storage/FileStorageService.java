@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 import java.util.UUID;
 
@@ -167,11 +168,7 @@ public class FileStorageService {
      ✍️ PRÉINSCRIPTIONS — SIGNATURES
      ============================ */
 
-  public String storeSignature(MultipartFile file) {
-    validateImage(file);
-    validateSize(file, MAX_IMAGE_SIZE);
-    return store(file, "preinscriptions/signatures");
-  }
+
 
   /* ============================
      📄 PRÉINSCRIPTIONS — PDF GÉNÉRÉS
@@ -291,5 +288,22 @@ public class FileStorageService {
       throw new IllegalArgumentException("Nom de fichier invalide");
     }
     return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+  }
+
+  public String storeSignature(MultipartFile file) {
+
+    try {
+      String filename = "sign_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
+      Path path = Paths.get("/files/signatures/" + filename);
+
+      Files.createDirectories(path.getParent());
+      Files.write(path, file.getBytes());
+
+      return path.toString(); // ⚠️ chemin interne uniquement
+
+    } catch (Exception e) {
+      throw new RuntimeException("Erreur upload signature");
+    }
   }
 }

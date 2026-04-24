@@ -100,6 +100,7 @@ public class PreinscriptionAdminController {
         service.createPeriode(req);
     }
 
+    @AuditLog(action = "CONSULTATION_PERIODES")
     @GetMapping("/periodes")
     public List<PeriodeResponse> getPeriodes() {
         return service.getAllPeriodes();
