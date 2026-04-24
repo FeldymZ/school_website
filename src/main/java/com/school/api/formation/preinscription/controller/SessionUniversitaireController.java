@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/preinscriptions/sessions")
+@RequestMapping("/api/admin/sessions") // ✅ CHANGÉ ICI
 @RequiredArgsConstructor
 @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
 public class SessionUniversitaireController {
