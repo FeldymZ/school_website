@@ -31,8 +31,8 @@
         <band height="622" splitType="Stretch">
             <property name="com.jaspersoft.studio.unit.height" value="px"/>
             <image>
-                <reportElement x="0" y="3" width="130" height="46" uuid="062365d6-e385-46b2-8d99-02f4cb3894fb"/>
-                <imageExpression><![CDATA[new java.io.File($P{LOGO_PATH})]]></imageExpression>
+                <reportElement x="0" y="3" width="130" height="46"/>
+                <imageExpression><![CDATA[$P{LOGO_PATH}]]></imageExpression>
             </image>
             <staticText>
                 <reportElement x="285" y="10" width="270" height="19" uuid="dd7447fd-3a65-4d10-ab73-597d8954f876">
