@@ -14,7 +14,7 @@
             <table width="600" cellpadding="0" cellspacing="0"
                    style="background:#ffffff; border-radius:10px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
 
-                <!-- ══════════ HEADER ══════════ -->
+                <!-- HEADER -->
                 <tr>
                     <td style="padding:20px 30px; border-bottom:3px solid #00AEEF;">
                         <img
@@ -25,7 +25,7 @@
                     </td>
                 </tr>
 
-                <!-- ══════════ CONTENT ══════════ -->
+                <!-- CONTENT -->
                 <tr>
                     <td style="padding:30px; color:#333333;">
 
@@ -38,24 +38,33 @@
                             l'année universitaire <strong th:text="${anneeUniv}">2025-2026</strong>.
                         </p>
 
-                        <!-- ══ Récapitulatif ══ -->
+                        <!-- RÉCAP -->
                         <table width="100%" cellpadding="0" cellspacing="0"
                                style="background:#f0f7ff; border-left:4px solid #00AEEF;
-                          border-radius:4px; margin:20px 0;">
+                               border-radius:4px; margin:20px 0;">
                             <tr>
                                 <td style="padding:18px 20px;">
+
+                                    <p style="margin:0 0 8px; font-size:14px;">
+                                        <strong>Niveau académique :</strong>
+                                        <span th:text="${level}">Licence</span>
+                                    </p>
+
                                     <p style="margin:0 0 8px; font-size:14px;">
                                         <strong>Formation :</strong>
                                         <span th:text="${formation}">Licence Informatique</span>
                                     </p>
+
                                     <p style="margin:0 0 8px; font-size:14px;">
                                         <strong>Niveau souhaité :</strong>
                                         <span th:text="${niveau}">1ère année</span>
                                     </p>
+
                                     <p style="margin:0; font-size:14px;">
                                         <strong>Année universitaire :</strong>
                                         <span th:text="${anneeUniv}">2025-2026</span>
                                     </p>
+
                                 </td>
                             </tr>
                         </table>
@@ -66,8 +75,6 @@
                             par email dans les plus brefs délais.
                         </p>
 
-
-
                         <p style="margin-top:24px;">
                             Cordialement,<br>
                             <strong>L'équipe ESIITECH</strong>
@@ -76,7 +83,7 @@
                     </td>
                 </tr>
 
-                <!-- ══════════ FOOTER ══════════ -->
+                <!-- FOOTER -->
                 <tr>
                     <td style="background:#f4f6f8; padding:18px; text-align:center;
                      font-size:12px; color:#777;">
