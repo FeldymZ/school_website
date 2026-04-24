@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface PreinscriptionPeriodeRepository extends JpaRepository<PreinscriptionPeriode, Long> {
 
     /* ================= ACTIVE ================= */
-    Optional<PreinscriptionPeriode> findFirstByDateDebutBeforeAndDateFinAfter(
+    Optional<PreinscriptionPeriode> findFirstByDateDebutBeforeAndDateFinAfterOrderByDateDebutDesc(
             LocalDateTime now1,
             LocalDateTime now2
     );
@@ -27,6 +27,8 @@ public interface PreinscriptionPeriodeRepository extends JpaRepository<Preinscri
     /* ================= CHECK FK ================= */
     boolean existsByEmetteur_Id(Long emetteurId);
 
-    /* ================= BONUS (optionnel) ================= */
     long countByEmetteur_Id(Long emetteurId);
+
+    /* ================= NEW ================= */
+    boolean existsBySession_Id(Long sessionId);
 }

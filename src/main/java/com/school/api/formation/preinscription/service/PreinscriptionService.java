@@ -25,6 +25,7 @@ public class PreinscriptionService {
     private final PreinscriptionPeriodeRepository periodeRepo;
     private final FormationInitialeRepository formationRepo;
     private final PreinscriptionEmetteurRepository emetteurRepo;
+    private final SessionUniversitaireRepository sessionRepo;
 
     private final MailService mailService;
     private final PreinscriptionJasperService jasperService;
@@ -141,6 +142,50 @@ public class PreinscriptionService {
     }
 
     /* =====================================================
+       🔹 ADMIN — PÉRIODES
+       ===================================================== */
+    @Transactional
+    public void deletePeriode(Long id) {
+
+        PreinscriptionPeriode periode = periodeRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "PreinscriptionPeriode", "id", id
+                ));
+
+        LocalDateTime now = LocalDateTime.now();
+
+        boolean isActive =
+                periode.getDateDebut().isBefore(now) &&
+                        periode.getDateFin().isAfter(now);
+
+        if (isActive) {
+            throw new IllegalStateException("Impossible de supprimer une période active");
+        }
+
+        periodeRepo.delete(periode);
+    }
+
+    /* =====================================================
+       🔹 ADMIN — SESSION
+       ===================================================== */
+    @Transactional
+    public void deleteSession(Long id) {
+
+        SessionUniversitaire session = sessionRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "SessionUniversitaire", "id", id
+                ));
+
+        if (periodeRepo.existsBySession_Id(id)) {
+            throw new IllegalStateException(
+                    "Impossible de supprimer une session contenant des périodes"
+            );
+        }
+
+        sessionRepo.delete(session);
+    }
+
+    /* =====================================================
        🔹 ADMIN — ÉMETTEURS
        ===================================================== */
     public List<PreinscriptionEmetteur> getAllEmetteurs() {
@@ -207,7 +252,7 @@ public class PreinscriptionService {
     private PreinscriptionPeriode getActivePeriode() {
         LocalDateTime now = LocalDateTime.now();
         return periodeRepo
-                .findFirstByDateDebutBeforeAndDateFinAfter(now, now)
+                .findFirstByDateDebutBeforeAndDateFinAfterOrderByDateDebutDesc(now, now)
                 .orElse(null);
     }
 
