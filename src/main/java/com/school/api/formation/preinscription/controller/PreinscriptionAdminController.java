@@ -65,32 +65,8 @@ public class PreinscriptionAdminController {
         service.reject(id);
     }
 
-    /* ════════════════════════════════
-       📌 ÉMETTEURS
-       ════════════════════════════════ */
 
-    @AuditLog(action = "CONSULTATION_EMETTEURS")
-    @GetMapping("/emetteurs")
-    public List<PreinscriptionEmetteur> getAllEmetteurs() {
-        return service.getAllEmetteurs();
-    }
 
-    @AuditLog(action = "CREATION_EMETTEUR", target = "#nom")
-    @PostMapping(value = "/emetteurs", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void createEmetteur(
-            @RequestParam String nom,
-            @RequestParam String fonction,
-            @RequestParam MultipartFile signature
-    ) {
-        service.createEmetteur(nom, fonction, signature);
-    }
-
-    @AuditLog(action = "ACTIVATION_EMETTEUR", target = "#id.toString()")
-    @PutMapping("/emetteurs/{id}/activer")
-    @PreAuthorize("hasRole('SUPERADMIN')")
-    public void activateEmetteur(@PathVariable Long id) {
-        service.activateEmetteur(id);
-    }
 
     /* ════════════════════════════════
        📌 SESSIONS UNIVERSITAIRES
