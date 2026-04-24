@@ -46,9 +46,7 @@ public class PreinscriptionService {
             throw new IllegalStateException("Les préinscriptions sont fermées.");
         }
 
-        if (demandeRepo.existsByEmailAndPeriode_Id(req.email(), periode.getId())) {
-            throw new IllegalStateException("Demande déjà existante.");
-        }
+        // ✅ SUPPRESSION DU BLOC QUI BLOQUAIT LES DOUBLONS
 
         FormationInitiale formation = formationRepo.findById(req.formationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -78,7 +76,7 @@ public class PreinscriptionService {
                 saved.getEmail(),
                 saved.getCivilite().getLabel(),
                 saved.getNom(),
-                formation.getLevel().getLabel() + " " + formation.getName(), // 🔥 ICI
+                formation.getLevel().getLabel() + " " + formation.getName(),
                 saved.getNiveauSouhaite().getLabel(),
                 periode.getSession().getAnnee()
         );
@@ -137,7 +135,7 @@ public class PreinscriptionService {
                 d.getEmail(),
                 d.getCivilite().getLabel(),
                 d.getNom(),
-                d.getFormation().getLevel().getLabel() + " " + d.getFormation().getName(), // 🔥 ICI
+                d.getFormation().getLevel().getLabel() + " " + d.getFormation().getName(),
                 d.getNiveauSouhaite().getLabel(),
                 d.getPeriode().getSession().getAnnee(),
                 path
