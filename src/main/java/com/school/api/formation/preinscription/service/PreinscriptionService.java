@@ -91,24 +91,24 @@ public class PreinscriptionService {
     }
 
     /* =====================================================
-       🔹 ADMIN — DEMANDES
+       🔹 ADMIN — DEMANDES (FIX ICI 🔥)
     ===================================================== */
     public List<PreinscriptionDemandeResponse> getAll() {
-        return demandeRepo.findAllByOrderByCreatedAtDesc()
+        return demandeRepo.findAllWithRelations()
                 .stream()
                 .map(this::toDto)
                 .toList();
     }
 
     public List<PreinscriptionDemandeResponse> getByStatut(StatutDemande statut) {
-        return demandeRepo.findByStatutOrderByCreatedAtDesc(statut)
+        return demandeRepo.findByStatutWithRelations(statut)
                 .stream()
                 .map(this::toDto)
                 .toList();
     }
 
     public List<PreinscriptionDemandeResponse> getByFormation(Long formationId) {
-        return demandeRepo.findByFormation_IdOrderByCreatedAtDesc(formationId)
+        return demandeRepo.findByFormationWithRelations(formationId)
                 .stream()
                 .map(this::toDto)
                 .toList();
@@ -150,7 +150,7 @@ public class PreinscriptionService {
     }
 
     /* =====================================================
-       🔹 ADMIN — PÉRIODES (SECURISÉ AVEC active)
+       🔹 ADMIN — PÉRIODES
     ===================================================== */
     @Transactional
     public void deletePeriode(Long id) {
@@ -160,7 +160,6 @@ public class PreinscriptionService {
                         "PreinscriptionPeriode", "id", id
                 ));
 
-        /* 🔥 IMPORTANT : on bloque uniquement si active=true */
         if (periode.isActive()) {
             throw new IllegalStateException(
                     "Désactivez la période avant suppression"
@@ -252,13 +251,12 @@ public class PreinscriptionService {
     }
 
     /* =====================================================
-       🔹 PRIVATE — LOGIQUE ACTIVE
+       🔹 PRIVATE
     ===================================================== */
     private PreinscriptionPeriode getActivePeriode() {
 
         LocalDateTime now = now();
 
-        /* 🔥 FIX CRITIQUE : active=true */
         return periodeRepo
                 .findFirstByActiveTrueAndDateDebutBeforeAndDateFinAfterOrderByDateDebutDesc(now, now)
                 .orElse(null);
