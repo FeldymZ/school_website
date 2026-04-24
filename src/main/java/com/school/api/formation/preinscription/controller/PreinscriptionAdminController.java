@@ -4,12 +4,13 @@ import com.school.api.auth.audit.AuditLog;
 import com.school.api.formation.preinscription.dto.*;
 import com.school.api.formation.preinscription.entity.*;
 import com.school.api.formation.preinscription.service.PreinscriptionService;
+import com.school.api.formation.preinscription.service.PreinscriptionPeriodeService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,7 +20,9 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
 public class PreinscriptionAdminController {
 
-    private final PreinscriptionService service;
+    /* 🔥 SÉPARATION CLAIRE */
+    private final PreinscriptionService service; // demandes
+    private final PreinscriptionPeriodeService periodeService; // config
 
     /* ════════════════════════════════
        📌 DEMANDES
@@ -65,9 +68,6 @@ public class PreinscriptionAdminController {
         service.reject(id);
     }
 
-
-
-
     /* ════════════════════════════════
        📌 SESSIONS UNIVERSITAIRES
        ════════════════════════════════ */
@@ -78,13 +78,20 @@ public class PreinscriptionAdminController {
     public void createSession(
             @Valid @RequestBody SessionUniversitaireRequest req
     ) {
-        service.createSession(req);
+        periodeService.createSession(req); // ✅ CORRIGÉ
     }
 
     @AuditLog(action = "CONSULTATION_SESSIONS")
     @GetMapping("/sessions")
-    public List<SessionUniversitaireResponse> getSessions() {
-        return service.getAllSessions();
+    public List<SessionUniversitaire> getSessions() {
+        return periodeService.getAllSessions(); // ✅ CORRIGÉ
+    }
+
+    @AuditLog(action = "SUPPRESSION_SESSION")
+    @DeleteMapping("/sessions/{id}")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public void deleteSession(@PathVariable Long id) {
+        periodeService.deleteSession(id);
     }
 
     /* ════════════════════════════════
@@ -97,12 +104,19 @@ public class PreinscriptionAdminController {
     public void createPeriode(
             @Valid @RequestBody PeriodeRequest req
     ) {
-        service.createPeriode(req);
+        periodeService.createPeriode(req); // ✅ CORRIGÉ
     }
 
     @AuditLog(action = "CONSULTATION_PERIODES")
     @GetMapping("/periodes")
-    public List<PeriodeResponse> getPeriodes() {
-        return service.getAllPeriodes();
+    public List<PreinscriptionPeriode> getPeriodes() {
+        return periodeService.getAll(); // ✅ CORRIGÉ
+    }
+
+    @AuditLog(action = "SUPPRESSION_PERIODE")
+    @DeleteMapping("/periodes/{id}")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public void deletePeriode(@PathVariable Long id) {
+        periodeService.deletePeriode(id);
     }
 }
