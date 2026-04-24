@@ -30,4 +30,7 @@ public class PreinscriptionPeriode {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "emetteur_id", nullable = false)
     private PreinscriptionEmetteur emetteur;
+
+    @Column(nullable = false)
+    private boolean active = true;
 }

@@ -33,4 +33,9 @@ public interface PreinscriptionPeriodeRepository extends JpaRepository<Preinscri
     boolean existsBySession_Id(Long sessionId);
 
     long countBySession_Id(Long sessionId);
+
+    Optional<PreinscriptionPeriode> findFirstByActiveTrueAndDateDebutBeforeAndDateFinAfterOrderByDateDebutDesc(
+            LocalDateTime now1,
+            LocalDateTime now2
+    );
 }
