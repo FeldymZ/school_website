@@ -13,25 +13,13 @@ public class PreinscriptionPublicController {
 
     private final PreinscriptionService service;
 
-    /* =========================
-       📌 SESSION ACTIVE
-       ========================= */
-    @GetMapping("/session")
+    /* ================= SESSION ACTIVE ================= */
+    @GetMapping("/session-active")
     public SessionPublicResponse getSession() {
         return service.getActiveSession();
     }
 
-    /* =========================
-       📌 STATUT (legacy optionnel)
-       ========================= */
-    @GetMapping("/statut")
-    public boolean isOuverte() {
-        return service.isSessionOuverte();
-    }
-
-    /* =========================
-       📌 SOUMISSION
-       ========================= */
+    /* ================= SUBMIT ================= */
     @PostMapping
     public PreinscriptionDemandeResponse submit(
             @Valid @RequestBody PreinscriptionDemandeRequest request

@@ -4,9 +4,9 @@ import com.school.api.common.exception.ResourceNotFoundException;
 import com.school.api.formation.preinscription.dto.*;
 import com.school.api.formation.preinscription.entity.*;
 import com.school.api.formation.preinscription.repository.*;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -18,7 +18,7 @@ public class PreinscriptionPeriodeService {
     private final SessionUniversitaireRepository sessionRepo;
     private final PreinscriptionEmetteurRepository emetteurRepo;
 
-    /* ================= SESSION ================= */
+    /* ================= CREATE SESSION ================= */
     public void createSession(SessionUniversitaireRequest req) {
 
         if (sessionRepo.findByAnnee(req.annee()).isPresent()) {
@@ -27,22 +27,22 @@ public class PreinscriptionPeriodeService {
 
         sessionRepo.save(
                 SessionUniversitaire.builder()
-                        .annee(req.annee())
+                        .annee(req.annee().trim())
                         .build()
         );
     }
 
-    /* ================= PERIODE ================= */
+    /* ================= CREATE PERIODE ================= */
     @Transactional
     public void createPeriode(PeriodeRequest req) {
 
         if (req.dateFin().isBefore(req.dateDebut())) {
-            throw new IllegalArgumentException("Dates invalides");
+            throw new IllegalArgumentException("Date fin invalide");
         }
 
         SessionUniversitaire session = sessionRepo.findById(req.sessionId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "SessionUniversitaire", "id", req.sessionId()
+                        "Session", "id", req.sessionId()
                 ));
 
         PreinscriptionEmetteur emetteur = emetteurRepo.findById(req.emetteurId())
@@ -61,7 +61,9 @@ public class PreinscriptionPeriodeService {
     }
 
     /* ================= ACTIVE ================= */
+    @Transactional(readOnly = true)
     public PreinscriptionPeriode getActivePeriode() {
+
         LocalDateTime now = LocalDateTime.now();
 
         return periodeRepo
@@ -69,24 +71,30 @@ public class PreinscriptionPeriodeService {
                 .orElse(null);
     }
 
-    public boolean isPeriodeActive() {
-        return getActivePeriode() != null;
-    }
-
-    public PeriodePublicResponse getPublicInfo() {
+    /* ================= PUBLIC ================= */
+    @Transactional(readOnly = true)
+    public SessionPublicResponse getPublicSession() {
 
         PreinscriptionPeriode p = getActivePeriode();
 
         if (p == null) {
-            return PeriodePublicResponse.builder()
+            return SessionPublicResponse.builder()
                     .ouverte(false)
                     .anneeUniversitaire(null)
+                    .dateDebut(null)
+                    .dateFin(null)
                     .build();
         }
 
-        return PeriodePublicResponse.builder()
+        return SessionPublicResponse.builder()
                 .ouverte(true)
                 .anneeUniversitaire(p.getSession().getAnnee())
+                .dateDebut(p.getDateDebut())
+                .dateFin(p.getDateFin())
                 .build();
+    }
+
+    public boolean isPeriodeActive() {
+        return getActivePeriode() != null;
     }
 }

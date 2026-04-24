@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,9 +23,9 @@ public class PreinscriptionService {
 
     private final PreinscriptionDemandeRepository demandeRepo;
     private final PreinscriptionPeriodeRepository periodeRepo;
-    private final SessionUniversitaireRepository sessionRepo;
-    private final PreinscriptionEmetteurRepository emetteurRepo;
     private final FormationInitialeRepository formationRepo;
+    private final PreinscriptionEmetteurRepository emetteurRepo;
+
     private final MailService mailService;
     private final PreinscriptionJasperService jasperService;
     private final FileStorageService fileStorageService;
@@ -137,7 +138,6 @@ public class PreinscriptionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
 
         d.setStatut(StatutDemande.REJETEE);
-        demandeRepo.save(d);
     }
 
     /* =====================================================
@@ -154,8 +154,8 @@ public class PreinscriptionService {
 
         emetteurRepo.save(
                 PreinscriptionEmetteur.builder()
-                        .nom(nom)
-                        .fonction(fonction)
+                        .nom(nom.trim())
+                        .fonction(fonction.trim())
                         .signatureUrl(path)
                         .actif(false)
                         .build()
@@ -171,85 +171,10 @@ public class PreinscriptionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Emetteur", "id", id));
 
         em.setActif(true);
-        emetteurRepo.save(em);
     }
 
     /* =====================================================
-       🔹 SESSION UNIVERSITAIRE
-       ===================================================== */
-    @Transactional
-    public void createSession(SessionUniversitaireRequest req) {
-
-        if (sessionRepo.findByAnnee(req.annee()).isPresent()) {
-            throw new IllegalStateException("Session déjà existante");
-        }
-
-        sessionRepo.save(
-                SessionUniversitaire.builder()
-                        .annee(req.annee())
-                        .build()
-        );
-    }
-
-    public List<SessionUniversitaireResponse> getAllSessions() {
-        return sessionRepo.findAll()
-                .stream()
-                .map(s -> new SessionUniversitaireResponse(
-                        s.getId(),
-                        s.getAnnee()
-                ))
-                .toList();
-    }
-
-    /* =====================================================
-       🔹 PERIODE
-       ===================================================== */
-    @Transactional
-    public void createPeriode(PeriodeRequest req) {
-
-        if (req.dateFin().isBefore(req.dateDebut())) {
-            throw new IllegalArgumentException("Dates invalides");
-        }
-
-        SessionUniversitaire session = sessionRepo.findById(req.sessionId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Session", "id", req.sessionId()
-                ));
-
-        PreinscriptionEmetteur emetteur = emetteurRepo.findById(req.emetteurId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Emetteur", "id", req.emetteurId()
-                ));
-
-        periodeRepo.save(
-                PreinscriptionPeriode.builder()
-                        .session(session)
-                        .emetteur(emetteur)
-                        .dateDebut(req.dateDebut())
-                        .dateFin(req.dateFin())
-                        .build()
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public List<PeriodeResponse> getAllPeriodes() {
-
-        return periodeRepo.findAllWithRelations()
-                .stream()
-                .map(p -> PeriodeResponse.builder()
-                        .id(p.getId())
-                        .annee(p.getSession().getAnnee())
-                        .emetteurId(p.getEmetteur().getId())
-                        .emetteurNom(p.getEmetteur().getNom())
-                        .dateDebut(p.getDateDebut())
-                        .dateFin(p.getDateFin())
-                        .build()
-                )
-                .toList();
-    }
-
-    /* =====================================================
-       🔹 ACTIVE
+       🔹 ACTIVE SESSION (PUBLIC)
        ===================================================== */
     public SessionPublicResponse getActiveSession() {
 
@@ -258,6 +183,9 @@ public class PreinscriptionService {
         if (p == null) {
             return SessionPublicResponse.builder()
                     .ouverte(false)
+                    .anneeUniversitaire(null)
+                    .dateDebut(null)
+                    .dateFin(null)
                     .build();
         }
 
@@ -273,6 +201,9 @@ public class PreinscriptionService {
         return getActivePeriode() != null;
     }
 
+    /* =====================================================
+       🔹 PRIVATE
+       ===================================================== */
     private PreinscriptionPeriode getActivePeriode() {
         LocalDateTime now = LocalDateTime.now();
         return periodeRepo
@@ -280,9 +211,6 @@ public class PreinscriptionService {
                 .orElse(null);
     }
 
-    /* =====================================================
-       🔹 DTO
-       ===================================================== */
     private PreinscriptionDemandeResponse toDto(PreinscriptionDemande d) {
         return PreinscriptionDemandeResponse.builder()
                 .id(d.getId())
