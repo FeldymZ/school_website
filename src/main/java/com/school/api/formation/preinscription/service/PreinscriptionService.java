@@ -8,11 +8,11 @@ import com.school.api.formation.initiale.repository.FormationInitialeRepository;
 import com.school.api.formation.preinscription.dto.*;
 import com.school.api.formation.preinscription.entity.*;
 import com.school.api.formation.preinscription.repository.*;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
