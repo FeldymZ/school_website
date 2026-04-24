@@ -32,6 +32,24 @@ public class PreinscriptionPeriodeService {
         );
     }
 
+    /* ================= DELETE SESSION ================= */
+    @Transactional
+    public void deleteSession(Long id) {
+
+        SessionUniversitaire session = sessionRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "SessionUniversitaire", "id", id
+                ));
+
+        if (periodeRepo.existsBySession_Id(id)) {
+            throw new IllegalStateException(
+                    "Impossible de supprimer une session contenant des périodes"
+            );
+        }
+
+        sessionRepo.delete(session);
+    }
+
     /* ================= PERIODE ================= */
     @Transactional
     public void createPeriode(PeriodeRequest req) {
@@ -60,12 +78,37 @@ public class PreinscriptionPeriodeService {
         );
     }
 
+    /* ================= DELETE PERIODE ================= */
+    @Transactional
+    public void deletePeriode(Long id) {
+
+        PreinscriptionPeriode periode = periodeRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "PreinscriptionPeriode", "id", id
+                ));
+
+        LocalDateTime now = LocalDateTime.now();
+
+        boolean isActive =
+                periode.getDateDebut().isBefore(now) &&
+                        periode.getDateFin().isAfter(now);
+
+        if (isActive) {
+            throw new IllegalStateException(
+                    "Impossible de supprimer une période active"
+            );
+        }
+
+        periodeRepo.delete(periode);
+    }
+
     /* ================= ACTIVE ================= */
     public PreinscriptionPeriode getActivePeriode() {
+
         LocalDateTime now = LocalDateTime.now();
 
         return periodeRepo
-                .findFirstByDateDebutBeforeAndDateFinAfter(now, now)
+                .findFirstByDateDebutBeforeAndDateFinAfterOrderByDateDebutDesc(now, now)
                 .orElse(null);
     }
 
