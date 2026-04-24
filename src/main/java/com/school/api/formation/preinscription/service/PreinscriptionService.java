@@ -32,13 +32,15 @@ public class PreinscriptionService {
     private final PreinscriptionJasperService jasperService;
     private final FileStorageService fileStorageService;
 
-    /* ================= TIMEZONE CENTRALISÉ ================= */
+    /* =====================================================
+       🔹 TIMEZONE CENTRALISÉ
+    ===================================================== */
     private LocalDateTime now() {
         return LocalDateTime.now(ZoneId.of("Africa/Libreville"));
     }
 
     /* =====================================================
-       🔹 PUBLIC
+       🔹 PUBLIC — SUBMIT
     ===================================================== */
     @Transactional
     public PreinscriptionDemandeResponse submit(PreinscriptionDemandeRequest req) {
@@ -125,7 +127,7 @@ public class PreinscriptionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
 
         d.setStatut(StatutDemande.VALIDEE);
-        d.setValidatedAt(now()); // ✅ FIX TIMEZONE
+        d.setValidatedAt(now());
 
         byte[] pdf = jasperService.generatePdf(d);
 
@@ -148,7 +150,7 @@ public class PreinscriptionService {
     }
 
     /* =====================================================
-       🔹 ADMIN — PÉRIODES
+       🔹 ADMIN — PÉRIODES (SECURISÉ AVEC active)
     ===================================================== */
     @Transactional
     public void deletePeriode(Long id) {
@@ -158,14 +160,11 @@ public class PreinscriptionService {
                         "PreinscriptionPeriode", "id", id
                 ));
 
-        LocalDateTime now = now(); // ✅ FIX
-
-        boolean isActive =
-                periode.getDateDebut().isBefore(now) &&
-                        periode.getDateFin().isAfter(now);
-
-        if (isActive) {
-            throw new IllegalStateException("Impossible de supprimer une période active");
+        /* 🔥 IMPORTANT : on bloque uniquement si active=true */
+        if (periode.isActive()) {
+            throw new IllegalStateException(
+                    "Désactivez la période avant suppression"
+            );
         }
 
         periodeRepo.delete(periode);
@@ -225,7 +224,7 @@ public class PreinscriptionService {
     }
 
     /* =====================================================
-       🔹 ACTIVE SESSION (PUBLIC)
+       🔹 PUBLIC — SESSION ACTIVE
     ===================================================== */
     public SessionPublicResponse getActiveSession() {
 
@@ -253,17 +252,21 @@ public class PreinscriptionService {
     }
 
     /* =====================================================
-       🔹 PRIVATE
+       🔹 PRIVATE — LOGIQUE ACTIVE
     ===================================================== */
     private PreinscriptionPeriode getActivePeriode() {
 
-        LocalDateTime now = now(); // ✅ FIX CENTRAL
+        LocalDateTime now = now();
 
+        /* 🔥 FIX CRITIQUE : active=true */
         return periodeRepo
-                .findFirstByDateDebutBeforeAndDateFinAfterOrderByDateDebutDesc(now, now)
+                .findFirstByActiveTrueAndDateDebutBeforeAndDateFinAfterOrderByDateDebutDesc(now, now)
                 .orElse(null);
     }
 
+    /* =====================================================
+       🔹 DTO
+    ===================================================== */
     private PreinscriptionDemandeResponse toDto(PreinscriptionDemande d) {
         return PreinscriptionDemandeResponse.builder()
                 .id(d.getId())
