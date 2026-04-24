@@ -8,7 +8,6 @@ import com.school.api.formation.preinscription.service.PreinscriptionPeriodeServ
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +19,8 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
 public class PreinscriptionAdminController {
 
-    /* 🔥 SÉPARATION CLAIRE */
-    private final PreinscriptionService service; // demandes
-    private final PreinscriptionPeriodeService periodeService; // config
+    private final PreinscriptionService service;
+    private final PreinscriptionPeriodeService periodeService;
 
     /* ════════════════════════════════
        📌 DEMANDES
@@ -78,13 +76,13 @@ public class PreinscriptionAdminController {
     public void createSession(
             @Valid @RequestBody SessionUniversitaireRequest req
     ) {
-        periodeService.createSession(req); // ✅ CORRIGÉ
+        periodeService.createSession(req);
     }
 
     @AuditLog(action = "CONSULTATION_SESSIONS")
     @GetMapping("/sessions")
     public List<SessionUniversitaire> getSessions() {
-        return periodeService.getAllSessions(); // ✅ CORRIGÉ
+        return periodeService.getAllSessions();
     }
 
     @AuditLog(action = "SUPPRESSION_SESSION")
@@ -104,13 +102,13 @@ public class PreinscriptionAdminController {
     public void createPeriode(
             @Valid @RequestBody PeriodeRequest req
     ) {
-        periodeService.createPeriode(req); // ✅ CORRIGÉ
+        periodeService.createPeriode(req);
     }
 
     @AuditLog(action = "CONSULTATION_PERIODES")
     @GetMapping("/periodes")
     public List<PreinscriptionPeriode> getPeriodes() {
-        return periodeService.getAll(); // ✅ CORRIGÉ
+        return periodeService.getAll();
     }
 
     @AuditLog(action = "SUPPRESSION_PERIODE")
