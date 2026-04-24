@@ -16,11 +16,12 @@ public interface PreinscriptionPeriodeRepository extends JpaRepository<Preinscri
             LocalDateTime now2
     );
 
-    /* ================= LAZY FIX ================= */
+    /* ================= ALL WITH RELATIONS ================= */
     @Query("""
-        SELECT p FROM PreinscriptionPeriode p
+        SELECT DISTINCT p FROM PreinscriptionPeriode p
         JOIN FETCH p.session
         JOIN FETCH p.emetteur
+        ORDER BY p.dateDebut DESC
     """)
     List<PreinscriptionPeriode> findAllWithRelations();
 
@@ -29,6 +30,7 @@ public interface PreinscriptionPeriodeRepository extends JpaRepository<Preinscri
 
     long countByEmetteur_Id(Long emetteurId);
 
-    /* ================= NEW ================= */
     boolean existsBySession_Id(Long sessionId);
+
+    long countBySession_Id(Long sessionId);
 }
