@@ -73,7 +73,6 @@ public class PreinscriptionService {
 
         PreinscriptionDemande saved = demandeRepo.save(demande);
 
-        /* ✅ MAIL DE CONFIRMATION */
         mailService.sendPreinscriptionRecue(
                 saved.getEmail(),
                 saved.getCivilite().getLabel(),
@@ -114,7 +113,7 @@ public class PreinscriptionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
     }
 
-    /* 🔥 VALIDATION + MAIL + PDF */
+    /* 🔥 VALIDATION + PDF + MAIL */
     @Transactional
     public PreinscriptionDemandeResponse validate(Long id) {
 
@@ -128,14 +127,11 @@ public class PreinscriptionService {
 
         String filename = "preinscription_" + d.getId() + ".pdf";
 
-        String path = fileStorageService.storePreinscriptionPdf(
-                pdf,
-                filename
-        );
+        String path = fileStorageService.storePreinscriptionPdf(pdf, filename);
 
         d.setPdfUrl(path);
 
-        /* 🔥 AJOUT CRITIQUE : ENVOI DU MAIL AVEC PDF */
+        /* ✅ CORRECTION ICI */
         mailService.sendPreinscriptionValidee(
                 d.getEmail(),
                 d.getCivilite().getLabel(),
@@ -143,8 +139,7 @@ public class PreinscriptionService {
                 d.getFormation().getName(),
                 d.getNiveauSouhaite().getLabel(),
                 d.getPeriode().getSession().getAnnee(),
-                pdf,
-                filename
+                path   // ✅ IMPORTANT
         );
 
         return toDto(demandeRepo.save(d));
@@ -152,7 +147,6 @@ public class PreinscriptionService {
 
     @Transactional
     public void reject(Long id) {
-
         PreinscriptionDemande d = demandeRepo.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
 
@@ -248,9 +242,7 @@ public class PreinscriptionService {
     }
 
     private PreinscriptionPeriode getActivePeriode() {
-
         LocalDateTime now = now();
-
         return periodeRepo
                 .findFirstByActiveTrueAndDateDebutBeforeAndDateFinAfterOrderByDateDebutDesc(now, now)
                 .orElse(null);
