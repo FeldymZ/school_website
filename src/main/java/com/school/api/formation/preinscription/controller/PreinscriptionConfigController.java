@@ -35,7 +35,7 @@ public class PreinscriptionConfigController {
     }
 
     @GetMapping("/periodes")
-    public java.util.List<com.school.api.formation.preinscription.entity.PreinscriptionPeriode> getPeriodes() {
+    public java.util.List<com.school.api.formation.preinscription.dto.PeriodeResponse> getPeriodes() {
         return service.getAllPeriodes();
     }
 }
