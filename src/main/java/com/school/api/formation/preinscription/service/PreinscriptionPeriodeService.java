@@ -154,4 +154,43 @@ public class PreinscriptionPeriodeService {
         return now.isAfter(periode.getDateDebut())
                 && now.isBefore(periode.getDateFin());
     }
+
+    @Transactional
+    public void updateSession(Long id, SessionUniversitaireRequest req) {
+
+        SessionUniversitaire session = sessionRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "SessionUniversitaire", "id", id
+                ));
+
+        session.setAnnee(req.annee());
+    }
+
+    @Transactional
+    public void updatePeriode(Long id, PeriodeRequest req) {
+
+        if (req.dateFin().isBefore(req.dateDebut())) {
+            throw new IllegalArgumentException("Dates invalides");
+        }
+
+        PreinscriptionPeriode periode = periodeRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "PreinscriptionPeriode", "id", id
+                ));
+
+        SessionUniversitaire session = sessionRepo.findById(req.sessionId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "SessionUniversitaire", "id", req.sessionId()
+                ));
+
+        PreinscriptionEmetteur emetteur = emetteurRepo.findById(req.emetteurId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Emetteur", "id", req.emetteurId()
+                ));
+
+        periode.setSession(session);
+        periode.setEmetteur(emetteur);
+        periode.setDateDebut(req.dateDebut());
+        periode.setDateFin(req.dateFin());
+    }
 }

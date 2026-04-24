@@ -117,4 +117,24 @@ public class PreinscriptionAdminController {
     public void deletePeriode(@PathVariable Long id) {
         periodeService.deletePeriode(id);
     }
+
+    @AuditLog(action = "MODIFICATION_SESSION", target = "#id.toString()")
+    @PutMapping("/sessions/{id}")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public void updateSession(
+            @PathVariable Long id,
+            @RequestBody SessionUniversitaireRequest req
+    ) {
+        periodeService.updateSession(id, req);
+    }
+
+    @AuditLog(action = "MODIFICATION_PERIODE", target = "#id.toString()")
+    @PutMapping("/periodes/{id}")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public void updatePeriode(
+            @PathVariable Long id,
+            @Valid @RequestBody PeriodeRequest req
+    ) {
+        periodeService.updatePeriode(id, req);
+    }
 }
