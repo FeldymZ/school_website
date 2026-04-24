@@ -2,6 +2,7 @@ plugins {
   id 'java'
   id 'org.springframework.boot' version '3.3.6'
   id 'io.spring.dependency-management' version '1.1.6'
+  id 'org.jetbrains.kotlin.jvm'
 }
 
 group = 'com.school'
@@ -64,10 +65,13 @@ dependencies {
   // 📄 Apache POI (Word - préinscriptions)
   implementation 'org.apache.poi:poi-ooxml:5.2.5'
 
+  // 📄 JasperReports
+  implementation 'net.sf.jasperreports:jasperreports:6.19.1'
 
   // 🧪 Tests
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.springframework.security:spring-security-test'
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 tasks.named('test') {

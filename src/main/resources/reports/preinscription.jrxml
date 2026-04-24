@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ab97aaec-690e-4b4d-ba05-262c668840d2">
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+    <parameter name="LOGO_PATH" class="java.lang.String"/>
+    <parameter name="NUMERO_DEMANDE" class="java.lang.String"/>
+    <parameter name="ANNEE_UNIV" class="java.lang.String"/>
+    <parameter name="CIVILITE" class="java.lang.String"/>
+    <parameter name="NOM" class="java.lang.String"/>
+    <parameter name="PRENOM" class="java.lang.String"/>
+    <parameter name="DATE_NAISSANCE" class="java.lang.String"/>
+    <parameter name="LIEU_NAISSANCE" class="java.lang.String"/>
+    <parameter name="NATIONALITE" class="java.lang.String"/>
+    <parameter name="EMAIL" class="java.lang.String"/>
+    <parameter name="TELEPHONE" class="java.lang.String"/>
+    <parameter name="WHATSAPP" class="java.lang.String"/>
+    <parameter name="NIVEAU" class="java.lang.String"/>
+    <parameter name="FORMATION_TITRE" class="java.lang.String"/>
+    <parameter name="SPECIALITE" class="java.lang.String"/>
+    <parameter name="EMETTEUR_NOM" class="java.lang.String"/>
+    <parameter name="EMETTEUR_FONCTION" class="java.lang.String"/>
+    <parameter name="SIGNATURE_PATH" class="java.lang.String"/>
+    <parameter name="DATE_EMISSION" class="java.lang.String"/>
+    <queryString>
+        <![CDATA[]]>
+    </queryString>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="622" splitType="Stretch">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+            <image>
+                <reportElement x="0" y="3" width="130" height="46" uuid="062365d6-e385-46b2-8d99-02f4cb3894fb"/>
+                <imageExpression><![CDATA[new java.io.File($P{LOGO_PATH})]]></imageExpression>
+            </image>
+            <staticText>
+                <reportElement x="285" y="10" width="270" height="19" uuid="dd7447fd-3a65-4d10-ab73-597d8954f876">
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                </reportElement>
+                <textElement>
+                    <font fontName="Maiandra GD"/>
+                </textElement>
+                <text><![CDATA[ECOLE SUPERIEURE PRIVEE RECONNUE PAR L’ETAT                                                                             ]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="300" y="30" width="230" height="16" uuid="7ce7ff9c-9bbf-462c-b839-22960532f52c"/>
+                <textElement>
+                    <font fontName="Maiandra GD"/>
+                </textElement>
+                <text><![CDATA[Décrets N°071/PR/MESRSIT & 072/PR/MESRSIT ]]></text>
+            </staticText>
+            <rectangle>
+                <reportElement x="22" y="55" width="515" height="2" forecolor="#00AEEF" backcolor="#00AEEF" uuid="b2db0d0f-ec6d-47f3-ae87-4a337cdbc791">
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+            </rectangle>
+            <textField>
+                <reportElement x="0" y="62" width="555" height="20" uuid="0c531bdb-42fa-4af7-adc0-fdd9e53deb40">
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="Maiandra GD"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Année universitaire : " + $P{ANNEE_UNIV}]]></textFieldExpression>
+            </textField>
+            <rectangle>
+                <reportElement isPrintRepeatedValues="false" x="22" y="91" width="515" height="36" uuid="c7b84bcd-1135-4b0c-b0b3-a14693f29468">
+                    <property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+            </rectangle>
+            <textField>
+                <reportElement x="120" y="94" width="330" height="30" uuid="5d2448c5-f7e8-4713-a5bc-8e9ef620e5fb"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="Maiandra GD"/>
+                </textElement>
+                <textFieldExpression><![CDATA["ATTESTATION DE PREINSCRIPTION N°" + $P{NUMERO_DEMANDE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="145" width="554" height="19" uuid="7b312b00-0a0c-44e7-9ed1-76420973d48b">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement verticalAlignment="Middle">
+                    <font size="12"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Je soussigné(e), " + $P{EMETTEUR_NOM} + ", " + $P{EMETTEUR_FONCTION} + ", atteste que :"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="166" width="515" height="19" uuid="a91f3912-da5f-47cb-8693-4d9eaee67aa2">
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Maiandra GD" size="12"/>
+                </textElement>
+                <textFieldExpression><![CDATA["M./Mme/Mlle : " + $P{CIVILITE} + " " + $P{NOM} + " " + $P{PRENOM}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="208" width="515" height="19" uuid="368cece1-cc79-4800-a166-199824cbbb57">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font fontName="Maiandra GD" size="12"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Nationalité : " + $P{NATIONALITE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="229" width="515" height="19" uuid="85cd68e4-2c11-45d2-bbc9-675400292293">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Maiandra GD" size="12"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Adresse émail : " + $P{EMAIL}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="250" width="515" height="19" uuid="b99cd5d2-1382-4761-884d-c7b03a925a92">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Maiandra GD" size="12"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Téléphone : " + $P{TELEPHONE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="271" width="515" height="19" uuid="f3ad119c-d0d3-410a-8e58-3458cfd781d3">
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Maiandra GD" size="12"/>
+                </textElement>
+                <textFieldExpression><![CDATA["WhatsApp : " + $P{WHATSAPP}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="187" width="515" height="19" uuid="6d4fdd6f-3cf0-49fd-8cae-26de9410f69b">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Maiandra GD" size="12"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Né(e) le : " + $P{DATE_NAISSANCE} + " à " + $P{LIEU_NAISSANCE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="-1" y="299" width="515" height="19" uuid="3aef50de-5c84-46df-a03c-d6ac9cd77fd3">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Maiandra GD" size="11"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Est préinscrit(e) au sein de notre établissement pour l'année universitaire " + $P{ANNEE_UNIV} + ", en :"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="10" y="321" width="500" height="19" forecolor="#0070C0" uuid="5a2d7998-af0f-41f3-8346-a881bad46aa5">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textFieldExpression><![CDATA["√   " + $P{NIVEAU}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="10" y="343" width="500" height="19" forecolor="#0070C0" uuid="5b2da141-1d8a-4dcd-ad0d-1a83d82eaca9">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textFieldExpression><![CDATA["√   " + $P{FORMATION_TITRE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="10" y="365" width="500" height="19" forecolor="#0070C0" uuid="cf5a858e-b5df-4a6f-b6a5-f32b8ceaa4f0">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textFieldExpression><![CDATA["√   Spécialité : " + $P{SPECIALITE}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="388" width="450" height="18" uuid="96145341-78d3-48a1-899f-ccba4af8bfc5">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                </reportElement>
+                <textElement>
+                    <font fontName="Maiandra GD" size="12"/>
+                </textElement>
+                <text><![CDATA[Cette attestation est délivrée à l'intéressé(e) pour servir et valoir ce que de droit.]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="281" y="413" width="200" height="19" uuid="2522948f-3574-4c98-9b89-84d820789387">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="Maiandra GD" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Fait à Libreville le " + $P{DATE_EMISSION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="280" y="443" width="200" height="19" uuid="ea7c5ae2-f9b8-4a68-83e1-9e13e0c3a462">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="Maiandra GD" size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMETTEUR_FONCTION}]]></textFieldExpression>
+            </textField>
+            <image>
+                <reportElement x="355" y="476" width="50" height="50" uuid="d8b6db97-ea6a-4e85-8f8d-69e27dbaba44"/>
+                <imageExpression><![CDATA[new java.io.File($P{SIGNATURE_PATH})]]></imageExpression>
+            </image>
+            <textField>
+                <reportElement x="282" y="535" width="200" height="19" uuid="39757f3e-4493-4178-85d7-265c5eee9a0e">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="Maiandra GD" size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMETTEUR_NOM}]]></textFieldExpression>
+            </textField>
+            <rectangle>
+                <reportElement x="23" y="567" width="515" height="2" forecolor="#00AEEF" backcolor="#00AEEF" uuid="229eecaa-ece0-420d-a75f-b8252d4189a5">
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="33" y="574" width="494" height="16" uuid="67d54a31-0082-4d1e-bb76-10ac52b3ec6c"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[Derrière le Palais de justice-BP 20308 Libreville-Gabon   Téléphone +241 7623 7638]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="33" y="593" width="494" height="16" uuid="eb2396ef-4e26-44d7-b41a-004dfd62d9c0"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[Email : contact@esiitech-gabon.com   Site officiel : www.esiitech-gabon.com]]></text>
+            </staticText>
+        </band>
+    </title>
+    <pageHeader>
+        <band splitType="Stretch">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+        </band>
+    </pageHeader>
+    <columnHeader>
+        <band splitType="Stretch">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+        </band>
+    </columnHeader>
+    <detail>
+        <band splitType="Stretch">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+        </band>
+    </detail>
+    <columnFooter>
+        <band splitType="Stretch">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+        </band>
+    </columnFooter>
+    <pageFooter>
+        <band splitType="Stretch">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+        </band>
+    </pageFooter>
+    <summary>
+        <band splitType="Stretch">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+        </band>
+    </summary>
+</jasperReport>

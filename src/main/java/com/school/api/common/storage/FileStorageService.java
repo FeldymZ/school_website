@@ -76,6 +76,38 @@ public class FileStorageService {
   }
 
   /* ============================
+     🎓 FORMATIONS CONTINUES
+     ============================ */
+
+  public String storeFormationContinuesCover(MultipartFile file) {
+    validateImage(file);
+    validateSize(file, MAX_IMAGE_SIZE);
+    return store(file, "formations/continues/covers");
+  }
+
+  public String storeFormationContinuesGalleryImage(MultipartFile file) {
+    validateImage(file);
+    validateSize(file, MAX_IMAGE_SIZE);
+    return store(file, "formations/continues/gallery");
+  }
+
+  public String storeFormationContinuesPdf(MultipartFile file) {
+    validatePdf(file);
+    validateSize(file, MAX_PDF_SIZE);
+    return store(file, "formations/continues/pdfs");
+  }
+
+  /* ============================
+     📄 DEVIS CONTINUES
+     ============================ */
+
+  public String storeDevisContinuesAttachment(MultipartFile file) {
+    validatePdf(file);
+    validateSize(file, MAX_PDF_SIZE);
+    return store(file, "formations/continues/devis-reponses");
+  }
+
+  /* ============================
      📰 ACTUALITÉS
      ============================ */
 
@@ -132,25 +164,51 @@ public class FileStorageService {
   }
 
   /* ============================
-     🗑️ SUPPRESSION FICHIER (CORRIGÉ)
+     ✍️ PRÉINSCRIPTIONS — SIGNATURES
+     ============================ */
+
+  public String storeSignature(MultipartFile file) {
+    validateImage(file);
+    validateSize(file, MAX_IMAGE_SIZE);
+    return store(file, "preinscriptions/signatures");
+  }
+
+  /* ============================
+     📄 PRÉINSCRIPTIONS — PDF GÉNÉRÉS
+     ============================ */
+
+  /**
+   * Stocke un PDF généré en mémoire (byte[]) par JasperReports.
+   * Retourne le chemin absolu sur disque (utilisé pour l'envoi email).
+   */
+  public String storePreinscriptionPdf(byte[] bytes, String filename) {
+    try {
+      Path dir = Path.of(BASE_DIR, "preinscriptions/attestations");
+      Files.createDirectories(dir);
+
+      Path target = dir.resolve(filename);
+      Files.write(target, bytes);
+
+      return target.toAbsolutePath().toString();
+
+    } catch (IOException e) {
+      throw new RuntimeException("Erreur stockage PDF préinscription", e);
+    }
+  }
+
+  /* ============================
+     🗑️ SUPPRESSION
      ============================ */
 
   public void delete(String publicUrl) {
 
-    if (publicUrl == null || publicUrl.isBlank()) {
-      return;
-    }
+    if (publicUrl == null || publicUrl.isBlank()) return;
 
     try {
+      if (!publicUrl.startsWith("/files/")) return;
 
-      if (!publicUrl.startsWith("/files/")) {
-        return;
-      }
-
-      // ✅ CORRECTION ICI
       String relativePath = publicUrl.replace("/files/", "");
       Path path = Path.of(BASE_DIR, relativePath);
-
       Files.deleteIfExists(path);
 
     } catch (IOException e) {
@@ -158,15 +216,20 @@ public class FileStorageService {
     }
   }
 
+  public void deleteQuietly(String publicUrl) {
+    try {
+      delete(publicUrl);
+    } catch (Exception ignored) {}
+  }
+
   /* ============================
      ⚙️ CORE COMMUN
      ============================ */
 
   private String store(MultipartFile file, String subDir) {
-
     try {
       String extension = getExtension(file.getOriginalFilename());
-      String filename = UUID.randomUUID() + "." + extension;
+      String filename  = UUID.randomUUID() + "." + extension;
 
       Path directory = Path.of(BASE_DIR, subDir);
       Files.createDirectories(directory);
@@ -193,7 +256,6 @@ public class FileStorageService {
 
   private void validateImage(MultipartFile file) {
     validateFile(file);
-
     String ext = getExtension(file.getOriginalFilename());
     if (!IMAGE_EXTENSIONS.contains(ext)) {
       throw new IllegalArgumentException("Image non supportée");
@@ -202,7 +264,6 @@ public class FileStorageService {
 
   private void validateVideo(MultipartFile file) {
     validateFile(file);
-
     String ext = getExtension(file.getOriginalFilename());
     if (!VIDEO_EXTENSIONS.contains(ext)) {
       throw new IllegalArgumentException("Vidéo non supportée");
@@ -211,7 +272,6 @@ public class FileStorageService {
 
   private void validatePdf(MultipartFile file) {
     validateFile(file);
-
     String ext = getExtension(file.getOriginalFilename());
     if (!"pdf".equals(ext)) {
       throw new IllegalArgumentException("Le fichier doit être un PDF");
@@ -231,43 +291,5 @@ public class FileStorageService {
       throw new IllegalArgumentException("Nom de fichier invalide");
     }
     return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-  }
-
-  public void deleteQuietly(String publicUrl) {
-    try {
-      delete(publicUrl);
-    } catch (Exception ignored) {}
-  }
-
-  /* ============================
-     🎓 FORMATIONS CONTINUES
-     ============================ */
-
-  public String storeFormationContinuesCover(MultipartFile file) {
-    validateImage(file);
-    validateSize(file, MAX_IMAGE_SIZE);
-    return store(file, "formations/continues/covers");
-  }
-
-  public String storeFormationContinuesGalleryImage(MultipartFile file) {
-    validateImage(file);
-    validateSize(file, MAX_IMAGE_SIZE);
-    return store(file, "formations/continues/gallery");
-  }
-
-  public String storeFormationContinuesPdf(MultipartFile file) {
-    validatePdf(file);
-    validateSize(file, MAX_PDF_SIZE);
-    return store(file, "formations/continues/pdfs");
-  }
-
-  /* ============================
-     📄 DEVIS CONTINUES
-     ============================ */
-
-  public String storeDevisContinuesAttachment(MultipartFile file) {
-    validatePdf(file);
-    validateSize(file, MAX_PDF_SIZE);
-    return store(file, "formations/continues/devis-reponses");
   }
 }
