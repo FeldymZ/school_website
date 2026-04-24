@@ -31,9 +31,10 @@ services:
     env_file:
       - .env
 
-    # 🔑 VOLUME PARTAGÉ POUR LES FICHIERS
+    # 🔑 VOLUMES PARTAGÉS
     volumes:
       - /opt/school_website/files:/files
+      - /opt/school_assets:/app/assets   # ✅ AJOUT ICI
 
     restart: always
 
