@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontFamilies>
+    <fontFamily name="Maiandra GD">
+
+        <normal>
+            fonts/maiandra-gd.ttf
+        </normal>
+
+        <bold>
+            fonts/maiandra-gd.ttf
+        </bold>
+
+        <italic>
+            fonts/maiandra-gd.ttf
+        </italic>
+
+        <boldItalic>
+            fonts/maiandra-gd.ttf
+        </boldItalic>
+
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+
+    </fontFamily>
+</fontFamilies>

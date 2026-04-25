@@ -3,7 +3,7 @@ package com.school.api.formation.preinscription.service;
 import com.school.api.formation.preinscription.entity.PreinscriptionDemande;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.JREmptyDataSource; // ✅ CORRIGÉ ICI
+import net.sf.jasperreports.engine.JREmptyDataSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -33,13 +33,13 @@ public class PreinscriptionJasperService {
             JasperPrint print = JasperFillManager.fillReport(
                     report,
                     buildParams(demande),
-                    new JREmptyDataSource(1) // ✅ OK
+                    new JREmptyDataSource(1)
             );
 
             return JasperExportManager.exportReportToPdf(print);
 
         } catch (Exception e) {
-            log.error("❌ Erreur génération PDF préinscription", e);
+            log.error(" Erreur génération PDF préinscription", e);
             throw new RuntimeException("Erreur génération PDF préinscription", e);
         }
     }
@@ -58,7 +58,8 @@ public class PreinscriptionJasperService {
             InputStream logoStream = new FileInputStream(LOGO_PATH);
             p.put("LOGO", logoStream);
         } catch (Exception e) {
-            log.warn("⚠️ Logo non trouvé : {}", LOGO_PATH);
+            log.warn(" Logo non trouvé : {}", LOGO_PATH);
+            p.put("LOGO", null); // 🔥 évite crash Jasper
         }
 
         /* ================= INFOS ================= */
@@ -77,19 +78,29 @@ public class PreinscriptionJasperService {
 
         /* ================= FORMATION ================= */
         p.put("NIVEAU", d.getNiveauSouhaite().getLabel());
-        p.put("FORMATION_TITRE",
-                formation.getLevel().getLabel() + " " + formation.getName());
+
+        String formationComplete =
+                formation.getLevel().getLabel() + " en " + formation.getName();
+
+        p.put("FORMATION_TITRE", formationComplete);
         p.put("SPECIALITE", formation.getName());
 
         /* ================= EMETTEUR ================= */
         p.put("EMETTEUR_NOM", emetteur.getNom());
         p.put("EMETTEUR_FONCTION", emetteur.getFonction());
 
+        /* 🔥 SIGNATURE SÉCURISÉE */
         try {
-            InputStream signatureStream = new FileInputStream(emetteur.getSignatureUrl());
-            p.put("SIGNATURE", signatureStream);
+            if (emetteur.getSignatureUrl() != null) {
+                InputStream signatureStream =
+                        new FileInputStream(emetteur.getSignatureUrl());
+                p.put("SIGNATURE", signatureStream);
+            } else {
+                p.put("SIGNATURE", null);
+            }
         } catch (Exception e) {
-            log.warn("⚠️ Signature non trouvée : {}", emetteur.getSignatureUrl());
+            log.warn(" Signature non trouvée : {}", emetteur.getSignatureUrl());
+            p.put("SIGNATURE", null);
         }
 
         /* ================= DATE ================= */
