@@ -75,77 +75,77 @@
             <textField>
                 <reportElement x="21" y="183" width="515" height="19" uuid="f84636a6-6b7a-4d14-b9b8-57ba6c395b57"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Je soussigné(e), " + $P{EMETTEUR_NOM} + ", " + $P{EMETTEUR_FONCTION} + ", atteste que :"]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="209" width="515" height="19" uuid="07f934b6-737c-4cb1-b2ab-1e0cc3312132"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["M./Mme/Mlle : " + $P{CIVILITE} + " " + $P{NOM} + " " + $P{PRENOM}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="235" width="515" height="19" uuid="55cfca89-bdd4-448d-8e25-49e4dc15a91a"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Né(e) le : " + $P{DATE_NAISSANCE} + " à " + $P{LIEU_NAISSANCE}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="261" width="515" height="19" uuid="53d42f23-6b0d-4fbf-a394-9d95fae5f882"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Nationalité : " + $P{NATIONALITE}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="287" width="515" height="19" uuid="57e52d51-03f5-4a13-b0fd-e981687b1dfe"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Adresse email : " + $P{EMAIL}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="313" width="515" height="19" uuid="ee19444f-9de4-4624-834d-c36c21181b0d"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Téléphone : " + $P{TELEPHONE}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="339" width="515" height="19" uuid="e5a1f405-2472-4bb5-8c53-058cf1c87371"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["WhatsApp : " + ($P{WHATSAPP} == null ? "—" : $P{WHATSAPP})]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="366" width="515" height="19" uuid="a0670973-1dfc-461b-9593-9708be6c78ea"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Est préinscrit(e) pour l'année universitaire " + $P{ANNEE_UNIV}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="31" y="393" width="500" height="19" forecolor="#320AFC" uuid="fb8faf9e-14b3-4bae-b21f-916978119851"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["√ Niveau : " + $P{NIVEAU}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="31" y="420" width="500" height="19" forecolor="#320AFC" uuid="755bea3b-d9e7-431b-9f95-7a8c8857b6ce"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["√ Niveau académique : " + ($P{FORMATION_TITRE} == null ? "" : $P{FORMATION_TITRE})]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="31" y="447" width="500" height="19" forecolor="#320AFC" uuid="c8619862-5d44-45f3-b4b4-8cfbb0f1ba54"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["√ Spécialité : " + ($P{SPECIALITE} == null ? "" : $P{SPECIALITE})]]></textFieldExpression>
             </textField>
@@ -164,11 +164,11 @@
                 <textFieldExpression><![CDATA[$P{EMETTEUR_FONCTION}]]></textFieldExpression>
             </textField>
             <image onErrorType="Blank">
-                <reportElement x="315" y="569" width="145" height="144" uuid="1fff7b12-7515-42fa-932f-7b414634ea64"/>
+                <reportElement x="315" y="567" width="145" height="144" uuid="1fff7b12-7515-42fa-932f-7b414634ea64"/>
                 <imageExpression><![CDATA[$P{SIGNATURE}]]></imageExpression>
             </image>
             <textField>
-                <reportElement x="296" y="706" width="200" height="19" uuid="c7f07141-c0ec-45d0-8987-813cd6caf274"/>
+                <reportElement x="296" y="699" width="200" height="19" uuid="c7f07141-c0ec-45d0-8987-813cd6caf274"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Corbel" size="12" isBold="true"/>
                 </textElement>
