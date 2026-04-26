@@ -1,87 +1,40 @@
 plugins {
   id 'java'
-  id 'org.springframework.boot' version '3.3.6'
-  id 'io.spring.dependency-management' version '1.1.6'
-  id 'org.jetbrains.kotlin.jvm'
+  id 'org.springframework.boot' version '3.2.5'
+  id 'io.spring.dependency-management' version '1.1.4'
 }
 
 group = 'com.school'
 version = '0.0.1-SNAPSHOT'
 
 java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(17)
-  }
+  sourceCompatibility = '17'
 }
 
 repositories {
   mavenCentral()
-
-  // 🔥 AJOUT CRITIQUE (Jasper)
-  maven {
-    url "https://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts/"
-  }
 }
 
 dependencies {
-
-  // 🌐 Web API
   implementation 'org.springframework.boot:spring-boot-starter-web'
 
-  // 🔤 Utils
+  // JasperReports
+  implementation 'net.sf.jasperreports:jasperreports:6.21.0'
+
+  // (optionnel mais utile)
   implementation 'org.apache.commons:commons-lang3:3.14.0'
 
-  // 🗄️ JPA
-  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-
-  // 🔐 Security
-  implementation 'org.springframework.boot:spring-boot-starter-security'
-
-  // ✅ Validation
-  implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-  // 📧 Mail
-  implementation 'org.springframework.boot:spring-boot-starter-mail'
-
-  // 🩺 Actuator
-  implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
-  // 🐘 PostgreSQL
-  runtimeOnly 'org.postgresql:postgresql:42.7.3'
-
-  // 🧰 Lombok
-  compileOnly 'org.projectlombok:lombok'
-  annotationProcessor 'org.projectlombok:lombok'
-
-  annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-
-  // 📖 Swagger
-  implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
-
-  // 🔑 JWT
-  implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-  runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-  runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
-  // 🌱 Thymeleaf
-  implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-
-  // 📄 Apache POI
-  implementation 'org.apache.poi:poi-ooxml:5.2.5'
-
-  // 📄 JasperReports
-  implementation 'net.sf.jasperreports:jasperreports:6.19.1'
-
-  // 🔥 OPTION RECOMMANDÉE (remplace iText)
-  implementation 'com.github.librepdf:openpdf:1.3.30'
-
-  // 🧪 Tests
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
-  testImplementation 'org.springframework.security:spring-security-test'
-
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
-tasks.named('test') {
-  useJUnitPlatform()
+tasks.withType(JavaCompile) {
+  options.encoding = 'UTF-8'
+}
+
+tasks.processResources {
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+bootJar {
+  archiveFileName = 'app.jar'
 }
