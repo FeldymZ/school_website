@@ -101,9 +101,9 @@ public class PreinscriptionJasperService {
         String formationComplete;
 
         if ("Licence".equalsIgnoreCase(niveau)) {
-            formationComplete = "Licence PROFESSIONNELLE EN " + domaine;
+            formationComplete = "Licence PROFESSIONNELLE EN INFORMATIQUE " ;
         } else if ("Master".equalsIgnoreCase(niveau)) {
-            formationComplete = "Master PROFESSIONNEL EN " + domaine;
+            formationComplete = "Master PROFESSIONNEL EN INFORMATIQUE";
         } else {
             formationComplete = niveau + " EN " + domaine;
         }
