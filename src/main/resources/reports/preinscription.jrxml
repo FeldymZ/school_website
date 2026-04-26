@@ -164,11 +164,11 @@
                 <textFieldExpression><![CDATA[$P{EMETTEUR_FONCTION}]]></textFieldExpression>
             </textField>
             <image onErrorType="Blank">
-                <reportElement x="315" y="567" width="145" height="144" uuid="1fff7b12-7515-42fa-932f-7b414634ea64"/>
+                <reportElement x="315" y="562" width="145" height="144" uuid="1fff7b12-7515-42fa-932f-7b414634ea64"/>
                 <imageExpression><![CDATA[$P{SIGNATURE}]]></imageExpression>
             </image>
             <textField>
-                <reportElement x="296" y="699" width="200" height="19" uuid="c7f07141-c0ec-45d0-8987-813cd6caf274"/>
+                <reportElement x="296" y="694" width="200" height="19" uuid="c7f07141-c0ec-45d0-8987-813cd6caf274"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Corbel" size="12" isBold="true"/>
                 </textElement>
