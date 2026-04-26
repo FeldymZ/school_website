@@ -2,20 +2,25 @@
 <fontFamilies>
 
     <fontFamily name="Corbel">
-        <normal><![CDATA[fonts/Corbel.ttf]]></normal>
-        <bold><![CDATA[fonts/Corbel-Bold.ttf]]></bold>
+        <normal>fonts/corbel.ttf</normal>
+        <bold>fonts/corbelb.ttf</bold>
+        <italic>fonts/corbeli.ttf</italic>
+        <boldItalic>fonts/corbelz.ttf</boldItalic>
         <pdfEncoding>Identity-H</pdfEncoding>
         <pdfEmbedded>true</pdfEmbedded>
     </fontFamily>
 
     <fontFamily name="Comic Sans MS">
-        <normal><![CDATA[fonts/ComicSansMS.ttf]]></normal>
+        <normal>fonts/comic.ttf</normal>
+        <bold>fonts/comicbd.ttf</bold>
+        <italic>fonts/comici.ttf</italic>
+        <boldItalic>fonts/comicz.ttf</boldItalic>
         <pdfEncoding>Identity-H</pdfEncoding>
         <pdfEmbedded>true</pdfEmbedded>
     </fontFamily>
 
     <fontFamily name="Copperplate Gothic Bold">
-        <normal><![CDATA[fonts/CopperplateGothicBold.ttf]]></normal>
+        <normal>fonts/COPRGTB.TTF</normal>
         <pdfEncoding>Identity-H</pdfEncoding>
         <pdfEmbedded>true</pdfEmbedded>
     </fontFamily>
