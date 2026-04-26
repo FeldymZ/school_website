@@ -39,7 +39,7 @@ public class PreinscriptionJasperService {
             return JasperExportManager.exportReportToPdf(print);
 
         } catch (Exception e) {
-            log.error(" Erreur génération PDF préinscription", e);
+            log.error("Erreur génération PDF préinscription", e);
             throw new RuntimeException("Erreur génération PDF préinscription", e);
         }
     }
@@ -58,8 +58,8 @@ public class PreinscriptionJasperService {
             InputStream logoStream = new FileInputStream(LOGO_PATH);
             p.put("LOGO", logoStream);
         } catch (Exception e) {
-            log.warn(" Logo non trouvé : {}", LOGO_PATH);
-            p.put("LOGO", null); // 🔥 évite crash Jasper
+            log.warn("Logo non trouvé : {}", LOGO_PATH);
+            p.put("LOGO", null);
         }
 
         /* ================= INFOS ================= */
@@ -67,20 +67,46 @@ public class PreinscriptionJasperService {
         p.put("ANNEE_UNIV", session.getAnnee());
 
         p.put("CIVILITE", d.getCivilite().getLabel());
-        p.put("NOM", d.getNom().toUpperCase());
+        p.put("NOM", d.getNom() != null ? d.getNom().toUpperCase() : "");
         p.put("PRENOM", d.getPrenom());
-        p.put("DATE_NAISSANCE", d.getDateNaissance().format(DATE_FR));
+
+        p.put("DATE_NAISSANCE",
+                d.getDateNaissance() != null
+                        ? d.getDateNaissance().format(DATE_FR)
+                        : "");
+
         p.put("LIEU_NAISSANCE", d.getLieuNaissance());
         p.put("NATIONALITE", d.getNationalite());
         p.put("EMAIL", d.getEmail());
         p.put("TELEPHONE", d.getTelephone());
-        p.put("WHATSAPP", d.getWhatsapp() != null ? d.getWhatsapp() : "—");
+
+        p.put("WHATSAPP",
+                d.getWhatsapp() != null ? d.getWhatsapp() : "—");
 
         /* ================= FORMATION ================= */
-        p.put("NIVEAU", d.getNiveauSouhaite().getLabel());
 
-        String formationComplete =
-                formation.getLevel().getLabel() + " en " + formation.getName();
+        p.put("NIVEAU",
+                d.getNiveauSouhaite() != null
+                        ? d.getNiveauSouhaite().getLabel()
+                        : "");
+
+        String niveau = formation.getLevel() != null
+                ? formation.getLevel().getLabel()
+                : "";
+
+        String domaine = formation.getName() != null
+                ? formation.getName().toUpperCase()
+                : "INFORMATIQUE";
+
+        String formationComplete;
+
+        if ("Licence".equalsIgnoreCase(niveau)) {
+            formationComplete = "Licence PROFESSIONNELLE EN " + domaine;
+        } else if ("Master".equalsIgnoreCase(niveau)) {
+            formationComplete = "Master PROFESSIONNEL EN " + domaine;
+        } else {
+            formationComplete = niveau + " EN " + domaine;
+        }
 
         p.put("FORMATION_TITRE", formationComplete);
         p.put("SPECIALITE", formation.getName());
@@ -89,7 +115,7 @@ public class PreinscriptionJasperService {
         p.put("EMETTEUR_NOM", emetteur.getNom());
         p.put("EMETTEUR_FONCTION", emetteur.getFonction());
 
-        /* 🔥 SIGNATURE SÉCURISÉE */
+        /* ================= SIGNATURE ================= */
         try {
             if (emetteur.getSignatureUrl() != null) {
                 InputStream signatureStream =
@@ -99,13 +125,15 @@ public class PreinscriptionJasperService {
                 p.put("SIGNATURE", null);
             }
         } catch (Exception e) {
-            log.warn(" Signature non trouvée : {}", emetteur.getSignatureUrl());
+            log.warn("Signature non trouvée : {}", emetteur.getSignatureUrl());
             p.put("SIGNATURE", null);
         }
 
         /* ================= DATE ================= */
         p.put("DATE_EMISSION",
-                d.getValidatedAt().toLocalDate().format(DATE_FR));
+                d.getValidatedAt() != null
+                        ? d.getValidatedAt().toLocalDate().format(DATE_FR)
+                        : "");
 
         return p;
     }

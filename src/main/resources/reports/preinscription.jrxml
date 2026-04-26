@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="preinscription" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="09cdd05c-7cce-4234-ab29-cabf5a5b9986">
+    <property name="net.sf.jasperreports.default.pdf.encoding" value="Identity-H"/>
+    <property name="net.sf.jasperreports.awt.ignore.missing.font" value="true"/>
     <parameter name="LOGO" class="java.io.InputStream"/>
     <parameter name="SIGNATURE" class="java.io.InputStream"/>
     <parameter name="NUMERO_DEMANDE" class="java.lang.String"/>
@@ -26,21 +28,21 @@
     <title>
         <band height="802">
             <property name="com.jaspersoft.studio.unit.height" value="px"/>
-            <image>
-                <reportElement x="0" y="3" width="130" height="46" uuid="fb3650f4-90a9-4efd-be26-e36bf55ec424"/>
+            <image onErrorType="Blank">
+                <reportElement x="22" y="3" width="130" height="46" uuid="dd72b04c-8669-45a5-a2a3-1ddd1901d773"/>
                 <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
             </image>
             <staticText>
-                <reportElement x="277" y="10" width="270" height="19" uuid="b6641226-c269-4536-8471-6209eb08439f"/>
+                <reportElement x="267" y="10" width="270" height="19" forecolor="#767171" uuid="b6641226-c269-4536-8471-6209eb08439f"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="11"/>
+                    <font fontName="Corbel" size="11"/>
                 </textElement>
                 <text><![CDATA[ECOLE SUPERIEURE PRIVEE RECONNUE PAR L'ETAT]]></text>
             </staticText>
             <staticText>
-                <reportElement x="296" y="30" width="230" height="16" uuid="adb97a6d-ef77-48e4-acdc-84e6cbb2e37f"/>
+                <reportElement x="287" y="30" width="230" height="16" forecolor="#767171" uuid="adb97a6d-ef77-48e4-acdc-84e6cbb2e37f"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="11"/>
+                    <font fontName="Corbel" size="11"/>
                 </textElement>
                 <text><![CDATA[Décrets N°071/PR/MESRSIT & 072/PR/MESRSIT]]></text>
             </staticText>
@@ -48,133 +50,141 @@
                 <reportElement x="22" y="60" width="515" height="2" forecolor="#00AEEF" backcolor="#00AEEF" uuid="41b07221-4454-4c50-b148-ee3647083369"/>
             </rectangle>
             <textField>
-                <reportElement x="0" y="74" width="555" height="20" uuid="b281cc6f-d67d-40bd-bc55-dbabb012b9b9"/>
+                <reportElement x="22" y="74" width="515" height="20" uuid="b281cc6f-d67d-40bd-bc55-dbabb012b9b9">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                </reportElement>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="14" isBold="true"/>
+                    <font fontName="Comic Sans MS" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Année universitaire : " + $P{ANNEE_UNIV}]]></textFieldExpression>
             </textField>
             <rectangle>
-                <reportElement x="17" y="123" width="527" height="28" uuid="619223e9-ba1b-42db-bfaa-5616fb8d654a"/>
+                <reportElement x="22" y="123" width="515" height="28" uuid="619223e9-ba1b-42db-bfaa-5616fb8d654a">
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
             </rectangle>
             <textField>
                 <reportElement x="94" y="125" width="376" height="24" uuid="a9f69575-8999-4cea-b752-8a1a6c72375c"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="12" isBold="true"/>
+                    <font fontName="Copperplate Gothic Bold" size="14" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["ATTESTATION DE PREINSCRIPTION N°" + $P{NUMERO_DEMANDE}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="183" width="515" height="19" uuid="f84636a6-6b7a-4d14-b9b8-57ba6c395b57"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="14"/>
+                    <font fontName="Corbel" size="14" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Je soussigné(e), " + $P{EMETTEUR_NOM} + ", " + $P{EMETTEUR_FONCTION} + ", atteste que :"]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="209" width="515" height="19" uuid="07f934b6-737c-4cb1-b2ab-1e0cc3312132"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="14" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["M./Mme/Mlle : " + $P{CIVILITE} + " " + $P{NOM} + " " + $P{PRENOM}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="235" width="515" height="19" uuid="55cfca89-bdd4-448d-8e25-49e4dc15a91a"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="14"/>
+                    <font fontName="Corbel" size="14" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Né(e) le : " + $P{DATE_NAISSANCE} + " à " + $P{LIEU_NAISSANCE}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="261" width="515" height="19" uuid="53d42f23-6b0d-4fbf-a394-9d95fae5f882"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="14"/>
+                    <font fontName="Corbel" size="14" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Nationalité : " + $P{NATIONALITE}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="287" width="515" height="19" uuid="57e52d51-03f5-4a13-b0fd-e981687b1dfe"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="14"/>
+                    <font fontName="Corbel" size="14" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Adresse email : " + $P{EMAIL}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="313" width="515" height="19" uuid="ee19444f-9de4-4624-834d-c36c21181b0d"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="14"/>
+                    <font fontName="Corbel" size="14" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Téléphone : " + $P{TELEPHONE}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="339" width="515" height="19" uuid="e5a1f405-2472-4bb5-8c53-058cf1c87371"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="14"/>
+                    <font fontName="Corbel" size="14" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA["WhatsApp : " + $P{WHATSAPP}]]></textFieldExpression>
+                <textFieldExpression><![CDATA["WhatsApp : " + ($P{WHATSAPP} == null ? "—" : $P{WHATSAPP})]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="21" y="366" width="515" height="19" uuid="a0670973-1dfc-461b-9593-9708be6c78ea"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="14"/>
+                    <font fontName="Corbel" size="14" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Est préinscrit(e) pour l'année universitaire " + $P{ANNEE_UNIV}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="31" y="393" width="500" height="19" forecolor="#320AFC" uuid="fb8faf9e-14b3-4bae-b21f-916978119851"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="14" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["√ Niveau : " + $P{NIVEAU}]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="31" y="420" width="500" height="19" forecolor="#320AFC" uuid="755bea3b-d9e7-431b-9f95-7a8c8857b6ce"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="14" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA["√ Niveau académique : " + $P{FORMATION_TITRE}]]></textFieldExpression>
+                <textFieldExpression><![CDATA["√ Niveau académique : " + ($P{FORMATION_TITRE} == null ? "" : $P{FORMATION_TITRE})]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="31" y="447" width="500" height="19" forecolor="#320AFC" uuid="c8619862-5d44-45f3-b4b4-8cfbb0f1ba54"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="14" isBold="true"/>
+                    <font fontName="Corbel" size="14" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA["√ Spécialité : " + $P{SPECIALITE}]]></textFieldExpression>
+                <textFieldExpression><![CDATA["√ Spécialité : " + ($P{SPECIALITE} == null ? "" : $P{SPECIALITE})]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="269" y="500" width="242" height="19" uuid="144150b3-f635-4275-9646-b9786b98f1b2"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="11"/>
+                    <font fontName="Corbel" size="11" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Fait à Libreville le " + $P{DATE_EMISSION}]]></textFieldExpression>
+                <textFieldExpression><![CDATA["Fait à Libreville le " + ($P{DATE_EMISSION} == null ? "" : $P{DATE_EMISSION})]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="288" y="539" width="200" height="19" uuid="9cd6c459-68c1-445d-ac41-fa2ca0da90e4"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="12" isBold="true"/>
+                    <font fontName="Corbel" size="12" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$P{EMETTEUR_FONCTION}]]></textFieldExpression>
             </textField>
-            <image>
-                <reportElement x="315" y="569" width="145" height="144" uuid="8e54bc6e-ab68-4b97-a588-aa04668fbfc2"/>
+            <image onErrorType="Blank">
+                <reportElement x="315" y="569" width="145" height="144" uuid="1fff7b12-7515-42fa-932f-7b414634ea64"/>
                 <imageExpression><![CDATA[$P{SIGNATURE}]]></imageExpression>
             </image>
             <textField>
-                <reportElement x="294" y="715" width="200" height="19" uuid="c7f07141-c0ec-45d0-8987-813cd6caf274"/>
+                <reportElement x="296" y="706" width="200" height="19" uuid="c7f07141-c0ec-45d0-8987-813cd6caf274"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="12" isBold="true"/>
+                    <font fontName="Corbel" size="12" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$P{EMETTEUR_NOM}]]></textFieldExpression>
             </textField>
             <rectangle>
-                <reportElement x="21" y="752" width="515" height="2" forecolor="#00AEEF" backcolor="#00AEEF" uuid="29423ba9-ec96-4ff4-a6b3-f9c452c9ed18"/>
+                <reportElement x="22" y="752" width="515" height="2" forecolor="#00AEEF" backcolor="#00AEEF" uuid="29423ba9-ec96-4ff4-a6b3-f9c452c9ed18">
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                </reportElement>
             </rectangle>
             <textField>
                 <reportElement x="61" y="759" width="440" height="19" uuid="a805f3c7-6b63-4be8-9644-895505127081">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="10"/>
+                    <font fontName="Corbel" size="10"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Derrière le Palais de justice-BP 20308 Libreville-Gabon   Téléphone +241 7623 7638"]]></textFieldExpression>
             </textField>
@@ -184,7 +194,7 @@
                     <property name="com.jaspersoft.studio.unit.x" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Maiandra GD" size="10"/>
+                    <font fontName="Corbel" size="10"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Email : contact@esiitech-gabon.com   Site officiel : www.esiitech-gabon.com"]]></textFieldExpression>
             </textField>

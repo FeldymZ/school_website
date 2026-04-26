@@ -1,11 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fontFamilies>
-    <fontFamily name="Maiandra GD">
-        <normal>fonts/maiandra.ttf</normal>
-        <bold>fonts/maiandra.ttf</bold>
-        <italic>fonts/maiandra.ttf</italic>
-        <boldItalic>fonts/maiandra.ttf</boldItalic>
+
+    <fontFamily name="Corbel">
+        <normal><![CDATA[fonts/Corbel.ttf]]></normal>
+        <bold><![CDATA[fonts/Corbel-Bold.ttf]]></bold>
         <pdfEncoding>Identity-H</pdfEncoding>
         <pdfEmbedded>true</pdfEmbedded>
     </fontFamily>
+
+    <fontFamily name="Comic Sans MS">
+        <normal><![CDATA[fonts/ComicSansMS.ttf]]></normal>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <fontFamily name="Copperplate Gothic Bold">
+        <normal><![CDATA[fonts/CopperplateGothicBold.ttf]]></normal>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
 </fontFamilies>
