@@ -134,7 +134,7 @@
                 <text><![CDATA[WhatsApp :]]></text>
             </staticText>
             <textField>
-                <reportElement x="131" y="213" width="394" height="19" uuid="4b95f1e2-4e32-48c2-9e6f-dfc2728d21c5">
+                <reportElement x="131" y="213" width="394" height="19" forecolor="#320AFC" uuid="4b95f1e2-4e32-48c2-9e6f-dfc2728d21c5">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left" verticalAlignment="Middle">
@@ -143,7 +143,7 @@
                 <textFieldExpression><![CDATA[$P{CIVILITE} + " " + $P{NOM} + " " + $P{PRENOM}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="131" y="238" width="394" height="19" uuid="4b717419-5c68-4fc2-b33d-1f73271a0bb4">
+                <reportElement x="131" y="238" width="394" height="19" forecolor="#320AFC" uuid="4b717419-5c68-4fc2-b33d-1f73271a0bb4">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left" verticalAlignment="Middle">
@@ -152,7 +152,7 @@
                 <textFieldExpression><![CDATA[$P{DATE_NAISSANCE} + " à " + $P{LIEU_NAISSANCE}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="131" y="263" width="396" height="19" uuid="6b6fab38-a9da-4267-8b35-30d22b92c827">
+                <reportElement x="131" y="263" width="396" height="19" forecolor="#320AFC" uuid="6b6fab38-a9da-4267-8b35-30d22b92c827">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left" verticalAlignment="Middle">
@@ -161,7 +161,7 @@
                 <textFieldExpression><![CDATA[$P{NATIONALITE}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="131" y="288" width="394" height="19" uuid="f00f223f-38f5-48b8-af9b-df0821214041">
+                <reportElement x="131" y="288" width="394" height="19" forecolor="#320AFC" uuid="f00f223f-38f5-48b8-af9b-df0821214041">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left" verticalAlignment="Middle">
@@ -170,7 +170,7 @@
                 <textFieldExpression><![CDATA[$P{EMAIL}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="131" y="313" width="394" height="19" uuid="1b62b120-08b5-4dfc-a9f0-289a9569c292">
+                <reportElement x="131" y="313" width="394" height="19" forecolor="#320AFC" uuid="1b62b120-08b5-4dfc-a9f0-289a9569c292">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left" verticalAlignment="Middle">
@@ -179,7 +179,7 @@
                 <textFieldExpression><![CDATA[$P{TELEPHONE}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="131" y="338" width="394" height="19" uuid="a02e4783-b582-4174-bbc1-a08c7e8c827b">
+                <reportElement x="131" y="338" width="394" height="19" forecolor="#320AFC" uuid="a02e4783-b582-4174-bbc1-a08c7e8c827b">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left" verticalAlignment="Middle">
@@ -206,7 +206,7 @@
                 <textElement verticalAlignment="Middle">
                     <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA["√ Formation académique : " + ($P{FORMATION_TITRE} == null ? "" : $P{FORMATION_TITRE})]]></textFieldExpression>
+                <textFieldExpression><![CDATA["√ Formation : " + ($P{FORMATION_TITRE} == null ? "" : $P{FORMATION_TITRE})]]></textFieldExpression>
             </textField>
             <textField>
                 <reportElement x="32" y="446" width="500" height="19" forecolor="#320AFC" uuid="c8619862-5d44-45f3-b4b4-8cfbb0f1ba54"/>
