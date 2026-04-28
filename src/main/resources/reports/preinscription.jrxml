@@ -80,77 +80,35 @@
                 <textFieldExpression><![CDATA["Je soussigné(e), " + $P{EMETTEUR_NOM} + ", " + $P{EMETTEUR_FONCTION} + ", atteste que :"]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="21" y="209" width="515" height="19" uuid="07f934b6-737c-4cb1-b2ab-1e0cc3312132"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="13" isBold="true"/>
-                </textElement>
-                <textFieldExpression><![CDATA["M./Mme/Mlle : " + $P{CIVILITE} + " " + $P{NOM} + " " + $P{PRENOM}]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="21" y="235" width="515" height="19" uuid="55cfca89-bdd4-448d-8e25-49e4dc15a91a"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="13" isBold="true"/>
-                </textElement>
-                <textFieldExpression><![CDATA["Né(e) le : " + $P{DATE_NAISSANCE} + " à " + $P{LIEU_NAISSANCE}]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="21" y="261" width="515" height="19" uuid="53d42f23-6b0d-4fbf-a394-9d95fae5f882"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="13" isBold="true"/>
-                </textElement>
-                <textFieldExpression><![CDATA["Nationalité : " + $P{NATIONALITE}]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="21" y="287" width="515" height="19" uuid="57e52d51-03f5-4a13-b0fd-e981687b1dfe"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="13" isBold="true"/>
-                </textElement>
-                <textFieldExpression><![CDATA["Adresse email : " + $P{EMAIL}]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="21" y="313" width="515" height="19" uuid="ee19444f-9de4-4624-834d-c36c21181b0d"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="13" isBold="true"/>
-                </textElement>
-                <textFieldExpression><![CDATA["Téléphone : " + $P{TELEPHONE}]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="21" y="339" width="515" height="19" uuid="e5a1f405-2472-4bb5-8c53-058cf1c87371"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="Corbel" size="13" isBold="true"/>
-                </textElement>
-                <textFieldExpression><![CDATA["WhatsApp : " + ($P{WHATSAPP} == null ? "—" : $P{WHATSAPP})]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="21" y="366" width="515" height="19" uuid="a0670973-1dfc-461b-9593-9708be6c78ea"/>
+                <reportElement x="22" y="365" width="515" height="19" uuid="a0670973-1dfc-461b-9593-9708be6c78ea"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Est préinscrit(e) pour l'année universitaire " + $P{ANNEE_UNIV}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="31" y="393" width="500" height="19" forecolor="#320AFC" uuid="fb8faf9e-14b3-4bae-b21f-916978119851"/>
+                <reportElement x="32" y="392" width="500" height="19" forecolor="#320AFC" uuid="fb8faf9e-14b3-4bae-b21f-916978119851"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["√ Niveau : " + $P{NIVEAU}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="31" y="420" width="500" height="19" forecolor="#320AFC" uuid="755bea3b-d9e7-431b-9f95-7a8c8857b6ce"/>
+                <reportElement x="32" y="419" width="500" height="19" forecolor="#320AFC" uuid="755bea3b-d9e7-431b-9f95-7a8c8857b6ce"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA["√ Niveau académique : " + ($P{FORMATION_TITRE} == null ? "" : $P{FORMATION_TITRE})]]></textFieldExpression>
+                <textFieldExpression><![CDATA["√ Formation académique : " + ($P{FORMATION_TITRE} == null ? "" : $P{FORMATION_TITRE})]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="31" y="447" width="500" height="19" forecolor="#320AFC" uuid="c8619862-5d44-45f3-b4b4-8cfbb0f1ba54"/>
+                <reportElement x="32" y="446" width="500" height="19" forecolor="#320AFC" uuid="c8619862-5d44-45f3-b4b4-8cfbb0f1ba54"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Corbel" size="13" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["√ Spécialité : " + ($P{SPECIALITE} == null ? "" : $P{SPECIALITE})]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="269" y="500" width="242" height="19" uuid="144150b3-f635-4275-9646-b9786b98f1b2"/>
+                <reportElement x="269" y="499" width="242" height="19" uuid="144150b3-f635-4275-9646-b9786b98f1b2"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Corbel" size="11" isBold="true"/>
                 </textElement>
@@ -164,7 +122,7 @@
                 <textFieldExpression><![CDATA[$P{EMETTEUR_FONCTION}]]></textFieldExpression>
             </textField>
             <image onErrorType="Blank">
-                <reportElement x="315" y="562" width="145" height="144" uuid="1fff7b12-7515-42fa-932f-7b414634ea64"/>
+                <reportElement x="313" y="562" width="145" height="144" uuid="1fff7b12-7515-42fa-932f-7b414634ea64"/>
                 <imageExpression><![CDATA[$P{SIGNATURE}]]></imageExpression>
             </image>
             <textField>
@@ -197,6 +155,121 @@
                     <font fontName="Corbel" size="10"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Email : contact@esiitech-gabon.com   Site officiel : www.esiitech-gabon.com"]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="22" y="3408" width="515" height="1" uuid="5fab3590-6e3b-4f13-916c-13530a2f86df">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+                </reportElement>
+            </line>
+            <staticText>
+                <reportElement x="34" y="213" width="106" height="19" uuid="12c1363a-27fc-4f6f-ba99-85a9936266b0">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left">
+                    <font fontName="Corbel" size="14"/>
+                </textElement>
+                <text><![CDATA[M./Mme/Mlle :]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="34" y="238" width="106" height="19" uuid="ef44f6ca-ad89-46ea-b1b8-cecd25b44af8">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left">
+                    <font fontName="Corbel" size="14"/>
+                </textElement>
+                <text><![CDATA[Né(e) le :]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="34" y="263" width="106" height="19" uuid="e524e174-eed0-4659-97db-9ccc585bc944">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left">
+                    <font fontName="Corbel" size="14"/>
+                </textElement>
+                <text><![CDATA[Nationalité :]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="34" y="288" width="106" height="19" uuid="dfc763a8-9537-4ce2-92b5-9020ef0279d5">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left">
+                    <font fontName="Corbel" size="14"/>
+                </textElement>
+                <text><![CDATA[Adresse email :]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="34" y="313" width="106" height="19" uuid="72bbfffd-ee31-4bab-b28a-7ac7585db9b1">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left">
+                    <font fontName="Corbel" size="14"/>
+                </textElement>
+                <text><![CDATA[Téléphone : ]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="34" y="338" width="106" height="19" uuid="44e39d04-f780-4a00-97a8-57977d126116">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left">
+                    <font fontName="Corbel" size="14"/>
+                </textElement>
+                <text><![CDATA[WhatsApp :]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="141" y="213" width="394" height="19" uuid="4b95f1e2-4e32-48c2-9e6f-dfc2728d21c5">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font fontName="Corbel" size="13" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{CIVILITE} + " " + $P{NOM} + " " + $P{PRENOM}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="141" y="238" width="394" height="19" uuid="4b717419-5c68-4fc2-b33d-1f73271a0bb4">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font fontName="Corbel" size="13" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[ $P{DATE_NAISSANCE} + " à " + $P{LIEU_NAISSANCE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="141" y="263" width="396" height="19" uuid="6b6fab38-a9da-4267-8b35-30d22b92c827">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font fontName="Corbel" size="13" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{NATIONALITE]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="141" y="288" width="394" height="19" uuid="f00f223f-38f5-48b8-af9b-df0821214041">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font fontName="Corbel" size="13" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMAIL}
+]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="141" y="313" width="394" height="19" uuid="1b62b120-08b5-4dfc-a9f0-289a9569c292">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font fontName="Corbel" size="13" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TELEPHONE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="141" y="337" width="394" height="19" uuid="a02e4783-b582-4174-bbc1-a08c7e8c827b">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font fontName="Corbel" size="13" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[($P{WHATSAPP} == null ? "—" : $P{WHATSAPP})]]></textFieldExpression>
             </textField>
         </band>
     </title>
