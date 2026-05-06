@@ -41,10 +41,18 @@ public class PreinscriptionDemande {
     @Enumerated(EnumType.STRING)
     private NiveauSouhaite niveauSouhaite;
 
+    private String diplomePresente;
+
+    @Enumerated(EnumType.STRING)
+    private StatutDiplome statutDiplome;
+
+    private Integer anneeObtention;
+
+    private String etablissementProvenance;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private FormationInitiale formation;
 
-    /* 🔥 CORRECTION ICI */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "periode_id", nullable = false)
     private PreinscriptionPeriode periode;

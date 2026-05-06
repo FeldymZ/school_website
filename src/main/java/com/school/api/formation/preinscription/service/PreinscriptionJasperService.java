@@ -22,11 +22,12 @@ public class PreinscriptionJasperService {
 
     private static final String LOGO_PATH = "/app/assets/logo.png";
 
+    /* ================= PUBLIC ================= */
     public byte[] generatePdf(PreinscriptionDemande demande) {
+
         try {
-            InputStream template = new ClassPathResource(
-                    "reports/preinscription.jrxml"
-            ).getInputStream();
+            // ✅ UN SEUL TEMPLATE
+            InputStream template = new ClassPathResource("reports/preinscription.jrxml").getInputStream();
 
             JasperReport report = JasperCompileManager.compileReport(template);
 
@@ -44,6 +45,7 @@ public class PreinscriptionJasperService {
         }
     }
 
+    /* ================= PARAMS ================= */
     private Map<String, Object> buildParams(PreinscriptionDemande d) {
 
         var periode   = d.getPeriode();
@@ -101,7 +103,7 @@ public class PreinscriptionJasperService {
         String formationComplete;
 
         if ("Licence".equalsIgnoreCase(niveau)) {
-            formationComplete = "Licence PROFESSIONNELLE EN INFORMATIQUE " ;
+            formationComplete = "Licence PROFESSIONNELLE EN INFORMATIQUE";
         } else if ("Master".equalsIgnoreCase(niveau)) {
             formationComplete = "Master PROFESSIONNEL EN INFORMATIQUE";
         } else {
@@ -110,6 +112,18 @@ public class PreinscriptionJasperService {
 
         p.put("FORMATION_TITRE", formationComplete);
         p.put("SPECIALITE", formation.getName());
+
+        /* ================= DIPLOME ================= */
+
+        p.put("DIPLOME_PRESENTE", d.getDiplomePresente());
+        p.put("ETABLISSEMENT_PROVENANCE", d.getEtablissementProvenance());
+
+        // ✅ IMPORTANT : NULL au lieu de ""
+        p.put("ANNEE_OBTENTION",
+                d.getAnneeObtention() != null
+                        ? d.getAnneeObtention().toString()
+                        : null
+        );
 
         /* ================= EMETTEUR ================= */
         p.put("EMETTEUR_NOM", emetteur.getNom());
