@@ -17,6 +17,13 @@ public record PreinscriptionDemandeResponse(
         String niveau,
         String formation,
         String nationalite,
+
+        /* ===== DIPLOME ===== */
+        String diplomePresente,
+        String statutDiplome,
+        Integer anneeObtention,
+        String etablissementProvenance,
+
         String anneeUniversitaire,
         StatutDemande statut,
         LocalDateTime createdAt,

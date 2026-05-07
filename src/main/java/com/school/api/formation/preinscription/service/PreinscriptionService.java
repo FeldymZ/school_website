@@ -36,6 +36,27 @@ public class PreinscriptionService {
         return LocalDateTime.now(ZoneId.of("Africa/Libreville"));
     }
 
+    /* ================= VALIDATION DIPLOME ================= */
+    private void validateDiplome(PreinscriptionDemandeRequest req) {
+
+        if (req.statutDiplome() == StatutDiplome.OBTENU) {
+
+            if (req.anneeObtention() == null) {
+                throw new IllegalArgumentException(
+                        "L'année d'obtention est obligatoire pour un diplôme obtenu"
+                );
+            }
+
+        } else if (req.statutDiplome() == StatutDiplome.EN_COURS) {
+
+            if (req.anneeObtention() != null) {
+                throw new IllegalArgumentException(
+                        "Ne renseignez pas l'année d'obtention si le diplôme est en cours"
+                );
+            }
+        }
+    }
+
     /* ================= PUBLIC ================= */
     @Transactional
     public PreinscriptionDemandeResponse submit(PreinscriptionDemandeRequest req) {
@@ -46,12 +67,13 @@ public class PreinscriptionService {
             throw new IllegalStateException("Les préinscriptions sont fermées.");
         }
 
-        // ✅ SUPPRESSION DU BLOC QUI BLOQUAIT LES DOUBLONS
-
         FormationInitiale formation = formationRepo.findById(req.formationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Formation", "id", req.formationId()
                 ));
+
+        /* 🔥 VALIDATION METIER */
+        validateDiplome(req);
 
         PreinscriptionDemande demande = PreinscriptionDemande.builder()
                 .civilite(req.civilite())
@@ -64,6 +86,13 @@ public class PreinscriptionService {
                 .telephone(req.telephone())
                 .whatsapp(req.whatsapp())
                 .niveauSouhaite(req.niveauSouhaite())
+
+                /* 🔥 DIPLOME */
+                .diplomePresente(req.diplomePresente())
+                .statutDiplome(req.statutDiplome())
+                .anneeObtention(req.anneeObtention())
+                .etablissementProvenance(req.etablissementProvenance())
+
                 .formation(formation)
                 .periode(periode)
                 .statut(StatutDemande.EN_ATTENTE)
@@ -71,7 +100,6 @@ public class PreinscriptionService {
 
         PreinscriptionDemande saved = demandeRepo.save(demande);
 
-        /* ✅ FIX : AJOUT LICENCE / MASTER */
         mailService.sendPreinscriptionRecue(
                 saved.getEmail(),
                 saved.getCivilite().getLabel(),
@@ -85,6 +113,7 @@ public class PreinscriptionService {
     }
 
     /* ================= ADMIN ================= */
+
     public List<PreinscriptionDemandeResponse> getAll() {
         return demandeRepo.findAllWithRelations()
                 .stream()
@@ -113,6 +142,7 @@ public class PreinscriptionService {
     }
 
     /* ================= VALIDATION ================= */
+
     @Transactional
     public PreinscriptionDemandeResponse validate(Long id) {
 
@@ -125,12 +155,10 @@ public class PreinscriptionService {
         byte[] pdf = jasperService.generatePdf(d);
 
         String filename = "preinscription_" + d.getId() + ".pdf";
-
         String path = fileStorageService.storePreinscriptionPdf(pdf, filename);
 
         d.setPdfUrl(path);
 
-        /* ✅ FIX : LICENCE / MASTER */
         mailService.sendPreinscriptionValidee(
                 d.getEmail(),
                 d.getCivilite().getLabel(),
@@ -153,6 +181,7 @@ public class PreinscriptionService {
     }
 
     /* ================= AUTRES ================= */
+
     @Transactional
     public void deletePeriode(Long id) {
 
@@ -259,6 +288,13 @@ public class PreinscriptionService {
                 .niveau(d.getNiveauSouhaite().getLabel())
                 .formation(d.getFormation().getName())
                 .nationalite(d.getNationalite())
+
+                /* 🔥 DIPLOME */
+                .diplomePresente(d.getDiplomePresente())
+                .statutDiplome(d.getStatutDiplome().name())
+                .anneeObtention(d.getAnneeObtention())
+                .etablissementProvenance(d.getEtablissementProvenance())
+
                 .anneeUniversitaire(d.getPeriode().getSession().getAnnee())
                 .statut(d.getStatut())
                 .createdAt(d.getCreatedAt())
