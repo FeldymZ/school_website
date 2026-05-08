@@ -3,11 +3,12 @@ package com.school.api.formation.preinscription.controller;
 import com.school.api.auth.audit.AuditLog;
 import com.school.api.formation.preinscription.dto.*;
 import com.school.api.formation.preinscription.entity.*;
-import com.school.api.formation.preinscription.service.PreinscriptionService;
 import com.school.api.formation.preinscription.service.PreinscriptionPeriodeService;
+import com.school.api.formation.preinscription.service.PreinscriptionService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +33,10 @@ public class PreinscriptionAdminController {
         return service.getAll();
     }
 
-    @AuditLog(action = "CONSULTATION_PREINSCRIPTIONS_PAR_STATUT", target = "#statut.toString()")
+    @AuditLog(
+            action = "CONSULTATION_PREINSCRIPTIONS_PAR_STATUT",
+            target = "#statut.toString()"
+    )
     @GetMapping("/statut/{statut}")
     public List<PreinscriptionDemandeResponse> getByStatut(
             @PathVariable StatutDemande statut
@@ -40,7 +44,10 @@ public class PreinscriptionAdminController {
         return service.getByStatut(statut);
     }
 
-    @AuditLog(action = "CONSULTATION_PREINSCRIPTIONS_PAR_FORMATION", target = "#formationId.toString()")
+    @AuditLog(
+            action = "CONSULTATION_PREINSCRIPTIONS_PAR_FORMATION",
+            target = "#formationId.toString()"
+    )
     @GetMapping("/formation/{formationId}")
     public List<PreinscriptionDemandeResponse> getByFormation(
             @PathVariable Long formationId
@@ -48,21 +55,36 @@ public class PreinscriptionAdminController {
         return service.getByFormation(formationId);
     }
 
-    @AuditLog(action = "CONSULTATION_PREINSCRIPTION", target = "#id.toString()")
+    @AuditLog(
+            action = "CONSULTATION_PREINSCRIPTION",
+            target = "#id.toString()"
+    )
     @GetMapping("/{id}")
-    public PreinscriptionDemandeResponse getById(@PathVariable Long id) {
+    public PreinscriptionDemandeResponse getById(
+            @PathVariable Long id
+    ) {
         return service.getById(id);
     }
 
-    @AuditLog(action = "VALIDATION_PREINSCRIPTION", target = "#id.toString()")
+    @AuditLog(
+            action = "VALIDATION_PREINSCRIPTION",
+            target = "#id.toString()"
+    )
     @PostMapping("/{id}/valider")
-    public PreinscriptionDemandeResponse validate(@PathVariable Long id) {
+    public PreinscriptionDemandeResponse validate(
+            @PathVariable Long id
+    ) {
         return service.validate(id);
     }
 
-    @AuditLog(action = "REJET_PREINSCRIPTION", target = "#id.toString()")
+    @AuditLog(
+            action = "REJET_PREINSCRIPTION",
+            target = "#id.toString()"
+    )
     @PostMapping("/{id}/rejeter")
-    public void reject(@PathVariable Long id) {
+    public void reject(
+            @PathVariable Long id
+    ) {
         service.reject(id);
     }
 
@@ -88,8 +110,23 @@ public class PreinscriptionAdminController {
     @AuditLog(action = "SUPPRESSION_SESSION")
     @DeleteMapping("/sessions/{id}")
     @PreAuthorize("hasRole('SUPERADMIN')")
-    public void deleteSession(@PathVariable Long id) {
+    public void deleteSession(
+            @PathVariable Long id
+    ) {
         periodeService.deleteSession(id);
+    }
+
+    @AuditLog(
+            action = "MODIFICATION_SESSION",
+            target = "#id.toString()"
+    )
+    @PutMapping("/sessions/{id}")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public void updateSession(
+            @PathVariable Long id,
+            @RequestBody SessionUniversitaireRequest req
+    ) {
+        periodeService.updateSession(id, req);
     }
 
     /* ════════════════════════════════
@@ -114,21 +151,16 @@ public class PreinscriptionAdminController {
     @AuditLog(action = "SUPPRESSION_PERIODE")
     @DeleteMapping("/periodes/{id}")
     @PreAuthorize("hasRole('SUPERADMIN')")
-    public void deletePeriode(@PathVariable Long id) {
+    public void deletePeriode(
+            @PathVariable Long id
+    ) {
         periodeService.deletePeriode(id);
     }
 
-    @AuditLog(action = "MODIFICATION_SESSION", target = "#id.toString()")
-    @PutMapping("/sessions/{id}")
-    @PreAuthorize("hasRole('SUPERADMIN')")
-    public void updateSession(
-            @PathVariable Long id,
-            @RequestBody SessionUniversitaireRequest req
-    ) {
-        periodeService.updateSession(id, req);
-    }
-
-    @AuditLog(action = "MODIFICATION_PERIODE", target = "#id.toString()")
+    @AuditLog(
+            action = "MODIFICATION_PERIODE",
+            target = "#id.toString()"
+    )
     @PutMapping("/periodes/{id}")
     @PreAuthorize("hasRole('SUPERADMIN')")
     public void updatePeriode(
@@ -138,10 +170,31 @@ public class PreinscriptionAdminController {
         periodeService.updatePeriode(id, req);
     }
 
-    @AuditLog(action = "DESACTIVATION_PERIODE", target = "#id.toString()")
+    /* ================= DESACTIVER ================= */
+
+    @AuditLog(
+            action = "DESACTIVATION_PERIODE",
+            target = "#id.toString()"
+    )
     @PutMapping("/periodes/{id}/desactiver")
     @PreAuthorize("hasRole('SUPERADMIN')")
-    public void deactivatePeriode(@PathVariable Long id) {
+    public void deactivatePeriode(
+            @PathVariable Long id
+    ) {
         periodeService.deactivatePeriode(id);
+    }
+
+    /* ================= ACTIVER ================= */
+
+    @AuditLog(
+            action = "ACTIVATION_PERIODE",
+            target = "#id.toString()"
+    )
+    @PutMapping("/periodes/{id}/activer")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public void activatePeriode(
+            @PathVariable Long id
+    ) {
+        service.activatePeriode(id);
     }
 }
