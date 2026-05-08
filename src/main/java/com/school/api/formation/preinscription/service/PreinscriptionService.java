@@ -210,8 +210,31 @@ public class PreinscriptionService {
 
         byte[] pdf = jasperService.generatePdf(d);
 
+        /* ================= NOM FICHIER ================= */
+
+        String nom = d.getNom() != null
+                ? d.getNom()
+                .trim()
+                .replaceAll("\\s+", "_")
+                .replaceAll("[^a-zA-Z0-9_]", "")
+                : "demandeur";
+
+        String prenom = d.getPrenom() != null
+                ? d.getPrenom()
+                .trim()
+                .replaceAll("\\s+", "_")
+                .replaceAll("[^a-zA-Z0-9_]", "")
+                : "";
+
         String filename =
-                "preinscription_" + d.getId() + ".pdf";
+                "preinscription_"
+                        + nom
+                        + (!prenom.isBlank() ? "_" + prenom : "")
+                        + "_"
+                        + d.getId()
+                        + ".pdf";
+
+        /* ================= SAVE PDF ================= */
 
         String path = fileStorageService.storePreinscriptionPdf(
                 pdf,
@@ -219,6 +242,8 @@ public class PreinscriptionService {
         );
 
         d.setPdfUrl(path);
+
+        /* ================= MAIL ================= */
 
         mailService.sendPreinscriptionValidee(
                 d.getEmail(),
