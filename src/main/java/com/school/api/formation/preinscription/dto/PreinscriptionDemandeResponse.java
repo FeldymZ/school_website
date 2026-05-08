@@ -10,12 +10,12 @@ public record PreinscriptionDemandeResponse(
 
         Long id,
 
+        /* ================= IDENTITE ================= */
+
         String civilite,
 
         String nom,
         String prenom,
-
-        /* ================= IDENTITE ================= */
 
         String dateNaissance,
         String lieuNaissance,
@@ -48,6 +48,8 @@ public record PreinscriptionDemandeResponse(
 
         LocalDateTime createdAt,
         LocalDateTime validatedAt,
+
+        /* ================= PDF ================= */
 
         String pdfUrl
 
