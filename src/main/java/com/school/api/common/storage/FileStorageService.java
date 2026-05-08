@@ -5,29 +5,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class FileStorageService {
 
-    /* ============================
-       DOSSIER PHYSIQUE
-       ============================ */
+  /* ============================
+     DOSSIER RACINE
+     ============================ */
 
   private static final String BASE_DIR = "/files";
 
-    /* ============================
-       URL PUBLIQUE
-       ============================ */
-
-  private static final String PUBLIC_BASE = "/files";
-
-    /* ============================
-       LIMITES
-       ============================ */
+  /* ============================
+     LIMITES
+     ============================ */
 
   private static final long MAX_IMAGE_SIZE = 10_000_000;
   private static final long MAX_VIDEO_SIZE = 30_000_000;
@@ -39,9 +32,9 @@ public class FileStorageService {
   private static final Set<String> VIDEO_EXTENSIONS =
           Set.of("mp4", "webm");
 
-    /* ============================
-       🖼️ BANNERS
-       ============================ */
+  /* ============================
+     🖼️ BANNERS
+     ============================ */
 
   public String storeBannerMedia(
           MultipartFile file,
@@ -73,132 +66,241 @@ public class FileStorageService {
     );
   }
 
-    /* ============================
-       🎓 FORMATIONS INITIALES
-       ============================ */
+  /* ============================
+     🎓 FORMATIONS INITIALES
+     ============================ */
 
-  public String storeFormationCover(MultipartFile file) {
+  public String storeFormationCover(
+          MultipartFile file
+  ) {
+
     validateImage(file);
+
     validateSize(file, MAX_IMAGE_SIZE);
-    return store(file, "formations/initiale/covers");
+
+    return store(
+            file,
+            "formations/initiale/covers"
+    );
   }
 
-  public String storeFormationGalleryImage(MultipartFile file) {
+  public String storeFormationGalleryImage(
+          MultipartFile file
+  ) {
+
     validateImage(file);
+
     validateSize(file, MAX_IMAGE_SIZE);
-    return store(file, "formations/initiale/gallery");
+
+    return store(
+            file,
+            "formations/initiale/gallery"
+    );
   }
 
-  public String storeFormationPdf(MultipartFile file) {
+  public String storeFormationPdf(
+          MultipartFile file
+  ) {
+
     validatePdf(file);
+
     validateSize(file, MAX_PDF_SIZE);
-    return store(file, "formations/initiale/pdfs");
+
+    return store(
+            file,
+            "formations/initiale/pdfs"
+    );
   }
 
-    /* ============================
-       🎓 FORMATIONS CONTINUES
-       ============================ */
+  /* ============================
+     🎓 FORMATIONS CONTINUES
+     ============================ */
 
-  public String storeFormationContinuesCover(MultipartFile file) {
+  public String storeFormationContinuesCover(
+          MultipartFile file
+  ) {
+
     validateImage(file);
+
     validateSize(file, MAX_IMAGE_SIZE);
-    return store(file, "formations/continues/covers");
+
+    return store(
+            file,
+            "formations/continues/covers"
+    );
   }
 
-  public String storeFormationContinuesGalleryImage(MultipartFile file) {
+  public String storeFormationContinuesGalleryImage(
+          MultipartFile file
+  ) {
+
     validateImage(file);
+
     validateSize(file, MAX_IMAGE_SIZE);
-    return store(file, "formations/continues/gallery");
+
+    return store(
+            file,
+            "formations/continues/gallery"
+    );
   }
 
-  public String storeFormationContinuesPdf(MultipartFile file) {
+  public String storeFormationContinuesPdf(
+          MultipartFile file
+  ) {
+
     validatePdf(file);
+
     validateSize(file, MAX_PDF_SIZE);
-    return store(file, "formations/continues/pdfs");
+
+    return store(
+            file,
+            "formations/continues/pdfs"
+    );
   }
 
-    /* ============================
-       📄 DEVIS CONTINUES
-       ============================ */
+  /* ============================
+     📄 DEVIS CONTINUES
+     ============================ */
 
-  public String storeDevisContinuesAttachment(MultipartFile file) {
+  public String storeDevisContinuesAttachment(
+          MultipartFile file
+  ) {
+
     validatePdf(file);
+
     validateSize(file, MAX_PDF_SIZE);
-    return store(file, "formations/continues/devis-reponses");
+
+    return store(
+            file,
+            "formations/continues/devis-reponses"
+    );
   }
 
-    /* ============================
-       📰 ACTUALITÉS
-       ============================ */
+  /* ============================
+     📰 ACTUALITÉS
+     ============================ */
 
-  public String storeActualiteCover(MultipartFile file) {
+  public String storeActualiteCover(
+          MultipartFile file
+  ) {
+
     validateImage(file);
+
     validateSize(file, MAX_IMAGE_SIZE);
-    return store(file, "actualites/covers");
+
+    return store(
+            file,
+            "actualites/covers"
+    );
   }
 
-  public String storeActualiteGalleryImage(MultipartFile file) {
+  public String storeActualiteGalleryImage(
+          MultipartFile file
+  ) {
+
     validateImage(file);
+
     validateSize(file, MAX_IMAGE_SIZE);
-    return store(file, "actualites/gallery");
+
+    return store(
+            file,
+            "actualites/gallery"
+    );
   }
 
-    /* ============================
-       💬 COMMENTAIRES
-       ============================ */
+  /* ============================
+     💬 COMMENTAIRES
+     ============================ */
 
-  public String storeCommentaireAvatar(MultipartFile file) {
+  public String storeCommentaireAvatar(
+          MultipartFile file
+  ) {
+
     validateImage(file);
+
     validateSize(file, MAX_IMAGE_SIZE);
-    return store(file, "commentaires/authors");
+
+    return store(
+            file,
+            "commentaires/authors"
+    );
   }
 
-    /* ============================
-       🤝 PARTENAIRES
-       ============================ */
+  /* ============================
+     🤝 PARTENAIRES
+     ============================ */
 
-  public String storePartenaireLogo(MultipartFile file) {
+  public String storePartenaireLogo(
+          MultipartFile file
+  ) {
+
     validateImage(file);
+
     validateSize(file, MAX_IMAGE_SIZE);
-    return store(file, "partenaires/logos");
+
+    return store(
+            file,
+            "partenaires/logos"
+    );
   }
 
-    /* ============================
-       ✉️ CONTACT
-       ============================ */
+  /* ============================
+     ✉️ CONTACT
+     ============================ */
 
-  public String storeContactReplyAttachment(MultipartFile file) {
+  public String storeContactReplyAttachment(
+          MultipartFile file
+  ) {
+
     validateFile(file);
+
     validateSize(file, 7_000_000);
-    return store(file, "contact/replies");
+
+    return store(
+            file,
+            "contact/replies"
+    );
   }
 
-    /* ============================
-       🏭 VIE ÉTUDIANTE
-       ============================ */
+  /* ============================
+     🏭 VIE ÉTUDIANTE
+     ============================ */
 
-  public String storeVisiteEntrepriseImage(MultipartFile file) {
-    validateImage(file);
-    validateSize(file, MAX_IMAGE_SIZE);
-    return store(file, "vie-etudiante/visites-entreprise");
-  }
-
-    /* ============================
-       ✍️ SIGNATURES
-       ============================ */
-
-  public String storeSignature(MultipartFile file) {
+  public String storeVisiteEntrepriseImage(
+          MultipartFile file
+  ) {
 
     validateImage(file);
 
     validateSize(file, MAX_IMAGE_SIZE);
 
-    return store(file, "signatures");
+    return store(
+            file,
+            "vie-etudiante/visites-entreprise"
+    );
   }
 
-    /* ============================
-       📄 PDF PREINSCRIPTIONS
-       ============================ */
+  /* ============================
+     ✍️ SIGNATURES
+     ============================ */
+
+  public String storeSignature(
+          MultipartFile file
+  ) {
+
+    validateImage(file);
+
+    validateSize(file, MAX_IMAGE_SIZE);
+
+    return store(
+            file,
+            "signatures"
+    );
+  }
+
+  /* ============================
+     📄 PRÉINSCRIPTIONS PDF
+     ============================ */
 
   public String storePreinscriptionPdf(
           byte[] bytes,
@@ -207,22 +309,19 @@ public class FileStorageService {
 
     try {
 
-      String subDir =
-              "preinscriptions/attestations";
-
-      Path dir = Path.of(BASE_DIR, subDir);
+      Path dir = Path.of(
+              BASE_DIR,
+              "preinscriptions/attestations"
+      );
 
       Files.createDirectories(dir);
 
-      Path target =
-              dir.resolve(filename);
+      Path target = dir.resolve(filename);
 
       Files.write(target, bytes);
 
-      return PUBLIC_BASE
-              + "/"
-              + subDir
-              + "/"
+      // ✅ URL publique utilisée par le frontend
+      return "/files/preinscriptions/attestations/"
               + filename;
 
     } catch (IOException e) {
@@ -234,27 +333,32 @@ public class FileStorageService {
     }
   }
 
-    /* ============================
-       🗑️ SUPPRESSION
-       ============================ */
+  /* ============================
+     🗑️ SUPPRESSION
+     ============================ */
 
   public void delete(String publicUrl) {
 
-    if (publicUrl == null || publicUrl.isBlank()) {
+    if (
+            publicUrl == null ||
+                    publicUrl.isBlank()
+    ) {
       return;
     }
 
     try {
 
-      if (!publicUrl.startsWith(PUBLIC_BASE)) {
+      if (!publicUrl.startsWith("/files/")) {
         return;
       }
 
       String relativePath =
-              publicUrl.replace(PUBLIC_BASE + "/", "");
+              publicUrl.replace("/files/", "");
 
-      Path path =
-              Path.of(BASE_DIR, relativePath);
+      Path path = Path.of(
+              BASE_DIR,
+              relativePath
+      );
 
       Files.deleteIfExists(path);
 
@@ -277,9 +381,9 @@ public class FileStorageService {
     }
   }
 
-    /* ============================
-       ⚙️ CORE
-       ============================ */
+  /* ============================
+     ⚙️ CORE COMMUN
+     ============================ */
 
   private String store(
           MultipartFile file,
@@ -298,8 +402,10 @@ public class FileStorageService {
                       + "."
                       + extension;
 
-      Path directory =
-              Path.of(BASE_DIR, subDir);
+      Path directory = Path.of(
+              BASE_DIR,
+              subDir
+      );
 
       Files.createDirectories(directory);
 
@@ -308,8 +414,7 @@ public class FileStorageService {
 
       file.transferTo(target.toFile());
 
-      return PUBLIC_BASE
-              + "/"
+      return "/files/"
               + subDir
               + "/"
               + filename;
@@ -323,13 +428,18 @@ public class FileStorageService {
     }
   }
 
-    /* ============================
-       VALIDATIONS
-       ============================ */
+  /* ============================
+     🔍 VALIDATIONS
+     ============================ */
 
-  private void validateFile(MultipartFile file) {
+  private void validateFile(
+          MultipartFile file
+  ) {
 
-    if (file == null || file.isEmpty()) {
+    if (
+            file == null ||
+                    file.isEmpty()
+    ) {
 
       throw new IllegalArgumentException(
               "Fichier manquant"
@@ -337,7 +447,9 @@ public class FileStorageService {
     }
   }
 
-  private void validateImage(MultipartFile file) {
+  private void validateImage(
+          MultipartFile file
+  ) {
 
     validateFile(file);
 
@@ -354,7 +466,9 @@ public class FileStorageService {
     }
   }
 
-  private void validateVideo(MultipartFile file) {
+  private void validateVideo(
+          MultipartFile file
+  ) {
 
     validateFile(file);
 
@@ -371,7 +485,9 @@ public class FileStorageService {
     }
   }
 
-  private void validatePdf(MultipartFile file) {
+  private void validatePdf(
+          MultipartFile file
+  ) {
 
     validateFile(file);
 
@@ -403,9 +519,14 @@ public class FileStorageService {
     }
   }
 
-  private String getExtension(String filename) {
+  private String getExtension(
+          String filename
+  ) {
 
-    if (filename == null || !filename.contains(".")) {
+    if (
+            filename == null ||
+                    !filename.contains(".")
+    ) {
 
       throw new IllegalArgumentException(
               "Nom de fichier invalide"

@@ -20,33 +20,65 @@ public class PreinscriptionJasperService {
     private static final DateTimeFormatter DATE_FR =
             DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private static final String LOGO_PATH = "/app/assets/logo.png";
+    private static final String LOGO_PATH =
+            "/app/assets/logo.png";
 
-    /* ================= PUBLIC ================= */
-    public byte[] generatePdf(PreinscriptionDemande demande) {
+    /* ================= GENERATE PDF ================= */
 
-        try {
-            // ✅ UN SEUL TEMPLATE
-            InputStream template = new ClassPathResource("reports/preinscription.jrxml").getInputStream();
+    public byte[] generatePdf(
+            PreinscriptionDemande demande
+    ) {
 
-            JasperReport report = JasperCompileManager.compileReport(template);
+        try (
+                InputStream template =
+                        new ClassPathResource(
+                                "reports/preinscription.jrxml"
+                        ).getInputStream()
+        ) {
 
-            JasperPrint print = JasperFillManager.fillReport(
-                    report,
-                    buildParams(demande),
-                    new JREmptyDataSource(1)
+            JasperReport report =
+                    JasperCompileManager.compileReport(
+                            template
+                    );
+
+            JasperPrint print =
+                    JasperFillManager.fillReport(
+                            report,
+                            buildParams(demande),
+                            new JREmptyDataSource(1)
+                    );
+
+            byte[] pdf =
+                    JasperExportManager.exportReportToPdf(
+                            print
+                    );
+
+            log.info(
+                    "✅ PDF généré avec succès - taille : {} bytes",
+                    pdf.length
             );
 
-            return JasperExportManager.exportReportToPdf(print);
+            return pdf;
 
         } catch (Exception e) {
-            log.error("Erreur génération PDF préinscription", e);
-            throw new RuntimeException("Erreur génération PDF préinscription", e);
+
+            log.error(
+                    "❌ Erreur génération PDF préinscription",
+                    e
+            );
+
+            throw new RuntimeException(
+                    "Erreur génération PDF préinscription",
+                    e
+            );
         }
     }
 
     /* ================= PARAMS ================= */
-    private Map<String, Object> buildParams(PreinscriptionDemande d) {
+
+    private Map<String, Object> buildParams(
+            PreinscriptionDemande d
+    ) {
 
         var periode   = d.getPeriode();
         var session   = periode.getSession();
@@ -56,103 +88,216 @@ public class PreinscriptionJasperService {
         Map<String, Object> p = new HashMap<>();
 
         /* ================= LOGO ================= */
+
         try {
-            InputStream logoStream = new FileInputStream(LOGO_PATH);
+
+            InputStream logoStream =
+                    new FileInputStream(LOGO_PATH);
+
             p.put("LOGO", logoStream);
+
         } catch (Exception e) {
-            log.warn("Logo non trouvé : {}", LOGO_PATH);
+
+            log.warn(
+                    "⚠️ Logo non trouvé : {}",
+                    LOGO_PATH
+            );
+
             p.put("LOGO", null);
         }
 
         /* ================= INFOS ================= */
-        p.put("NUMERO_DEMANDE", genererNumero(d.getId()));
-        p.put("ANNEE_UNIV", session.getAnnee());
 
-        p.put("CIVILITE", d.getCivilite().getLabel());
-        p.put("NOM", d.getNom() != null ? d.getNom().toUpperCase() : "");
-        p.put("PRENOM", d.getPrenom());
+        p.put(
+                "NUMERO_DEMANDE",
+                genererNumero(d.getId())
+        );
 
-        p.put("DATE_NAISSANCE",
+        p.put(
+                "ANNEE_UNIV",
+                session.getAnnee()
+        );
+
+        p.put(
+                "CIVILITE",
+                d.getCivilite().getLabel()
+        );
+
+        p.put(
+                "NOM",
+                d.getNom() != null
+                        ? d.getNom().toUpperCase()
+                        : ""
+        );
+
+        p.put(
+                "PRENOM",
+                d.getPrenom()
+        );
+
+        p.put(
+                "DATE_NAISSANCE",
                 d.getDateNaissance() != null
                         ? d.getDateNaissance().format(DATE_FR)
-                        : "");
+                        : ""
+        );
 
-        p.put("LIEU_NAISSANCE", d.getLieuNaissance());
-        p.put("NATIONALITE", d.getNationalite());
-        p.put("EMAIL", d.getEmail());
-        p.put("TELEPHONE", d.getTelephone());
+        p.put(
+                "LIEU_NAISSANCE",
+                d.getLieuNaissance()
+        );
 
-        p.put("WHATSAPP",
-                d.getWhatsapp() != null ? d.getWhatsapp() : "—");
+        p.put(
+                "NATIONALITE",
+                d.getNationalite()
+        );
+
+        p.put(
+                "EMAIL",
+                d.getEmail()
+        );
+
+        p.put(
+                "TELEPHONE",
+                d.getTelephone()
+        );
+
+        p.put(
+                "WHATSAPP",
+                d.getWhatsapp() != null
+                        ? d.getWhatsapp()
+                        : "—"
+        );
 
         /* ================= FORMATION ================= */
 
-        p.put("NIVEAU",
+        p.put(
+                "NIVEAU",
                 d.getNiveauSouhaite() != null
                         ? d.getNiveauSouhaite().getLabel()
-                        : "");
+                        : ""
+        );
 
-        String niveau = formation.getLevel() != null
-                ? formation.getLevel().getLabel()
-                : "";
+        String niveau =
+                formation.getLevel() != null
+                        ? formation.getLevel().getLabel()
+                        : "";
 
-        String domaine = formation.getName() != null
-                ? formation.getName().toUpperCase()
-                : "INFORMATIQUE";
+        String domaine =
+                formation.getName() != null
+                        ? formation.getName().toUpperCase()
+                        : "INFORMATIQUE";
 
         String formationComplete;
 
         if ("Licence".equalsIgnoreCase(niveau)) {
-            formationComplete = "Licence PROFESSIONNELLE EN INFORMATIQUE";
+
+            formationComplete =
+                    "Licence PROFESSIONNELLE EN INFORMATIQUE";
+
         } else if ("Master".equalsIgnoreCase(niveau)) {
-            formationComplete = "Master PROFESSIONNEL EN INFORMATIQUE";
+
+            formationComplete =
+                    "Master PROFESSIONNEL EN INFORMATIQUE";
+
         } else {
-            formationComplete = niveau + " EN " + domaine;
+
+            formationComplete =
+                    niveau + " EN " + domaine;
         }
 
-        p.put("FORMATION_TITRE", formationComplete);
-        p.put("SPECIALITE", formation.getName());
+        p.put(
+                "FORMATION_TITRE",
+                formationComplete
+        );
+
+        p.put(
+                "SPECIALITE",
+                formation.getName()
+        );
 
         /* ================= DIPLOME ================= */
 
-        p.put("DIPLOME_PRESENTE", d.getDiplomePresente());
-        p.put("ETABLISSEMENT_PROVENANCE", d.getEtablissementProvenance());
+        p.put(
+                "DIPLOME_PRESENTE",
+                d.getDiplomePresente()
+        );
 
-        // ✅ IMPORTANT : NULL au lieu de ""
-        p.put("ANNEE_OBTENTION",
+        p.put(
+                "ETABLISSEMENT_PROVENANCE",
+                d.getEtablissementProvenance()
+        );
+
+        p.put(
+                "ANNEE_OBTENTION",
                 d.getAnneeObtention() != null
                         ? d.getAnneeObtention().toString()
                         : null
         );
 
         /* ================= EMETTEUR ================= */
-        p.put("EMETTEUR_NOM", emetteur.getNom());
-        p.put("EMETTEUR_FONCTION", emetteur.getFonction());
+
+        p.put(
+                "EMETTEUR_NOM",
+                emetteur.getNom()
+        );
+
+        p.put(
+                "EMETTEUR_FONCTION",
+                emetteur.getFonction()
+        );
 
         /* ================= SIGNATURE ================= */
+
         try {
+
             if (emetteur.getSignatureUrl() != null) {
+
                 InputStream signatureStream =
-                        new FileInputStream(emetteur.getSignatureUrl());
-                p.put("SIGNATURE", signatureStream);
+                        new FileInputStream(
+                                emetteur.getSignatureUrl()
+                        );
+
+                p.put(
+                        "SIGNATURE",
+                        signatureStream
+                );
+
             } else {
+
                 p.put("SIGNATURE", null);
             }
+
         } catch (Exception e) {
-            log.warn("Signature non trouvée : {}", emetteur.getSignatureUrl());
+
+            log.warn(
+                    "⚠️ Signature non trouvée : {}",
+                    emetteur.getSignatureUrl()
+            );
+
             p.put("SIGNATURE", null);
         }
 
         /* ================= DATE ================= */
-        p.put("DATE_EMISSION",
+
+        p.put(
+                "DATE_EMISSION",
                 d.getValidatedAt() != null
-                        ? d.getValidatedAt().toLocalDate().format(DATE_FR)
-                        : "");
+                        ? d.getValidatedAt()
+                        .toLocalDate()
+                        .format(DATE_FR)
+                        : ""
+        );
 
         return p;
     }
 
-    private String genererNumero(Long id) {
+    /* ================= NUMERO ================= */
+
+    private String genererNumero(
+            Long id
+    ) {
+
         return String.valueOf(1000 + id);
     }
 }
