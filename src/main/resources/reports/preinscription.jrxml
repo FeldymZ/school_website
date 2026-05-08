@@ -92,7 +92,7 @@
                 <text><![CDATA[M./Mme/Mlle :]]></text>
             </staticText>
             <staticText>
-                <reportElement x="34" y="217" width="96" height="19" uuid="ef44f6ca-ad89-46ea-b1b8-cecd25b44af8">
+                <reportElement x="34" y="217" width="60" height="19" uuid="ef44f6ca-ad89-46ea-b1b8-cecd25b44af8">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left">
@@ -101,7 +101,7 @@
                 <text><![CDATA[Né(e) le :]]></text>
             </staticText>
             <staticText>
-                <reportElement x="34" y="242" width="96" height="19" uuid="e524e174-eed0-4659-97db-9ccc585bc944">
+                <reportElement x="34" y="242" width="76" height="19" uuid="e524e174-eed0-4659-97db-9ccc585bc944">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left">
@@ -119,7 +119,7 @@
                 <text><![CDATA[Adresse email :]]></text>
             </staticText>
             <staticText>
-                <reportElement x="34" y="362" width="96" height="19" uuid="72bbfffd-ee31-4bab-b28a-7ac7585db9b1">
+                <reportElement x="34" y="362" width="76" height="19" uuid="72bbfffd-ee31-4bab-b28a-7ac7585db9b1">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left">
@@ -128,7 +128,7 @@
                 <text><![CDATA[Téléphone :]]></text>
             </staticText>
             <staticText>
-                <reportElement x="34" y="387" width="96" height="19" uuid="44e39d04-f780-4a00-97a8-57977d126116">
+                <reportElement x="34" y="387" width="76" height="19" uuid="44e39d04-f780-4a00-97a8-57977d126116">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left">
@@ -146,7 +146,7 @@
                 <textFieldExpression><![CDATA[$P{CIVILITE} + " " + $P{NOM} + " " + $P{PRENOM}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="131" y="217" width="394" height="19" forecolor="#320AFC" uuid="4b717419-5c68-4fc2-b33d-1f73271a0bb4">
+                <reportElement x="94" y="217" width="394" height="19" forecolor="#320AFC" uuid="4b717419-5c68-4fc2-b33d-1f73271a0bb4">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left" verticalAlignment="Middle">
@@ -155,7 +155,7 @@
                 <textFieldExpression><![CDATA[$P{DATE_NAISSANCE} + " à " + $P{LIEU_NAISSANCE}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="131" y="242" width="396" height="19" forecolor="#320AFC" uuid="6b6fab38-a9da-4267-8b35-30d22b92c827">
+                <reportElement x="110" y="242" width="396" height="19" forecolor="#320AFC" uuid="6b6fab38-a9da-4267-8b35-30d22b92c827">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left" verticalAlignment="Middle">
@@ -173,7 +173,7 @@
                 <textFieldExpression><![CDATA[$P{EMAIL}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="131" y="362" width="394" height="19" forecolor="#320AFC" uuid="1b62b120-08b5-4dfc-a9f0-289a9569c292">
+                <reportElement x="110" y="362" width="394" height="19" forecolor="#320AFC" uuid="1b62b120-08b5-4dfc-a9f0-289a9569c292">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left" verticalAlignment="Middle">
@@ -182,7 +182,7 @@
                 <textFieldExpression><![CDATA[$P{TELEPHONE}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="131" y="387" width="394" height="19" forecolor="#320AFC" uuid="a02e4783-b582-4174-bbc1-a08c7e8c827b">
+                <reportElement x="110" y="387" width="394" height="19" forecolor="#320AFC" uuid="a02e4783-b582-4174-bbc1-a08c7e8c827b">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left" verticalAlignment="Middle">
@@ -301,11 +301,9 @@
                 <textElement textAlignment="Left" verticalAlignment="Middle">
                     <font fontName="Corbel" size="14" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA[
-    ($P{ANNEE_OBTENTION} == null || $P{ANNEE_OBTENTION}.trim().isEmpty())
+                <textFieldExpression><![CDATA[($P{ANNEE_OBTENTION} == null || $P{ANNEE_OBTENTION}.trim().isEmpty())
     ? "Diplôme en cours de préparation"
-    : "Obtenu en " + $P{ANNEE_OBTENTION}
-]]></textFieldExpression>
+    : "Obtenu en " + $P{ANNEE_OBTENTION}]]></textFieldExpression>
             </textField>
             <staticText>
                 <reportElement x="34" y="314" width="182" height="19" uuid="de59b4a1-dd7e-4cbd-b136-da8bf95e432b">
