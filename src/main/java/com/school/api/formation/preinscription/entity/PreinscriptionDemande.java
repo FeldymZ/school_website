@@ -20,7 +20,8 @@ public class PreinscriptionDemande {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /* ── Identité ── */
+    /* ================= IDENTITE ================= */
+
     @Enumerated(EnumType.STRING)
     private Civilite civilite;
 
@@ -32,19 +33,24 @@ public class PreinscriptionDemande {
 
     private String nationalite;
 
-    /* ── Contact ── */
+    /* ================= CONTACT ================= */
+
     private String email;
     private String telephone;
     private String whatsapp;
 
-    /* ── Formation ── */
+    /* ================= FORMATION ================= */
+
     @Enumerated(EnumType.STRING)
     private NiveauSouhaite niveauSouhaite;
+
+    /* ===== DIPLOME ===== */
 
     private String diplomePresente;
 
     @Enumerated(EnumType.STRING)
-    private StatutDiplome statutDiplome;
+    @Builder.Default
+    private StatutDiplome statutDiplome = StatutDiplome.EN_COURS;
 
     private Integer anneeObtention;
 
@@ -53,18 +59,26 @@ public class PreinscriptionDemande {
     @ManyToOne(fetch = FetchType.LAZY)
     private FormationInitiale formation;
 
+    /* ================= PERIODE ================= */
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "periode_id", nullable = false)
     private PreinscriptionPeriode periode;
 
-    /* ── Statut ── */
+    /* ================= STATUT ================= */
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private StatutDemande statut = StatutDemande.EN_ATTENTE;
+
+    /* ================= DATES ================= */
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private LocalDateTime validatedAt;
+
+    /* ================= PDF ================= */
+
     private String pdfUrl;
 }
