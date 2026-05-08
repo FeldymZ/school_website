@@ -11,8 +11,8 @@ import com.school.api.formation.preinscription.repository.*;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,6 +37,7 @@ public class PreinscriptionService {
     }
 
     /* ================= VALIDATION DIPLOME ================= */
+
     private void validateDiplome(PreinscriptionDemandeRequest req) {
 
         if (req.statutDiplome() == StatutDiplome.OBTENU) {
@@ -58,6 +59,7 @@ public class PreinscriptionService {
     }
 
     /* ================= PUBLIC ================= */
+
     @Transactional
     public PreinscriptionDemandeResponse submit(PreinscriptionDemandeRequest req) {
 
@@ -69,7 +71,9 @@ public class PreinscriptionService {
 
         FormationInitiale formation = formationRepo.findById(req.formationId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Formation", "id", req.formationId()
+                        "Formation",
+                        "id",
+                        req.formationId()
                 ));
 
         /* 🔥 VALIDATION METIER */
@@ -138,7 +142,11 @@ public class PreinscriptionService {
     public PreinscriptionDemandeResponse getById(Long id) {
         return demandeRepo.findByIdWithRelations(id)
                 .map(this::toDto)
-                .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Demande",
+                        "id",
+                        id
+                ));
     }
 
     /* ================= VALIDATION ================= */
@@ -147,7 +155,11 @@ public class PreinscriptionService {
     public PreinscriptionDemandeResponse validate(Long id) {
 
         PreinscriptionDemande d = demandeRepo.findByIdWithRelations(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Demande",
+                        "id",
+                        id
+                ));
 
         d.setStatut(StatutDemande.VALIDEE);
         d.setValidatedAt(now());
@@ -155,7 +167,11 @@ public class PreinscriptionService {
         byte[] pdf = jasperService.generatePdf(d);
 
         String filename = "preinscription_" + d.getId() + ".pdf";
-        String path = fileStorageService.storePreinscriptionPdf(pdf, filename);
+
+        String path = fileStorageService.storePreinscriptionPdf(
+                pdf,
+                filename
+        );
 
         d.setPdfUrl(path);
 
@@ -174,8 +190,13 @@ public class PreinscriptionService {
 
     @Transactional
     public void reject(Long id) {
+
         PreinscriptionDemande d = demandeRepo.findByIdWithRelations(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Demande", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Demande",
+                        "id",
+                        id
+                ));
 
         d.setStatut(StatutDemande.REJETEE);
     }
@@ -187,11 +208,15 @@ public class PreinscriptionService {
 
         PreinscriptionPeriode periode = periodeRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "PreinscriptionPeriode", "id", id
+                        "PreinscriptionPeriode",
+                        "id",
+                        id
                 ));
 
         if (periode.isActive()) {
-            throw new IllegalStateException("Désactivez la période avant suppression");
+            throw new IllegalStateException(
+                    "Désactivez la période avant suppression"
+            );
         }
 
         periodeRepo.delete(periode);
@@ -202,7 +227,9 @@ public class PreinscriptionService {
 
         SessionUniversitaire session = sessionRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "SessionUniversitaire", "id", id
+                        "SessionUniversitaire",
+                        "id",
+                        id
                 ));
 
         if (periodeRepo.existsBySession_Id(id)) {
@@ -219,7 +246,11 @@ public class PreinscriptionService {
     }
 
     @Transactional
-    public void createEmetteur(String nom, String fonction, MultipartFile signature) {
+    public void createEmetteur(
+            String nom,
+            String fonction,
+            MultipartFile signature
+    ) {
 
         String path = fileStorageService.storeSignature(signature);
 
@@ -239,7 +270,11 @@ public class PreinscriptionService {
         emetteurRepo.findAll().forEach(e -> e.setActif(false));
 
         PreinscriptionEmetteur em = emetteurRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Emetteur", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Emetteur",
+                        "id",
+                        id
+                ));
 
         em.setActif(true);
     }
@@ -270,36 +305,65 @@ public class PreinscriptionService {
     }
 
     private PreinscriptionPeriode getActivePeriode() {
+
         LocalDateTime now = now();
+
         return periodeRepo
-                .findFirstByActiveTrueAndDateDebutBeforeAndDateFinAfterOrderByDateDebutDesc(now, now)
+                .findFirstByActiveTrueAndDateDebutBeforeAndDateFinAfterOrderByDateDebutDesc(
+                        now,
+                        now
+                )
                 .orElse(null);
     }
 
-    private PreinscriptionDemandeResponse toDto(PreinscriptionDemande d) {
+    private PreinscriptionDemandeResponse toDto(
+            PreinscriptionDemande d
+    ) {
+
         return PreinscriptionDemandeResponse.builder()
                 .id(d.getId())
+
                 .civilite(d.getCivilite().getLabel())
+
                 .nom(d.getNom())
                 .prenom(d.getPrenom())
+
                 .email(d.getEmail())
                 .telephone(d.getTelephone())
                 .whatsapp(d.getWhatsapp())
+
                 .niveau(d.getNiveauSouhaite().getLabel())
+
                 .formation(d.getFormation().getName())
+
                 .nationalite(d.getNationalite())
 
                 /* 🔥 DIPLOME */
                 .diplomePresente(d.getDiplomePresente())
-                .statutDiplome(d.getStatutDiplome().name())
-                .anneeObtention(d.getAnneeObtention())
-                .etablissementProvenance(d.getEtablissementProvenance())
 
-                .anneeUniversitaire(d.getPeriode().getSession().getAnnee())
+                .statutDiplome(
+                        d.getStatutDiplome() != null
+                                ? d.getStatutDiplome().name()
+                                : null
+                )
+
+                .anneeObtention(d.getAnneeObtention())
+
+                .etablissementProvenance(
+                        d.getEtablissementProvenance()
+                )
+
+                .anneeUniversitaire(
+                        d.getPeriode().getSession().getAnnee()
+                )
+
                 .statut(d.getStatut())
+
                 .createdAt(d.getCreatedAt())
                 .validatedAt(d.getValidatedAt())
+
                 .pdfUrl(d.getPdfUrl())
+
                 .build();
     }
 }
