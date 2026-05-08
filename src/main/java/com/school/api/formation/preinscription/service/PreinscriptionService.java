@@ -231,7 +231,6 @@ public class PreinscriptionService {
                         + nom
                         + (!prenom.isBlank() ? "_" + prenom : "")
                         + "_"
-                        + d.getId()
                         + ".pdf";
 
         /* ================= SAVE PDF ================= */
