@@ -321,25 +321,49 @@ public class PreinscriptionService {
     ) {
 
         return PreinscriptionDemandeResponse.builder()
+
                 .id(d.getId())
+
+                /* ================= IDENTITE ================= */
 
                 .civilite(d.getCivilite().getLabel())
 
                 .nom(d.getNom())
                 .prenom(d.getPrenom())
 
-                .email(d.getEmail())
-                .telephone(d.getTelephone())
-                .whatsapp(d.getWhatsapp())
+                .dateNaissance(
+                        d.getDateNaissance() != null
+                                ? d.getDateNaissance().toString()
+                                : null
+                )
 
-                .niveau(d.getNiveauSouhaite().getLabel())
-
-                .formation(d.getFormation().getName())
+                .lieuNaissance(d.getLieuNaissance())
 
                 .nationalite(d.getNationalite())
 
-                /* 🔥 DIPLOME */
-                .diplomePresente(d.getDiplomePresente())
+                /* ================= CONTACT ================= */
+
+                .email(d.getEmail())
+
+                .telephone(d.getTelephone())
+
+                .whatsapp(d.getWhatsapp())
+
+                /* ================= FORMATION ================= */
+
+                .niveau(
+                        d.getNiveauSouhaite().getLabel()
+                )
+
+                .formation(
+                        d.getFormation().getName()
+                )
+
+                /* ================= DIPLOME ================= */
+
+                .diplomePresente(
+                        d.getDiplomePresente()
+                )
 
                 .statutDiplome(
                         d.getStatutDiplome() != null
@@ -347,22 +371,35 @@ public class PreinscriptionService {
                                 : null
                 )
 
-                .anneeObtention(d.getAnneeObtention())
+                .anneeObtention(
+                        d.getAnneeObtention()
+                )
 
                 .etablissementProvenance(
                         d.getEtablissementProvenance()
                 )
 
+                /* ================= AUTRES ================= */
+
                 .anneeUniversitaire(
                         d.getPeriode().getSession().getAnnee()
                 )
 
-                .statut(d.getStatut())
+                .statut(
+                        d.getStatut()
+                )
 
-                .createdAt(d.getCreatedAt())
-                .validatedAt(d.getValidatedAt())
+                .createdAt(
+                        d.getCreatedAt()
+                )
 
-                .pdfUrl(d.getPdfUrl())
+                .validatedAt(
+                        d.getValidatedAt()
+                )
+
+                .pdfUrl(
+                        d.getPdfUrl()
+                )
 
                 .build();
     }
