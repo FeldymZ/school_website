@@ -52,7 +52,7 @@ public class SecurityConfig {
         ).permitAll()
               .requestMatchers(
                       "/api/preinscriptions/*/pdf"
-              ).hasRole("SUPERADMIN/ADMIN")
+              ).hasAnyRole("SUPERADMIN", "ADMIN")
 
         // Preflight
         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
