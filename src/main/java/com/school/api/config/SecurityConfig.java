@@ -51,6 +51,10 @@ public class SecurityConfig {
           "/assets/**"
         ).permitAll()
 
+              .requestMatchers(
+                      "/api/preinscriptions/*/pdf"
+              ).hasRole("SUPERADMIN/ADMIN")
+
         // Preflight
         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
