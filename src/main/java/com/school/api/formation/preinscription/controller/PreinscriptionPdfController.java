@@ -22,6 +22,8 @@ import java.io.File;
 @RequestMapping("/api/preinscriptions")
 public class PreinscriptionPdfController {
 
+    private static final String BASE_DIR = "/files";
+
     private final PreinscriptionDemandeRepository demandeRepo;
 
     @GetMapping("/{id}/pdf")
@@ -46,16 +48,27 @@ public class PreinscriptionPdfController {
             );
         }
 
-        File file = new File(demande.getPdfUrl());
+        /* ================= URL → CHEMIN DISQUE ================= */
+
+        String relativePath =
+                demande.getPdfUrl()
+                        .replace("/files/", "");
+
+        File file = new File(
+                BASE_DIR,
+                relativePath
+        );
 
         if (!file.exists()) {
 
             throw new IllegalStateException(
-                    "Fichier PDF introuvable"
+                    "Fichier PDF introuvable : "
+                            + file.getAbsolutePath()
             );
         }
 
-        Resource resource = new FileSystemResource(file);
+        Resource resource =
+                new FileSystemResource(file);
 
         return ResponseEntity.ok()
 
@@ -63,7 +76,9 @@ public class PreinscriptionPdfController {
 
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=preinscription_" + id + ".pdf"
+                        "inline; filename=\""
+                                + file.getName()
+                                + "\""
                 )
 
                 .body(resource);
