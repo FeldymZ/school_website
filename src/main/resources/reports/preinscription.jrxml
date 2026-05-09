@@ -277,7 +277,7 @@
                 <text><![CDATA[Diplome présenté :]]></text>
             </staticText>
             <textField>
-                <reportElement x="157" y="266" width="343" height="19" forecolor="#320AFC" uuid="1bd3df0e-ac11-404a-98a7-f2fe38452c35">
+                <reportElement x="157" y="266" width="393" height="19" forecolor="#320AFC" uuid="1bd3df0e-ac11-404a-98a7-f2fe38452c35">
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <textElement textAlignment="Left" verticalAlignment="Middle">
