@@ -78,10 +78,7 @@ public class SecurityConfig {
 
                     .requestMatchers(
                             "/api/admin/preinscriptions/**"
-                    ).hasAnyAuthority(
-                            "ROLE_SUPERADMIN",
-                            "ROLE_ADMIN"
-                    )
+                    ).permitAll()
 
                     /* ================= PREFLIGHT ================= */
 
