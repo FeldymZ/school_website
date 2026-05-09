@@ -19,10 +19,8 @@ import java.io.File;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/preinscriptions")
+@RequestMapping("/api/admin/preinscriptions")
 public class PreinscriptionPdfController {
-
-    private static final String BASE_DIR = "/files";
 
     private final PreinscriptionDemandeRepository demandeRepo;
 
@@ -48,15 +46,14 @@ public class PreinscriptionPdfController {
             );
         }
 
-        /* ================= URL → CHEMIN DISQUE ================= */
+        /* ================= PATH ABSOLU ================= */
 
         String relativePath =
                 demande.getPdfUrl()
                         .replace("/files/", "");
 
         File file = new File(
-                BASE_DIR,
-                relativePath
+                "/files/" + relativePath
         );
 
         if (!file.exists()) {
@@ -76,9 +73,7 @@ public class PreinscriptionPdfController {
 
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\""
-                                + file.getName()
-                                + "\""
+                        "inline; filename=preinscription.pdf"
                 )
 
                 .body(resource);
