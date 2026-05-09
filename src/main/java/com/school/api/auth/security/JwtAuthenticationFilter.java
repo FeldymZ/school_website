@@ -25,11 +25,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   /* ================= IGNORE PUBLIC ROUTES ================= */
 
   @Override
-  protected boolean shouldNotFilter(HttpServletRequest request) {
+  protected boolean shouldNotFilter(
+          HttpServletRequest request
+  ) {
 
     String path = request.getRequestURI();
 
-    // 🔍 DEBUG (tu peux supprimer après test)
     System.out.println("JWT FILTER PATH = " + path);
 
     return path.startsWith("/api/public")
@@ -47,11 +48,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           FilterChain filterChain
   ) throws ServletException, IOException {
 
-    String header = request.getHeader("Authorization");
+    String header =
+            request.getHeader("Authorization");
 
-    // 🔓 Aucun token → on laisse passer
-    if (header == null || !header.startsWith("Bearer ")) {
+    /* ================= NO TOKEN ================= */
+
+    if (
+            header == null ||
+                    !header.startsWith("Bearer ")
+    ) {
+
+      System.out.println("❌ Aucun token JWT");
+
       filterChain.doFilter(request, response);
+
       return;
     }
 
@@ -59,42 +69,95 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
       String token = header.substring(7);
 
-      // 🔥 Sécurité contre token invalide
-      if (token == null || token.isBlank()
-              || token.equals("null")
-              || token.equals("undefined")) {
+      /* ================= INVALID TOKEN ================= */
+
+      if (
+              token == null ||
+                      token.isBlank() ||
+                      token.equals("null") ||
+                      token.equals("undefined")
+      ) {
+
+        System.out.println("❌ Token vide ou invalide");
+
         filterChain.doFilter(request, response);
+
         return;
       }
+
+      /* ================= PARSE JWT ================= */
 
       Claims claims = Jwts.parserBuilder()
-              .setSigningKey(jwtService.getKey())
+
+              .setSigningKey(
+                      jwtService.getKey()
+              )
+
               .build()
+
               .parseClaimsJws(token)
+
               .getBody();
 
-      String email = claims.getSubject();
-      String role = claims.get("role", String.class);
+      String email =
+              claims.getSubject();
 
-      if (email == null || role == null) {
+      String role =
+              claims.get("role", String.class);
+
+      /* ================= DEBUG JWT ================= */
+
+      System.out.println("JWT EMAIL = " + email);
+      System.out.println("JWT ROLE = " + role);
+
+      if (
+              email == null ||
+                      role == null
+      ) {
+
+        System.out.println("❌ Email ou rôle absent");
+
         filterChain.doFilter(request, response);
+
         return;
       }
 
-      String authority = role.startsWith("ROLE_")
-              ? role
-              : "ROLE_" + role;
+      /* ================= ROLE SPRING ================= */
 
-      var auth = new UsernamePasswordAuthenticationToken(
-              email,
-              null,
-              List.of(new SimpleGrantedAuthority(authority))
+      String authority =
+              role.startsWith("ROLE_")
+                      ? role
+                      : "ROLE_" + role;
+
+      System.out.println(
+              "SPRING AUTHORITY = " + authority
       );
 
-      SecurityContextHolder.getContext().setAuthentication(auth);
+      /* ================= AUTHENTICATION ================= */
+
+      var auth =
+              new UsernamePasswordAuthenticationToken(
+                      email,
+                      null,
+                      List.of(
+                              new SimpleGrantedAuthority(
+                                      authority
+                              )
+                      )
+              );
+
+      SecurityContextHolder
+              .getContext()
+              .setAuthentication(auth);
+
+      System.out.println("✅ Utilisateur authentifié");
 
     } catch (Exception e) {
-      // ❌ Token invalide → on nettoie mais on bloque PAS
+
+      System.out.println(
+              "❌ JWT invalide : " + e.getMessage()
+      );
+
       SecurityContextHolder.clearContext();
     }
 
