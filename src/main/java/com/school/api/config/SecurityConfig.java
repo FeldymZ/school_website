@@ -10,9 +10,7 @@ import org.springframework.http.HttpMethod;
 
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.web.SecurityFilterChain;
@@ -32,15 +30,23 @@ public class SecurityConfig {
 
     http
 
+            /* ================= CSRF ================= */
+
             .csrf(csrf -> csrf.disable())
 
+            /* ================= CORS ================= */
+
             .cors(Customizer.withDefaults())
+
+            /* ================= SESSION ================= */
 
             .sessionManagement(session ->
                     session.sessionCreationPolicy(
                             SessionCreationPolicy.STATELESS
                     )
             )
+
+            /* ================= AUTHORIZATION ================= */
 
             .authorizeHttpRequests(auth -> auth
 
@@ -68,7 +74,7 @@ public class SecurityConfig {
                             "/assets/**"
                     ).permitAll()
 
-                    /* ================= ADMIN PREINSCRIPTIONS ================= */
+                    /* ================= PDF PREINSCRIPTIONS ================= */
 
                     .requestMatchers(
                             "/api/admin/preinscriptions/**"
@@ -77,7 +83,7 @@ public class SecurityConfig {
                             "ROLE_ADMIN"
                     )
 
-                    /* ================= OPTIONS ================= */
+                    /* ================= PREFLIGHT ================= */
 
                     .requestMatchers(
                             HttpMethod.OPTIONS,
@@ -89,10 +95,14 @@ public class SecurityConfig {
                     .anyRequest().authenticated()
             )
 
+            /* ================= JWT FILTER ================= */
+
             .addFilterBefore(
                     jwtAuthenticationFilter,
                     UsernamePasswordAuthenticationFilter.class
             )
+
+            /* ================= DISABLE ================= */
 
             .formLogin(form -> form.disable())
 
