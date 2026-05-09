@@ -29,6 +29,13 @@ public class PreinscriptionPdfController {
             @PathVariable Long id
     ) {
 
+        System.out.println("=================================");
+        System.out.println("✅ PDF ENDPOINT HIT");
+        System.out.println("ID = " + id);
+        System.out.println("=================================");
+
+        /* ================= DEMANDE ================= */
+
         PreinscriptionDemande demande =
                 demandeRepo.findById(id)
                         .orElseThrow(() ->
@@ -39,7 +46,14 @@ public class PreinscriptionPdfController {
                                 )
                         );
 
+        System.out.println("DEMANDE TROUVEE");
+        System.out.println("PDF URL = " + demande.getPdfUrl());
+
+        /* ================= PDF URL ================= */
+
         if (demande.getPdfUrl() == null) {
+
+            System.out.println("❌ PDF URL NULL");
 
             throw new IllegalStateException(
                     "Aucun PDF disponible pour cette demande"
@@ -52,11 +66,22 @@ public class PreinscriptionPdfController {
                 demande.getPdfUrl()
                         .replace("/files/", "");
 
+        System.out.println("RELATIVE PATH = " + relativePath);
+
         File file = new File(
                 "/files/" + relativePath
         );
 
+        System.out.println("ABSOLUTE PATH = " + file.getAbsolutePath());
+        System.out.println("FILE EXISTS = " + file.exists());
+        System.out.println("IS FILE = " + file.isFile());
+        System.out.println("CAN READ = " + file.canRead());
+
+        /* ================= FILE CHECK ================= */
+
         if (!file.exists()) {
+
+            System.out.println("❌ FICHIER INTROUVABLE");
 
             throw new IllegalStateException(
                     "Fichier PDF introuvable : "
@@ -64,8 +89,12 @@ public class PreinscriptionPdfController {
             );
         }
 
+        /* ================= RESOURCE ================= */
+
         Resource resource =
                 new FileSystemResource(file);
+
+        System.out.println("✅ PDF ENVOYE");
 
         return ResponseEntity.ok()
 
