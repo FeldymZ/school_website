@@ -535,4 +535,51 @@ public class PreinscriptionService {
 
         periode.setActive(true);
     }
+
+    @Transactional(readOnly = true)
+    public void resendPreinscription(Long id) {
+
+        PreinscriptionDemande d =
+                demandeRepo.findByIdWithRelations(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Demande",
+                                        "id",
+                                        id
+                                )
+                        );
+
+        if (d.getStatut() != StatutDemande.VALIDEE) {
+
+            throw new IllegalStateException(
+                    "Seules les demandes validées peuvent être renvoyées"
+            );
+        }
+
+        if (d.getPdfUrl() == null || d.getPdfUrl().isBlank()) {
+
+            throw new IllegalStateException(
+                    "Aucun PDF disponible pour cette demande"
+            );
+        }
+
+        mailService.sendPreinscriptionValidee(
+
+                d.getEmail(),
+
+                d.getCivilite().getLabel(),
+
+                d.getNom(),
+
+                d.getFormation().getLevel().getLabel()
+                        + " "
+                        + d.getFormation().getName(),
+
+                d.getNiveauSouhaite().getLabel(),
+
+                d.getPeriode().getSession().getAnnee(),
+
+                d.getPdfUrl()
+        );
+    }
 }

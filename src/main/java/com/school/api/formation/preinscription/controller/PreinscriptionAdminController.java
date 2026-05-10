@@ -197,4 +197,15 @@ public class PreinscriptionAdminController {
     ) {
         service.activatePeriode(id);
     }
+
+    @AuditLog(
+            action = "RENVOI_PREINSCRIPTION",
+            target = "#id.toString()"
+    )
+    @PostMapping("/{id}/renvoyer")
+    public void resendPreinscription(
+            @PathVariable Long id
+    ) {
+        service.resendPreinscription(id);
+    }
 }
