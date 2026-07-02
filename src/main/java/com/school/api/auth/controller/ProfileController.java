@@ -20,14 +20,16 @@ public class ProfileController {
   public UserResponse me(Authentication auth) {
 
     User user = userRepository.findByEmail(auth.getName())
-      .orElseThrow();
+            .orElseThrow();
 
     return UserResponse.builder()
-      .id(user.getId())
-      .email(user.getEmail())
-      .role(user.getRole().name()) // ✅ conversion enum → String
-      .enabled(user.getEnabled())
-      .build();
+            .id(user.getId())
+            .email(user.getEmail())
+            .role(user.getRole().name())
+            .enabled(user.getEnabled())
+            .menuAccess(user.getMenuAccess()) // 🆕
+            .build();
   }
+
 
 }

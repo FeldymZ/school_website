@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -16,15 +17,10 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  // ✅ Plus besoin d'AdminAuditService ici : l'AOP s'en charge via @AuditLog
-
-  /* ===================== LISTE ===================== */
 
   public List<UserResponse> getAll() {
     return userRepository.findAll().stream().map(this::toDto).toList();
   }
-
-  /* ===================== DESACTIVER ===================== */
 
   public void disable(Long id, String actorEmail) {
     User user = get(id);
@@ -35,15 +31,11 @@ public class UserService {
     userRepository.save(user);
   }
 
-  /* ===================== ACTIVER ===================== */
-
   public void enable(Long id, String actorEmail) {
     User user = get(id);
     user.setEnabled(true);
     userRepository.save(user);
   }
-
-  /* ===================== SUPPRIMER ===================== */
 
   public void delete(Long id, String actorEmail) {
     User user = get(id);
@@ -52,8 +44,6 @@ public class UserService {
     }
     userRepository.delete(user);
   }
-
-  /* ===================== CHANGER ROLE ===================== */
 
   public void changeRole(Long id, Role role, String actorEmail) {
     User user = get(id);
@@ -64,15 +54,21 @@ public class UserService {
     userRepository.save(user);
   }
 
-  /* ===================== CHANGER MOT DE PASSE ===================== */
-
   public void changePassword(Long id, String newPassword, String actorEmail) {
     User user = get(id);
     user.setPassword(passwordEncoder.encode(newPassword));
     userRepository.save(user);
   }
 
-  /* ===================== FILTRES ===================== */
+  // 🆕 ===================== MENU ACCESS =====================
+  public void updateMenuAccess(Long id, Set<String> menuAccess, String actorEmail) {
+    User user = get(id);
+    if (user.getRole() == Role.SUPERADMIN) {
+      throw new IllegalStateException("Un SUPERADMIN a déjà accès à tout, inutile de configurer ses menus");
+    }
+    user.setMenuAccess(AdminService.validateMenuAccess(menuAccess));
+    userRepository.save(user);
+  }
 
   public List<UserResponse> filter(Role role, Boolean enabled) {
     if (role != null && enabled != null)
@@ -84,13 +80,9 @@ public class UserService {
     return getAll();
   }
 
-  /* ===================== RECHERCHE ===================== */
-
   public List<UserResponse> searchByEmail(String email) {
     return userRepository.findByEmailContainingIgnoreCase(email).stream().map(this::toDto).toList();
   }
-
-  /* ===================== UTILS ===================== */
 
   private User get(Long id) {
     return userRepository.findById(id)
@@ -103,6 +95,11 @@ public class UserService {
             .email(user.getEmail())
             .role(user.getRole().name())
             .enabled(user.getEnabled())
+            .menuAccess(user.getMenuAccess()) // 🆕
             .build();
   }
+
+
+
+
 }

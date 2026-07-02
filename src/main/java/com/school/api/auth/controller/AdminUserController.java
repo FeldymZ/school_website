@@ -3,9 +3,11 @@ package com.school.api.auth.controller;
 import com.school.api.auth.audit.AuditLog;
 import com.school.api.auth.dto.ChangePasswordRequest;
 import com.school.api.auth.dto.ChangeRoleRequest;
+import com.school.api.auth.dto.UpdateMenuAccessRequest;
 import com.school.api.auth.dto.UserResponse;
 import com.school.api.auth.entity.Role;
 import com.school.api.auth.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -99,6 +101,20 @@ public class AdminUserController {
           @RequestParam(required = false) Boolean enabled
   ) {
     return userService.filter(role, enabled);
+  }
+
+
+  /* ===================== MENU ACCESS (🆕) ===================== */
+
+  @AuditLog(action = "CHANGEMENT_MENU_ACCESS", target = "#id.toString()", failureAction = "CHANGEMENT_MENU_ACCESS_ECHEC")
+  @PatchMapping("/{id}/menu-access")
+  public ResponseEntity<Void> updateMenuAccess(
+          @PathVariable Long id,
+          @RequestBody @Valid UpdateMenuAccessRequest request,
+          Authentication auth
+  ) {
+    userService.updateMenuAccess(id, request.menuAccess(), auth.getName());
+    return ResponseEntity.noContent().build();
   }
 
   /* ===================== RECHERCHE ===================== */
