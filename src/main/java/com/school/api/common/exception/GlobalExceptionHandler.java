@@ -255,4 +255,23 @@ public class GlobalExceptionHandler {
                 )
         );
     }
+
+
+    /* =========================
+       🟡 CONFLICT
+       ========================= */
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<?> handleConflict(
+            IllegalStateException ex
+    ) {
+
+        log.warn("⚠️ CONFLICT : {}", ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                "CONFLICT",
+                ex.getMessage()
+        );
+    }
 }

@@ -3,6 +3,9 @@ package com.school.api.auth.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -29,4 +32,14 @@ public class User {
   @Builder.Default
   @Column(nullable = false)
   private Boolean enabled = true;
+
+  // 🆕 Clés de permissions de menu — pertinent uniquement pour role == ADMIN
+  @Builder.Default
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+          name = "user_menu_access",
+          joinColumns = @JoinColumn(name = "user_id")
+  )
+  @Column(name = "menu_key", nullable = false)
+  private Set<String> menuAccess = new HashSet<>();
 }
