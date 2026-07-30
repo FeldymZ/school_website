@@ -27,7 +27,7 @@ public class AdminInitializer {
                 userRepository.save(
                     User.builder()
                         .email(email)
-                        .password(passwordEncoder.encode("Esiitech2026#"))
+                        .password(passwordEncoder.encode("EsiitechNoCHanges@@1234"))
                         .role(Role.SUPERADMIN)   // ENUM
                         .enabled(true)
                         .build()
