@@ -25,6 +25,14 @@ public class User {
   @Column(nullable = false)
   private String password;
 
+  // 🆕 à ajouter dans User.java, aux côtés des champs existants (email, password, role, enabled, menuAccess...)
+
+  private String nom;
+
+  private String prenom;
+
+  private String photoUrl; // URL de la photo de profil, ex: "https://cdn.exemple.com/avatars/123.jpg"
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Role role;
