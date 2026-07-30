@@ -27,8 +27,15 @@ public class AdminService {
     Set<String> menuAccess = validateMenuAccess(request.menuAccess());
 
     User admin = User.builder()
+            .nom(request.nom())
+            .prenom(request.prenom())
             .email(request.email())
             .password(passwordEncoder.encode(request.password()))
+            .photoUrl(
+                    (request.photoUrl() == null || request.photoUrl().isBlank())
+                            ? null
+                            : request.photoUrl()
+            )
             .role(Role.ADMIN)
             .enabled(true)
             .menuAccess(menuAccess)
@@ -52,7 +59,7 @@ public class AdminService {
     userRepository.save(user);
   }
 
-  // 🆕 réutilisée aussi par UserService.updateMenuAccess
+  // réutilisée aussi par UserService.updateMenuAccess
   static Set<String> validateMenuAccess(Set<String> requested) {
     if (requested == null) return Set.of();
     for (String key : requested) {

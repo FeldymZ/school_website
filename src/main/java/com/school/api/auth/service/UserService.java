@@ -60,7 +60,6 @@ public class UserService {
     userRepository.save(user);
   }
 
-  // 🆕 ===================== MENU ACCESS =====================
   public void updateMenuAccess(Long id, Set<String> menuAccess, String actorEmail) {
     User user = get(id);
     if (user.getRole() == Role.SUPERADMIN) {
@@ -92,14 +91,13 @@ public class UserService {
   private UserResponse toDto(User user) {
     return UserResponse.builder()
             .id(user.getId())
+            .nom(user.getNom())           // 🆕
+            .prenom(user.getPrenom())     // 🆕
             .email(user.getEmail())
+            .photoUrl(user.getPhotoUrl()) // 🆕
             .role(user.getRole().name())
             .enabled(user.getEnabled())
-            .menuAccess(user.getMenuAccess()) // 🆕
+            .menuAccess(user.getMenuAccess())
             .build();
   }
-
-
-
-
 }
