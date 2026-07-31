@@ -5,6 +5,7 @@ import com.school.api.auth.dto.ChangePasswordRequest;
 import com.school.api.auth.dto.ChangeRoleRequest;
 import com.school.api.auth.dto.PhotoResponse;
 import com.school.api.auth.dto.UpdateMenuAccessRequest;
+import com.school.api.auth.dto.UpdateUserInfoRequest;
 import com.school.api.auth.dto.UserResponse;
 import com.school.api.auth.entity.Role;
 import com.school.api.auth.security.RequiresMenuAccess;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -35,7 +37,7 @@ public class AdminUserController {
     return userService.getAll();
   }
 
-  /* ===================== PHOTO (🆕) ===================== */
+  /* ===================== PHOTO ===================== */
 
   @RequiresMenuAccess("ADMINISTRATION_UTILISATEURS")
   @GetMapping("/{id}/photo")
@@ -44,6 +46,21 @@ public class AdminUserController {
     return ResponseEntity.ok()
             .contentType(MediaType.parseMediaType(photo.contentType()))
             .body(photo.data());
+  }
+
+  /* ===================== MODIFIER INFOS (🆕) ===================== */
+
+  @AuditLog(action = "MODIFICATION_UTILISATEUR", target = "#id.toString()", failureAction = "MODIFICATION_UTILISATEUR_ECHEC")
+  @RequiresMenuAccess("ADMINISTRATION_UTILISATEURS")
+  @PatchMapping(value = "/{id}/info", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<UserResponse> updateInfo(
+          @PathVariable Long id,
+          @RequestPart("data") @Valid UpdateUserInfoRequest request,
+          @RequestPart(value = "photo", required = false) MultipartFile photo,
+          Authentication auth
+  ) {
+    UserResponse updated = userService.updateInfo(id, request, photo, auth.getName());
+    return ResponseEntity.ok(updated);
   }
 
   /* ===================== DESACTIVER ===================== */

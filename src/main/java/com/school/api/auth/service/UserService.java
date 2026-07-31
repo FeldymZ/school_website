@@ -1,6 +1,7 @@
 package com.school.api.auth.service;
 
 import com.school.api.auth.dto.PhotoResponse;
+import com.school.api.auth.dto.UpdateUserInfoRequest;
 import com.school.api.auth.dto.UserResponse;
 import com.school.api.auth.entity.Role;
 import com.school.api.auth.entity.User;
@@ -8,7 +9,9 @@ import com.school.api.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -18,6 +21,8 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+
+  private static final long MAX_PHOTO_SIZE = 3L * 1024 * 1024; // 3 Mo
 
   public List<UserResponse> getAll() {
     return userRepository.findAll().stream().map(this::toDto).toList();
@@ -90,18 +95,72 @@ public class UserService {
     return buildPhotoResponse(user);
   }
 
-  // 🆕 Profil de l'utilisateur connecté — pour GET /api/me
-  public UserResponse getMe(String email) {
-    User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-    return toDto(user);
-  }
-
-  // 🆕 Photo de l'utilisateur connecté — pour GET /api/me/photo
+  // Photo de l'utilisateur connecté — pour GET /api/me/photo
   public PhotoResponse getMyPhoto(String email) {
     User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
     return buildPhotoResponse(user);
+  }
+
+  // 🆕 Modifier un autre utilisateur (nom, prénom, email, photo) — gestion admin
+  public UserResponse updateInfo(Long id, UpdateUserInfoRequest request, MultipartFile photo, String actorEmail) {
+    User user = get(id);
+
+    if (user.getRole() == Role.SUPERADMIN) {
+      throw new IllegalStateException("Impossible de modifier un SUPERADMIN via cette route");
+    }
+
+    applyInfoUpdate(user, request, photo);
+    userRepository.save(user);
+    return toDto(user);
+  }
+
+  // 🆕 Modifier son propre profil (nom, prénom, email, photo)
+  public UserResponse updateMyInfo(String email, UpdateUserInfoRequest request, MultipartFile photo) {
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+    applyInfoUpdate(user, request, photo);
+    userRepository.save(user);
+    return toDto(user);
+  }
+
+  private void applyInfoUpdate(User user, UpdateUserInfoRequest request, MultipartFile photo) {
+
+    // Vérifie l'unicité de l'email (en excluant l'utilisateur lui-même)
+    userRepository.findByEmail(request.email()).ifPresent(existing -> {
+      if (!existing.getId().equals(user.getId())) {
+        throw new IllegalStateException("Cet email est déjà utilisé par un autre compte");
+      }
+    });
+
+    user.setNom(request.nom());
+    user.setPrenom(request.prenom());
+    user.setEmail(request.email());
+
+    if (request.removePhoto()) {
+      user.setPhoto(null);
+      user.setPhotoContentType(null);
+    }
+
+    if (photo != null && !photo.isEmpty()) {
+
+      if (photo.getSize() > MAX_PHOTO_SIZE) {
+        throw new IllegalArgumentException("La photo ne doit pas dépasser 3 Mo");
+      }
+
+      String contentType = photo.getContentType();
+      if (contentType == null || !contentType.startsWith("image/")) {
+        throw new IllegalArgumentException("Le fichier envoyé doit être une image");
+      }
+
+      try {
+        user.setPhoto(photo.getBytes());
+        user.setPhotoContentType(contentType);
+      } catch (IOException e) {
+        throw new RuntimeException("Erreur lors de la lecture de la photo", e);
+      }
+    }
   }
 
   private PhotoResponse buildPhotoResponse(User user) {
