@@ -16,20 +16,20 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class AdminController {
 
-    private final AdminService adminService;
+  private final AdminService adminService;
 
-    @AuditLog(
-            action = "CREATION_ADMIN",
-            target = "#request.email",
-            failureAction = "CREATION_ADMIN_ECHEC"
-    )
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createAdmin(
-            @RequestPart("data") @Valid CreateAdminRequest request,
-            @RequestPart(value = "photo", required = false) MultipartFile photo,
-            Authentication auth
-    ) {
-        adminService.createAdmin(request, photo);
-        return ResponseEntity.ok("Admin créé avec succès");
-    }
+  @AuditLog(
+          action = "CREATION_ADMIN",
+          target = "#request.email",
+          failureAction = "CREATION_ADMIN_ECHEC"
+  )
+  @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<?> createAdmin(
+          @RequestPart("data") @Valid CreateAdminRequest request,
+          @RequestPart(value = "photo", required = false) MultipartFile photo,
+          Authentication auth
+  ) {
+    adminService.createAdmin(request, photo);
+    return ResponseEntity.ok("Admin créé avec succès");
+  }
 }
