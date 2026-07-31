@@ -18,7 +18,11 @@ public class AdminController {
 
   private final AdminService adminService;
 
-  @AuditLog(action = "CREATION_ADMIN", target = "#request.email", failureAction = "CREATION_ADMIN_ECHEC")
+  @AuditLog(
+          action = "CREATION_ADMIN",
+          target = "#request.email",
+          failureAction = "CREATION_ADMIN_ECHEC"
+  )
   @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<?> createAdmin(
           @RequestPart("data") @Valid CreateAdminRequest request,
