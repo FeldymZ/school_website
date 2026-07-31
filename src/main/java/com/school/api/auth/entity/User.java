@@ -25,20 +25,15 @@ public class User {
   @Column(nullable = false)
   private String password;
 
-  // 🆕 à ajouter dans User.java, aux côtés des champs existants (email, password, role, enabled, menuAccess...)
-
   private String nom;
 
   private String prenom;
 
-// 🆕 à ajouter dans User.java
-
-  @Lob
-  @Column(name = "photo")
+  @Column(name = "photo", columnDefinition = "bytea")
   private byte[] photo;
 
-
   private String photoContentType; // ex: "image/jpeg", "image/png"
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Role role;
@@ -47,7 +42,7 @@ public class User {
   @Column(nullable = false)
   private Boolean enabled = true;
 
-  // 🆕 Clés de permissions de menu — pertinent uniquement pour role == ADMIN
+  // Clés de permissions de menu — pertinent uniquement pour role == ADMIN
   @Builder.Default
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
