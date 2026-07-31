@@ -84,9 +84,27 @@ public class UserService {
     return userRepository.findByEmailContainingIgnoreCase(email).stream().map(this::toDto).toList();
   }
 
-  // 🆕 Lecture de la photo, pour l'endpoint GET /{id}/photo
+  // Lecture de la photo, pour l'endpoint GET /api/admin/users/{id}/photo (gestion d'autres utilisateurs)
   public PhotoResponse getPhoto(Long id) {
     User user = get(id);
+    return buildPhotoResponse(user);
+  }
+
+  // 🆕 Profil de l'utilisateur connecté — pour GET /api/me
+  public UserResponse getMe(String email) {
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+    return toDto(user);
+  }
+
+  // 🆕 Photo de l'utilisateur connecté — pour GET /api/me/photo
+  public PhotoResponse getMyPhoto(String email) {
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+    return buildPhotoResponse(user);
+  }
+
+  private PhotoResponse buildPhotoResponse(User user) {
     if (user.getPhoto() == null || user.getPhoto().length == 0) {
       throw new RuntimeException("Aucune photo pour cet utilisateur");
     }
