@@ -14,7 +14,6 @@ public class SuperAdminService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  // ✅ Plus besoin d'AdminAuditService ici : l'AOP s'en charge via @AuditLog
 
   public void createSecondSuperAdmin(CreateSecondSuperAdminRequest request) {
 
@@ -31,6 +30,8 @@ public class SuperAdminService {
     }
 
     User superAdmin = User.builder()
+            .nom(request.nom())
+            .prenom(request.prenom())
             .email(request.email())
             .password(passwordEncoder.encode(request.password()))
             .role(Role.SUPERADMIN)

@@ -6,12 +6,18 @@ import jakarta.validation.constraints.Size;
 
 public record CreateSecondSuperAdminRequest(
 
-  @Email
-  @NotBlank
-  String email,
+        @NotBlank
+        String nom,
 
-  @NotBlank
-  @Size(min = 8)
-  String password
+        @NotBlank
+        String prenom,
+
+        @Email
+        @NotBlank
+        String email,
+
+        @NotBlank
+        @Size(min = 8)
+        String password
 
 ) {}

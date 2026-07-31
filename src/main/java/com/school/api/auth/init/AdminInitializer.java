@@ -25,12 +25,14 @@ public class AdminInitializer {
             if (userRepository.findByEmail(email).isEmpty()) {
 
                 userRepository.save(
-                    User.builder()
-                        .email(email)
-                        .password(passwordEncoder.encode("EsiitechNoCHanges@@1234"))
-                        .role(Role.SUPERADMIN)   // ENUM
-                        .enabled(true)
-                        .build()
+                        User.builder()
+                                .nom("ESIITECH")
+                                .prenom("Admin")
+                                .email(email)
+                                .password(passwordEncoder.encode("EsiitechNoCHanges@@1234"))
+                                .role(Role.SUPERADMIN)
+                                .enabled(true)
+                                .build()
                 );
 
                 System.out.println("✅ Superadmin créé : " + email);
