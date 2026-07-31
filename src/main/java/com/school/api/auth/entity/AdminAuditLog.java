@@ -17,6 +17,8 @@ public class AdminAuditLog {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+
+
   // Email de l’admin qui agit
   @Column(nullable = false)
   private String actorEmail;
@@ -25,8 +27,7 @@ public class AdminAuditLog {
   @Column(nullable = false)
   private String action;
 
-  // Cible (email ou id)
-  @Column(nullable = false)
+  @Column(nullable = false, columnDefinition = "TEXT")
   private String target;
 
   // Date
