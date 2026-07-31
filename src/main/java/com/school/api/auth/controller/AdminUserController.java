@@ -3,6 +3,7 @@ package com.school.api.auth.controller;
 import com.school.api.auth.audit.AuditLog;
 import com.school.api.auth.dto.ChangePasswordRequest;
 import com.school.api.auth.dto.ChangeRoleRequest;
+import com.school.api.auth.dto.PhotoResponse;
 import com.school.api.auth.dto.UpdateMenuAccessRequest;
 import com.school.api.auth.dto.UserResponse;
 import com.school.api.auth.entity.Role;
@@ -10,6 +11,7 @@ import com.school.api.auth.security.RequiresMenuAccess;
 import com.school.api.auth.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -31,6 +33,17 @@ public class AdminUserController {
   @GetMapping
   public List<UserResponse> all() {
     return userService.getAll();
+  }
+
+  /* ===================== PHOTO (🆕) ===================== */
+
+  @RequiresMenuAccess("ADMINISTRATION_UTILISATEURS")
+  @GetMapping("/{id}/photo")
+  public ResponseEntity<byte[]> getPhoto(@PathVariable Long id) {
+    PhotoResponse photo = userService.getPhoto(id);
+    return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(photo.contentType()))
+            .body(photo.data());
   }
 
   /* ===================== DESACTIVER ===================== */

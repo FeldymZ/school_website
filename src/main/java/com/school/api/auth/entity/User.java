@@ -31,8 +31,14 @@ public class User {
 
   private String prenom;
 
-  private String photoUrl; // URL de la photo de profil, ex: "https://cdn.exemple.com/avatars/123.jpg"
+// 🆕 à ajouter dans User.java
 
+  @Lob
+  @Column(name = "photo")
+  private byte[] photo;
+
+
+  private String photoContentType; // ex: "image/jpeg", "image/png"
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Role role;

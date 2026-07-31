@@ -1,5 +1,6 @@
 package com.school.api.auth.service;
 
+import com.school.api.auth.dto.PhotoResponse;
 import com.school.api.auth.dto.UserResponse;
 import com.school.api.auth.entity.Role;
 import com.school.api.auth.entity.User;
@@ -83,6 +84,18 @@ public class UserService {
     return userRepository.findByEmailContainingIgnoreCase(email).stream().map(this::toDto).toList();
   }
 
+  // 🆕 Lecture de la photo, pour l'endpoint GET /{id}/photo
+  public PhotoResponse getPhoto(Long id) {
+    User user = get(id);
+    if (user.getPhoto() == null || user.getPhoto().length == 0) {
+      throw new RuntimeException("Aucune photo pour cet utilisateur");
+    }
+    String contentType = user.getPhotoContentType() != null
+            ? user.getPhotoContentType()
+            : "image/jpeg";
+    return new PhotoResponse(user.getPhoto(), contentType);
+  }
+
   private User get(Long id) {
     return userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
@@ -91,10 +104,10 @@ public class UserService {
   private UserResponse toDto(User user) {
     return UserResponse.builder()
             .id(user.getId())
-            .nom(user.getNom())           // 🆕
-            .prenom(user.getPrenom())     // 🆕
+            .nom(user.getNom())
+            .prenom(user.getPrenom())
             .email(user.getEmail())
-            .photoUrl(user.getPhotoUrl()) // 🆕
+            .hasPhoto(user.getPhoto() != null && user.getPhoto().length > 0)
             .role(user.getRole().name())
             .enabled(user.getEnabled())
             .menuAccess(user.getMenuAccess())
