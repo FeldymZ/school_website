@@ -51,6 +51,10 @@ public record PreinscriptionDemandeResponse(
 
         /* ================= PDF ================= */
 
-        String pdfUrl
+        String pdfUrl,
+
+
+
+        LocalDateTime rejectedAt // ⬅️ ajouté
 
 ) {}

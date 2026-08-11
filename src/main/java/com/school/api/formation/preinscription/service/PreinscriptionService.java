@@ -261,6 +261,8 @@ public class PreinscriptionService {
         );
     }
 
+    /* ================= REJET ================= */
+
     @Transactional
     public void reject(Long id) {
 
@@ -272,6 +274,7 @@ public class PreinscriptionService {
                 ));
 
         d.setStatut(StatutDemande.REJETEE);
+        d.setRejectedAt(now());
     }
 
     /* ================= AUTRES ================= */
@@ -508,6 +511,10 @@ public class PreinscriptionService {
 
                 .validatedAt(
                         d.getValidatedAt()
+                )
+
+                .rejectedAt(
+                        d.getRejectedAt()
                 )
 
                 .pdfUrl(

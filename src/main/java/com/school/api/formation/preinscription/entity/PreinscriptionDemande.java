@@ -25,6 +25,9 @@ public class PreinscriptionDemande {
     @Enumerated(EnumType.STRING)
     private Civilite civilite;
 
+    @Column
+    private LocalDateTime rejectedAt;
+
     private String nom;
     private String prenom;
 
