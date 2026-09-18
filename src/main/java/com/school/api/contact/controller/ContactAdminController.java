@@ -41,14 +41,19 @@ public class ContactAdminController {
     return service.getOne(id);
   }
 
+  /**
+   * `replied` is optional: omit it (or leave it null) to get every message,
+   * or pass true/false to filter to replied-only / pending-only messages.
+   */
   @AuditLog(action = "RECHERCHE_MESSAGES_CONTACT")
   @GetMapping("/messages/page")
   public Page<ContactResponse> paged(
           @RequestParam(defaultValue = "") String q,
           @RequestParam(defaultValue = "0") int page,
-          @RequestParam(defaultValue = "10") int size
+          @RequestParam(defaultValue = "10") int size,
+          @RequestParam(required = false) Boolean replied
   ) {
-    return service.search(q, page, size);
+    return service.search(q, page, size, replied);
   }
 
   @AuditLog(action = "REPONSE_MESSAGE_CONTACT", target = "#id.toString()", failureAction = "REPONSE_MESSAGE_ECHEC")

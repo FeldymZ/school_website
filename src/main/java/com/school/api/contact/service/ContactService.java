@@ -49,22 +49,22 @@ public class ContactService {
       throw new IllegalArgumentException("Le message est obligatoire");
 
     if (repository.existsBySenderEmailAndSentAtAfter(
-      request.senderEmail(),
-      LocalDateTime.now().minusMinutes(2)
+            request.senderEmail(),
+            LocalDateTime.now().minusMinutes(2)
     )) {
       throw new IllegalStateException(
-        "Veuillez patienter avant d’envoyer un nouveau message."
+              "Veuillez patienter avant d’envoyer un nouveau message."
       );
     }
 
     ContactMessage message = ContactMessage.builder()
-      .senderName(request.senderName())
-      .senderEmail(request.senderEmail())
-      .message(request.message())
-      .sentAt(LocalDateTime.now())
-      .replied(false)
-      .senderIp(ip)
-      .build();
+            .senderName(request.senderName())
+            .senderEmail(request.senderEmail())
+            .message(request.message())
+            .sentAt(LocalDateTime.now())
+            .replied(false)
+            .senderIp(ip)
+            .build();
 
     ContactMessage saved = repository.save(message);
 
@@ -75,9 +75,9 @@ public class ContactService {
       <hr/>
       <p>%s</p>
     """.formatted(
-      saved.getSenderName(),
-      saved.getSenderEmail(),
-      saved.getMessage()
+            saved.getSenderName(),
+            saved.getSenderEmail(),
+            saved.getMessage()
     );
 
     mailService.sendHtml(
@@ -91,15 +91,15 @@ public class ContactService {
     ctx.setVariable("year", LocalDateTime.now().getYear());
 
     mailService.sendTemplateMail(
-      saved.getSenderEmail(),
-      "Confirmation de réception de votre message",
-      "mail/contact-confirmation",
-      ctx
+            saved.getSenderEmail(),
+            "Confirmation de réception de votre message",
+            "mail/contact-confirmation",
+            ctx
     );
 
     slackNotificationService.notifyNewContact(
-      saved.getSenderName(),
-      saved.getSenderEmail()
+            saved.getSenderName(),
+            saved.getSenderEmail()
     );
 
     return toResponse(saved);
@@ -111,30 +111,35 @@ public class ContactService {
 
   public List<ContactResponse> getAll() {
     return repository.findAllByOrderBySentAtDesc()
-      .stream().map(this::toResponse).toList();
+            .stream().map(this::toResponse).toList();
   }
 
   public List<ContactResponse> getUnreplied() {
     return repository.findByRepliedFalseOrderBySentAtDesc()
-      .stream().map(this::toResponse).toList();
+            .stream().map(this::toResponse).toList();
   }
 
   public ContactResponse getOne(Long id) {
     ContactMessage m = repository.findById(id)
-      .orElseThrow(() -> new RuntimeException("Message introuvable"));
+            .orElseThrow(() -> new RuntimeException("Message introuvable"));
     return toResponse(m);
   }
 
   public Page<ContactResponse> search(String q, int page, int size) {
+    return search(q, page, size, null);
+  }
+
+  /**
+   * @param replied null = all messages, true = replied only, false = pending only.
+   */
+  public Page<ContactResponse> search(String q, int page, int size, Boolean replied) {
     PageRequest pr = PageRequest.of(
-      page, size, Sort.by("sentAt").descending()
+            page, size, Sort.by("sentAt").descending()
     );
 
     return repository
-      .findBySenderEmailContainingIgnoreCaseOrSenderNameContainingIgnoreCase(
-        q, q, pr
-      )
-      .map(this::toResponse);
+            .search(q == null ? "" : q, replied, pr)
+            .map(this::toResponse);
   }
 
   public void reply(Long id, String replyMessage, MultipartFile attachment) {
@@ -143,11 +148,11 @@ public class ContactService {
       throw new IllegalArgumentException("La réponse est obligatoire");
 
     ContactMessage message = repository.findById(id)
-      .orElseThrow(() -> new RuntimeException("Message introuvable"));
+            .orElseThrow(() -> new RuntimeException("Message introuvable"));
 
     String html = mailTemplateService.buildContactReply(
-      message.getSenderName(),
-      replyMessage
+            message.getSenderName(),
+            replyMessage
     );
 
     if (attachment != null && !attachment.isEmpty()) {
@@ -155,33 +160,33 @@ public class ContactService {
         Files.createDirectories(Paths.get(UPLOAD_DIR));
 
         String storedName =
-          System.currentTimeMillis() + "_" + attachment.getOriginalFilename();
+                System.currentTimeMillis() + "_" + attachment.getOriginalFilename();
 
         Path path = Paths.get(UPLOAD_DIR).resolve(storedName);
         Files.copy(attachment.getInputStream(), path);
 
         ContactReplyAttachment att = ContactReplyAttachment.builder()
-          .message(message)
-          .fileUrl("/api/admin/contact/attachments/" + storedName)
-          .originalFilename(attachment.getOriginalFilename())
-          .build();
+                .message(message)
+                .fileUrl("/api/admin/contact/attachments/" + storedName)
+                .originalFilename(attachment.getOriginalFilename())
+                .build();
 
         attachmentRepository.save(att);
 
         mailService.sendHtmlWithAttachment(
-          message.getSenderEmail(),
-          "Réponse à votre message",
-          html,
-          attachment
+                message.getSenderEmail(),
+                "Réponse à votre message",
+                html,
+                attachment
         );
       } catch (IOException e) {
         throw new RuntimeException("Erreur stockage fichier", e);
       }
     } else {
       mailService.sendHtml(
-        message.getSenderEmail(),
-        "Réponse à votre message",
-        html
+              message.getSenderEmail(),
+              "Réponse à votre message",
+              html
       );
     }
 
@@ -198,19 +203,19 @@ public class ContactService {
 
   private ContactResponse toResponse(ContactMessage m) {
     Optional<ContactReplyAttachment> att =
-      attachmentRepository.findByMessageId(m.getId());
+            attachmentRepository.findByMessageId(m.getId());
 
     return ContactResponse.builder()
-      .id(m.getId())
-      .senderName(m.getSenderName())
-      .senderEmail(m.getSenderEmail())
-      .message(m.getMessage())
-      .sentAt(m.getSentAt())
-      .replied(m.getReplied())
-      .repliedAt(m.getRepliedAt())
-      .replyMessage(m.getReplyMessage())
-      .attachmentUrl(att.map(ContactReplyAttachment::getFileUrl).orElse(null))
-      .attachmentName(att.map(ContactReplyAttachment::getOriginalFilename).orElse(null))
-      .build();
+            .id(m.getId())
+            .senderName(m.getSenderName())
+            .senderEmail(m.getSenderEmail())
+            .message(m.getMessage())
+            .sentAt(m.getSentAt())
+            .replied(m.getReplied())
+            .repliedAt(m.getRepliedAt())
+            .replyMessage(m.getReplyMessage())
+            .attachmentUrl(att.map(ContactReplyAttachment::getFileUrl).orElse(null))
+            .attachmentName(att.map(ContactReplyAttachment::getOriginalFilename).orElse(null))
+            .build();
   }
 }
