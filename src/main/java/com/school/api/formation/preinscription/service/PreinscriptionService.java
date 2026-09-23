@@ -295,9 +295,23 @@ public class PreinscriptionService {
         d.setRejectedAt(now());
         d.setMotifRejet(motif.trim());
 
-        return toDto(
-                demandeRepo.save(d)
+        PreinscriptionDemande saved = demandeRepo.save(d);
+
+        /* ================= MAIL ================= */
+
+        mailService.sendPreinscriptionRejetee(
+                d.getEmail(),
+                d.getCivilite().getLabel(),
+                d.getNom(),
+                d.getFormation().getLevel().getLabel()
+                        + " "
+                        + d.getFormation().getName(),
+                d.getNiveauSouhaite().getLabel(),
+                d.getPeriode().getSession().getAnnee(),
+                d.getMotifRejet()
         );
+
+        return toDto(saved);
     }
 
     /* ================= AUTRES ================= */
