@@ -204,6 +204,12 @@ public class PreinscriptionService {
                         id
                 ));
 
+        if (d.getStatut() != StatutDemande.EN_ATTENTE) {
+            throw new IllegalStateException(
+                    "Seules les demandes en attente peuvent être validées"
+            );
+        }
+
         d.setStatut(StatutDemande.VALIDEE);
 
         d.setValidatedAt(now());
@@ -264,7 +270,13 @@ public class PreinscriptionService {
     /* ================= REJET ================= */
 
     @Transactional
-    public void reject(Long id) {
+    public PreinscriptionDemandeResponse reject(Long id, String motif) {
+
+        if (motif == null || motif.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Le motif du rejet est obligatoire"
+            );
+        }
 
         PreinscriptionDemande d = demandeRepo.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -273,8 +285,19 @@ public class PreinscriptionService {
                         id
                 ));
 
+        if (d.getStatut() != StatutDemande.EN_ATTENTE) {
+            throw new IllegalStateException(
+                    "Seules les demandes en attente peuvent être rejetées"
+            );
+        }
+
         d.setStatut(StatutDemande.REJETEE);
         d.setRejectedAt(now());
+        d.setMotifRejet(motif.trim());
+
+        return toDto(
+                demandeRepo.save(d)
+        );
     }
 
     /* ================= AUTRES ================= */
@@ -515,6 +538,10 @@ public class PreinscriptionService {
 
                 .rejectedAt(
                         d.getRejectedAt()
+                )
+
+                .motifRejet(
+                        d.getMotifRejet()
                 )
 
                 .pdfUrl(

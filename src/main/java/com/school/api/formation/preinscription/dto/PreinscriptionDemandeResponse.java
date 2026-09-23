@@ -1,60 +1,61 @@
 package com.school.api.formation.preinscription.dto;
 
 import com.school.api.formation.preinscription.entity.StatutDemande;
-import lombok.Builder;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Builder
-public record PreinscriptionDemandeResponse(
+@NoArgsConstructor
+@AllArgsConstructor
+public class PreinscriptionDemandeResponse {
 
-        Long id,
+    private Long id;
 
-        /* ================= IDENTITE ================= */
+    /* ================= IDENTITE ================= */
 
-        String civilite,
+    private String civilite;
+    private String nom;
+    private String prenom;
+    private String dateNaissance;
+    private String lieuNaissance;
+    private String nationalite;
 
-        String nom,
-        String prenom,
+    /* ================= CONTACT ================= */
 
-        String dateNaissance,
-        String lieuNaissance,
+    private String email;
+    private String telephone;
+    private String whatsapp;
 
-        String nationalite,
+    /* ================= FORMATION ================= */
 
-        /* ================= CONTACT ================= */
+    private String niveau;
+    private String formation;
 
-        String email,
-        String telephone,
-        String whatsapp,
+    /* ================= DIPLOME ================= */
 
-        /* ================= FORMATION ================= */
+    private String diplomePresente;
+    private String statutDiplome;
+    private Integer anneeObtention;
+    private String etablissementProvenance;
 
-        String niveau,
-        String formation,
+    /* ================= AUTRES ================= */
 
-        /* ================= DIPLOME ================= */
+    private String anneeUniversitaire;
 
-        String diplomePresente,
-        String statutDiplome,
-        Integer anneeObtention,
-        String etablissementProvenance,
+    private StatutDemande statut;
 
-        /* ================= AUTRES ================= */
+    private LocalDateTime createdAt;
+    private LocalDateTime validatedAt;
+    private LocalDateTime rejectedAt;
 
-        String anneeUniversitaire,
+    /* ================= REJET ================= */
 
-        StatutDemande statut,
+    private String motifRejet;
 
-        LocalDateTime createdAt,
-        LocalDateTime validatedAt,
+    /* ================= PDF ================= */
 
-        /* ================= PDF ================= */
-
-        String pdfUrl,
-
-
-
-        LocalDateTime rejectedAt // ⬅️ ajouté
-
-) {}
+    private String pdfUrl;
+}

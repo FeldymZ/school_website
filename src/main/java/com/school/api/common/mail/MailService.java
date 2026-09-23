@@ -67,6 +67,51 @@ public class MailService {
     }
   }
 
+
+  /* =====================================================
+   🔹 PRÉINSCRIPTION — REJET + MOTIF
+   ===================================================== */
+  @Async
+  public void sendPreinscriptionRejetee(
+          String to,
+          String civilite,
+          String nom,
+          String formation,
+          String niveau,
+          String anneeUniv,
+          String motif
+  ) {
+    try {
+      Context context = new Context();
+
+      String level = formation.split(" ")[0];
+
+      context.setVariable("civilite",  civilite);
+      context.setVariable("nom",       nom.toUpperCase());
+      context.setVariable("formation", formation);
+      context.setVariable("level",     level);
+      context.setVariable("niveau",    niveau);
+      context.setVariable("anneeUniv", anneeUniv);
+      context.setVariable("motif",     motif);
+      context.setVariable("year",      Year.now().getValue());
+
+      String html = templateEngine.process(
+              "mail/preinscription-rejetee", context
+      );
+
+      sendHtml(
+              to,
+              "Votre demande de préinscription – " + anneeUniv,
+              html
+      );
+
+      log.info(" Rejet préinscription envoyé à {}", to);
+
+    } catch (Exception e) {
+      log.error(" Erreur envoi rejet préinscription", e);
+    }
+  }
+
   /* =====================================================
      🔹 EMAIL AVEC PJ (MultipartFile)
      ===================================================== */

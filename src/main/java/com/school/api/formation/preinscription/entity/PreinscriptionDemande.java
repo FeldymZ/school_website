@@ -25,9 +25,6 @@ public class PreinscriptionDemande {
     @Enumerated(EnumType.STRING)
     private Civilite civilite;
 
-    @Column
-    private LocalDateTime rejectedAt;
-
     private String nom;
     private String prenom;
 
@@ -80,6 +77,14 @@ public class PreinscriptionDemande {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private LocalDateTime validatedAt;
+
+    @Column
+    private LocalDateTime rejectedAt;
+
+    /* ================= REJET ================= */
+
+    @Column(name = "motif_rejet", columnDefinition = "TEXT")
+    private String motifRejet;
 
     /* ================= PDF ================= */
 

@@ -82,10 +82,11 @@ public class PreinscriptionAdminController {
             target = "#id.toString()"
     )
     @PostMapping("/{id}/rejeter")
-    public void reject(
-            @PathVariable Long id
+    public PreinscriptionDemandeResponse reject(
+            @PathVariable Long id,
+            @Valid @RequestBody RejetPreinscriptionRequest req
     ) {
-        service.reject(id);
+        return service.reject(id, req.motif());
     }
 
     /* ════════════════════════════════
