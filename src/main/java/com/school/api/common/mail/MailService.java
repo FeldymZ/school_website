@@ -280,6 +280,56 @@ public class MailService {
   }
 
   /* =====================================================
+     🔹 DEVIS FORMATION CONTINUE — ENVOI DU PDF AU CLIENT
+     Le PDF est joint directement depuis la mémoire (byte[]) :
+     pas besoin qu'il existe sur le disque.
+     ===================================================== */
+  @Async
+  public void sendDevis(
+          String to,
+          String clientName,
+          String numeroDevis,
+          String message,
+          byte[] pdf
+  ) {
+    try {
+
+      Context context = new Context();
+      context.setVariable("name", clientName);
+      context.setVariable("message", message);
+      context.setVariable("year", Year.now().getValue());
+      context.setVariable("hasAttachment", true);
+
+      String html =
+              templateEngine.process("mail/devis-reponse", context);
+
+      MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+      MimeMessageHelper helper =
+              new MimeMessageHelper(mimeMessage, true, StandardCharsets.UTF_8.name());
+
+      helper.setFrom(mailProperties.getFrom());
+      helper.setTo(to);
+      helper.setSubject("Votre devis n° " + numeroDevis + " – ESIITECH");
+      helper.setText(html, true);
+
+      /* 📎 Le devis PDF */
+      helper.addAttachment(
+              numeroDevis + ".pdf",
+              new ByteArrayResource(pdf),
+              "application/pdf"
+      );
+
+      mailSender.send(mimeMessage);
+
+      log.info("📨 Devis {} envoyé à {}", numeroDevis, to);
+
+    } catch (Exception e) {
+      log.error("❌ Erreur envoi devis {}", numeroDevis, e);
+    }
+  }
+
+  /* =====================================================
      🔹 BROCHURE FORMATION
      ===================================================== */
   @Async
