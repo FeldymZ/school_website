@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="devis"
+              pageWidth="595" pageHeight="842" columnWidth="515"
+              leftMargin="40" rightMargin="40" topMargin="20" bottomMargin="20"
+              whenNoDataType="AllSectionsNoDetail">
+
+    <property name="net.sf.jasperreports.default.pdf.encoding" value="Identity-H"/>
+    <property name="net.sf.jasperreports.awt.ignore.missing.font" value="true"/>
+
+    <!-- ================= STYLES ================= -->
+    <style name="Base" isDefault="true" fontName="Corbel" fontSize="11"/>
+    <style name="Tableau" fontName="Comic Sans MS" fontSize="10"/>
+
+    <!-- ================= PARAMÈTRES ================= -->
+    <parameter name="LOGO" class="java.io.InputStream"/>
+    <parameter name="SIGNATURE" class="java.io.InputStream"/>
+    <parameter name="CACHET" class="java.io.InputStream"/>
+
+    <parameter name="ECOLE_DECRETS" class="java.lang.String"/>
+    <parameter name="ECOLE_ADRESSE" class="java.lang.String"/>
+    <parameter name="ECOLE_EMAIL" class="java.lang.String"/>
+    <parameter name="ECOLE_SITE" class="java.lang.String"/>
+
+    <parameter name="NUMERO" class="java.lang.String"/>
+    <parameter name="DATE_EMISSION" class="java.lang.String"/>
+    <parameter name="DATE_VALIDITE" class="java.lang.String"/>
+    <parameter name="OBJET" class="java.lang.String"/>
+
+    <parameter name="CLIENT_NOM" class="java.lang.String"/>
+    <parameter name="CLIENT_ATTENTION" class="java.lang.String"/>
+    <parameter name="CLIENT_TEL" class="java.lang.String"/>
+    <parameter name="CLIENT_EMAIL" class="java.lang.String"/>
+
+    <parameter name="TOTAL" class="java.lang.String"/>
+    <parameter name="AVEC_REDUCTION" class="java.lang.Boolean"/>
+    <parameter name="REDUCTION_LIBELLE" class="java.lang.String"/>
+    <parameter name="REDUCTION_MONTANT" class="java.lang.String"/>
+    <parameter name="NET_A_PAYER" class="java.lang.String"/>
+    <parameter name="MONTANT_LETTRES" class="java.lang.String"/>
+
+    <parameter name="PAIEMENT_BENEFICIAIRE" class="java.lang.String"/>
+    <parameter name="PAIEMENT_MODE" class="java.lang.String"/>
+    <parameter name="PAIEMENT_BANQUE" class="java.lang.String"/>
+    <parameter name="PAIEMENT_RIB" class="java.lang.String"/>
+    <parameter name="CONDITIONS" class="java.lang.String"/>
+
+    <parameter name="EMETTEUR_NOM" class="java.lang.String"/>
+    <parameter name="EMETTEUR_FONCTION" class="java.lang.String"/>
+
+    <!-- ================= CHAMPS (une ligne par formation) ================= -->
+    <field name="libelle" class="java.lang.String"/>
+    <field name="participants" class="java.lang.String"/>
+    <field name="prixUnitaire" class="java.lang.String"/>
+    <field name="montant" class="java.lang.String"/>
+
+    <!-- ================= EN-TÊTE + CLIENT (1re page) ================= -->
+    <title>
+        <band height="232">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="150" height="52">
+                    <printWhenExpression><![CDATA[$P{LOGO} != null]]></printWhenExpression>
+                </reportElement>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+
+            <staticText>
+                <reportElement x="175" y="6" width="340" height="18"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[ECOLE SUPERIEURE PRIVEE RECONNUE PAR L'ETAT]]></text>
+            </staticText>
+            <textField isBlankWhenNull="true">
+                <reportElement x="175" y="24" width="340" height="16"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{ECOLE_DECRETS}]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="0" y="78" width="515" height="22"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Devis N° " + $P{NUMERO}]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="315" y="118" width="200" height="16"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Libreville, le " + $P{DATE_EMISSION}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="118" width="140" height="17"/>
+                <box><bottomPen lineWidth="0.75" lineColor="#000000"/></box>
+                <textElement verticalAlignment="Middle"/>
+                <text><![CDATA[Client]]></text>
+            </staticText>
+            <textField isBlankWhenNull="true">
+                <reportElement x="0" y="139" width="515" height="16"/>
+                <textElement verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{CLIENT_NOM}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" x="0" y="155" width="515" height="14" isRemoveLineWhenBlank="true">
+                    <printWhenExpression><![CDATA[$P{CLIENT_ATTENTION} != null]]></printWhenExpression>
+                </reportElement>
+                <textElement verticalAlignment="Middle">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{CLIENT_ATTENTION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" x="0" y="169" width="515" height="14" isRemoveLineWhenBlank="true">
+                    <printWhenExpression><![CDATA[$P{CLIENT_TEL} != null]]></printWhenExpression>
+                </reportElement>
+                <textElement verticalAlignment="Middle">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Tél. " + $P{CLIENT_TEL}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" x="0" y="183" width="515" height="14" isRemoveLineWhenBlank="true">
+                    <printWhenExpression><![CDATA[$P{CLIENT_EMAIL} != null]]></printWhenExpression>
+                </reportElement>
+                <textElement verticalAlignment="Middle" markup="styled">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["<style isBold='true'>Email:</style> <style forecolor='#0563C1'>" + $P{CLIENT_EMAIL} + "</style>"]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement positionType="Float" x="0" y="210" width="515" height="16"/>
+                <textElement verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Objet : " + $P{OBJET}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <!-- ================= EN-TÊTE DU TABLEAU (répété à chaque page) ================= -->
+    <columnHeader>
+        <band height="20">
+            <staticText>
+                <reportElement style="Tableau" x="0" y="0" width="230" height="20"/>
+                <box leftPadding="4"><bottomPen lineWidth="1.0" lineColor="#000000"/></box>
+                <textElement verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Description]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="Tableau" x="230" y="0" width="95" height="20"/>
+                <box><bottomPen lineWidth="1.0" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Participant(s)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="Tableau" x="325" y="0" width="95" height="20"/>
+                <box><bottomPen lineWidth="1.0" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[Tarif]]></text>
+            </staticText>
+            <staticText>
+                <reportElement style="Tableau" x="420" y="0" width="95" height="20"/>
+                <box><bottomPen lineWidth="1.0" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <text><![CDATA[S. Total]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <!-- ================= UNE LIGNE PAR FORMATION ================= -->
+    <detail>
+        <band height="20">
+            <textField textAdjust="StretchHeight">
+                <reportElement style="Tableau" mode="Opaque" stretchType="RelativeToTallestObject" x="0" y="0" width="230" height="20" backcolor="#DEEBF7"/>
+                <box topPadding="3" leftPadding="4" bottomPadding="3" rightPadding="4">
+                    <pen lineWidth="0.5" lineColor="#9DC3E6"/>
+                </box>
+                <textElement verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$F{libelle}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="Tableau" mode="Opaque" stretchType="RelativeToTallestObject" x="230" y="0" width="95" height="20" backcolor="#FFFFFF"/>
+                <box><pen lineWidth="0.5" lineColor="#9DC3E6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{participants}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement mode="Opaque" stretchType="RelativeToTallestObject" x="325" y="0" width="95" height="20" backcolor="#DEEBF7"/>
+                <box rightPadding="4"><pen lineWidth="0.5" lineColor="#9DC3E6"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="10"/></textElement>
+                <textFieldExpression><![CDATA[$F{prixUnitaire}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement mode="Opaque" stretchType="RelativeToTallestObject" x="420" y="0" width="95" height="20" backcolor="#DEEBF7"/>
+                <box rightPadding="4"><pen lineWidth="0.5" lineColor="#9DC3E6"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="10"/></textElement>
+                <textFieldExpression><![CDATA[$F{montant}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <!-- ================= PIED DE PAGE (chaque page) ================= -->
+    <pageFooter>
+        <band height="46">
+            <rectangle>
+                <reportElement x="0" y="4" width="515" height="2" forecolor="#00AEEF" backcolor="#00AEEF"/>
+            </rectangle>
+            <textField isBlankWhenNull="true">
+                <reportElement x="0" y="10" width="515" height="16"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{ECOLE_ADRESSE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="26" width="515" height="16"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle" markup="styled">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Email : <style forecolor='#0563C1'>" + $P{ECOLE_EMAIL} + "</style>   Site officiel : <style forecolor='#0563C1'>" + $P{ECOLE_SITE} + "</style>"]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <!-- ================= TOTAUX + CONDITIONS + SIGNATURE (bloc insécable) ================= -->
+    <summary>
+        <band height="314" splitType="Prevent">
+
+            <!-- Total -->
+            <frame>
+                <reportElement x="325" y="0" width="190" height="16"/>
+                <staticText>
+                    <reportElement x="0" y="0" width="95" height="16"/>
+                    <box leftPadding="4"><pen lineWidth="0.5" lineColor="#9DC3E6"/></box>
+                    <textElement verticalAlignment="Middle"><font size="10"/></textElement>
+                    <text><![CDATA[Total]]></text>
+                </staticText>
+                <textField>
+                    <reportElement x="95" y="0" width="95" height="16"/>
+                    <box rightPadding="4"><pen lineWidth="0.5" lineColor="#9DC3E6"/></box>
+                    <textElement textAlignment="Right" verticalAlignment="Middle"><font size="10"/></textElement>
+                    <textFieldExpression><![CDATA[$P{TOTAL}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <!-- Réduction (si appliquée) -->
+            <frame>
+                <reportElement positionType="Float" x="325" y="16" width="190" height="16" isRemoveLineWhenBlank="true">
+                    <printWhenExpression><![CDATA[Boolean.TRUE.equals($P{AVEC_REDUCTION})]]></printWhenExpression>
+                </reportElement>
+                <textField>
+                    <reportElement x="0" y="0" width="95" height="16"/>
+                    <box leftPadding="4"><pen lineWidth="0.5" lineColor="#9DC3E6"/></box>
+                    <textElement verticalAlignment="Middle"><font size="10"/></textElement>
+                    <textFieldExpression><![CDATA[$P{REDUCTION_LIBELLE}]]></textFieldExpression>
+                </textField>
+                <textField>
+                    <reportElement x="95" y="0" width="95" height="16"/>
+                    <box rightPadding="4"><pen lineWidth="0.5" lineColor="#9DC3E6"/></box>
+                    <textElement textAlignment="Right" verticalAlignment="Middle"><font size="10"/></textElement>
+                    <textFieldExpression><![CDATA["- " + $P{REDUCTION_MONTANT}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <!-- Net à payer -->
+            <frame>
+                <reportElement positionType="Float" x="325" y="32" width="190" height="16"/>
+                <staticText>
+                    <reportElement style="Tableau" x="0" y="0" width="95" height="16"/>
+                    <box leftPadding="4"><pen lineWidth="0.5" lineColor="#9DC3E6"/></box>
+                    <textElement verticalAlignment="Middle"><font isBold="true"/></textElement>
+                    <text><![CDATA[Net à payer]]></text>
+                </staticText>
+                <textField>
+                    <reportElement x="95" y="0" width="95" height="16"/>
+                    <box rightPadding="4"><pen lineWidth="0.5" lineColor="#9DC3E6"/></box>
+                    <textElement textAlignment="Right" verticalAlignment="Middle"><font size="10" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA[$P{NET_A_PAYER}]]></textFieldExpression>
+                </textField>
+            </frame>
+
+            <!-- Montant en lettres -->
+            <textField textAdjust="StretchHeight">
+                <reportElement positionType="Float" x="0" y="72" width="515" height="16"/>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["Le devis est arrêté à la somme nette de " + $P{MONTANT_LETTRES} + " F CFA."]]></textFieldExpression>
+            </textField>
+
+            <!-- Conditions de paiement -->
+            <textField>
+                <reportElement positionType="Float" x="10" y="96" width="505" height="16" isRemoveLineWhenBlank="true">
+                    <printWhenExpression><![CDATA[$P{PAIEMENT_BENEFICIAIRE} != null && !$P{PAIEMENT_BENEFICIAIRE}.isEmpty()]]></printWhenExpression>
+                </reportElement>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["√  " + $P{PAIEMENT_BENEFICIAIRE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" x="10" y="112" width="505" height="16" isRemoveLineWhenBlank="true">
+                    <printWhenExpression><![CDATA[$P{PAIEMENT_MODE} != null && !$P{PAIEMENT_MODE}.isEmpty()]]></printWhenExpression>
+                </reportElement>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["√  " + $P{PAIEMENT_MODE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" x="40" y="128" width="475" height="16" isRemoveLineWhenBlank="true">
+                    <printWhenExpression><![CDATA[$P{PAIEMENT_BANQUE} != null && !$P{PAIEMENT_BANQUE}.isEmpty()]]></printWhenExpression>
+                </reportElement>
+                <textElement verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["–  " + $P{PAIEMENT_BANQUE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" x="58" y="144" width="457" height="16" isRemoveLineWhenBlank="true">
+                    <printWhenExpression><![CDATA[$P{PAIEMENT_RIB} != null && !$P{PAIEMENT_RIB}.isEmpty()]]></printWhenExpression>
+                </reportElement>
+                <textElement verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["RIB " + $P{PAIEMENT_RIB}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" x="10" y="162" width="505" height="16"/>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["√  Devis valable jusqu'au " + $P{DATE_VALIDITE}]]></textFieldExpression>
+            </textField>
+
+            <!-- Condition saisie par l'admin (facultatif) -->
+            <textField textAdjust="StretchHeight">
+                <reportElement positionType="Float" x="10" y="178" width="505" height="16" isRemoveLineWhenBlank="true">
+                    <printWhenExpression><![CDATA[$P{CONDITIONS} != null && !$P{CONDITIONS}.trim().isEmpty()]]></printWhenExpression>
+                </reportElement>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA["√  " + $P{CONDITIONS}]]></textFieldExpression>
+            </textField>
+
+            <!-- Validateur : fonction -->
+            <textField isBlankWhenNull="true">
+                <reportElement positionType="Float" x="300" y="206" width="215" height="16"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMETTEUR_FONCTION}]]></textFieldExpression>
+            </textField>
+
+            <!-- Validateur : signature -->
+            <image scaleImage="RetainShape" hAlign="Center" onErrorType="Blank">
+                <reportElement positionType="Float" x="330" y="224" width="155" height="68">
+                    <printWhenExpression><![CDATA[$P{SIGNATURE} != null]]></printWhenExpression>
+                </reportElement>
+                <imageExpression><![CDATA[$P{SIGNATURE}]]></imageExpression>
+            </image>
+
+            <!-- Validateur : cachet (dessiné par-dessus la signature) -->
+            <image scaleImage="RetainShape" hAlign="Center" vAlign="Middle" onErrorType="Blank">
+                <reportElement positionType="Float" x="285" y="218" width="95" height="80">
+                    <printWhenExpression><![CDATA[$P{CACHET} != null]]></printWhenExpression>
+                </reportElement>
+                <imageExpression><![CDATA[$P{CACHET}]]></imageExpression>
+            </image>
+
+            <!-- Validateur : nom -->
+            <textField isBlankWhenNull="true">
+                <reportElement positionType="Float" x="300" y="294" width="215" height="16"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMETTEUR_NOM}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+</jasperReport>

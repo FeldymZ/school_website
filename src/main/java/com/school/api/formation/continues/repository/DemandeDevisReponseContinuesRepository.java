@@ -8,6 +8,5 @@ import java.util.List;
 public interface DemandeDevisReponseContinuesRepository
         extends JpaRepository<DemandeDevisReponseContinues, Long> {
 
-    List<DemandeDevisReponseContinues>
-    findByDemandeIdOrderByDateEnvoiAsc(Long demandeId);
+    List<DemandeDevisReponseContinues> findByDemandeIdOrderByDateEnvoiAsc(Long demandeId);
 }

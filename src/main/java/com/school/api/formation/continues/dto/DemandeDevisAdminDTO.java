@@ -1,13 +1,14 @@
 package com.school.api.formation.continues.dto;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class DemandeDevisAdminDTO {
 
@@ -21,23 +22,22 @@ public class DemandeDevisAdminDTO {
     private String nomStructure;
 
     private LocalDateTime dateDemande;
-    private String statut; // ✅ STRING
+    private String statut;
     private LocalDateTime dateTraitement;
 
     private List<LigneDTO> lignes;
     private List<DemandeDevisReponseDTO> reponses;
 
-    /* ================= LIGNES ================= */
+    /* null si aucun devis n'a été validé */
+    private DevisDTO devis;
 
     @Getter
     @Setter
-    @AllArgsConstructor
     @NoArgsConstructor
     public static class LigneDTO {
-
+        private Long id;
         private String formationLibelle;
         private Integer nombreParticipants;
-
         private Double prix;
         private Integer duree;
         private String uniteDuree;

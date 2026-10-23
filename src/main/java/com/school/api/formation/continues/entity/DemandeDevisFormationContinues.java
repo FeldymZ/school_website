@@ -7,6 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 @Entity
 @Table(name = "demande_devis_formation_continues")
 @Getter
@@ -33,10 +34,19 @@ public class DemandeDevisFormationContinues {
 
     private LocalDateTime dateTraitement;
 
+    /* Une ligne par formation demandée */
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
     private List<DemandeDevisLigneFormationContinues> lignes = new ArrayList<>();
 
+    /* Historique des réponses envoyées au client */
     @JsonIgnore
-    @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL)
-    private List<DemandeDevisReponseContinues> reponses;
+    @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("dateEnvoi ASC")
+    private List<DemandeDevisReponseContinues> reponses = new ArrayList<>();
+
+    /* Devis validé (supprimé automatiquement avec la demande) */
+    @JsonIgnore
+    @OneToOne(mappedBy = "demande", cascade = CascadeType.ALL, orphanRemoval = true)
+    private DevisFormationContinues devis;
 }

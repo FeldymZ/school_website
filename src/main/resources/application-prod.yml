@@ -19,10 +19,10 @@ spring:
     properties:
       hibernate:
         jdbc:
-          time_zone: Europe/Paris   # 🔥 FORCE GMT+1 DB
+          time_zone: Europe/Paris   # ⚠️ Africa/Libreville = vrai GMT+1 toute l'année
 
   jackson:
-    time-zone: Europe/Paris        # 🔥 FORCE GMT+1 JSON
+    time-zone: Europe/Paris        # ⚠️ Africa/Libreville = vrai GMT+1 toute l'année
 
   mail:
     host: ${SPRING_MAIL_HOST}
@@ -59,3 +59,22 @@ app:
     from: "ESIITech Gabon <noreply@esiitech-gabon.com>"
   notifications:
     slack-webhook: ${SLACK_WEBHOOK_URL}
+
+  # ===== DEVIS FORMATION CONTINUE =====
+  # (le validateur, sa signature et son cachet sont gérés dans « Validateurs des devis »)
+  devis:
+    ecole:
+      decrets: "Décrets N°0071/PR/MESRSIT et 0072/PR/MESRSIT du 24/02/2024"
+      adresse: "Derrière le Palais de justice-BP : 20308 Libreville-Gabon   Téléphone +241 076237638"
+      email: "contact@esiitech-gabon.com"
+      site: "www.esiitech-gabon.com"
+    # classpath:..., chemin disque, ou URL http(s)
+    logo: "https://api-test.esiitech-gabon.com/assets/logos/esiitech.png"
+    objet: "Formation"
+    devise: "XAF"
+    validite-jours: 30
+    paiement:
+      beneficiaire: "Payable à 100% à l'ordre de l'ESIITECH-GABON"
+      mode: "Mode de paiement : Chèque ou virement"
+      banque: "UGB"
+      rib: "40002 00004 90000755798-66"

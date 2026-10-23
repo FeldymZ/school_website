@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface DemandeDevisLigneFormationContinuesRepository
         extends JpaRepository<DemandeDevisLigneFormationContinues, Long> {
 
-    /* 🔥 CHECK UTILISATION FORMATION */
+    /* Vérifie si une formation est utilisée dans une demande */
     boolean existsByFormationId(Long formationId);
 }
