@@ -68,8 +68,8 @@ app:
       adresse: "Derrière le Palais de justice-BP : 20308 Libreville-Gabon   Téléphone +241 076237638"
       email: "contact@esiitech-gabon.com"
       site: "www.esiitech-gabon.com"
-    # classpath:..., chemin disque, ou URL http(s)
-    logo: "https://api-test.esiitech-gabon.com/assets/logos/esiitech.png"
+    # ✅ même fichier que l'attestation de préinscription (lu directement sur le disque du serveur)
+    logo: "/app/assets/logo.png"
     objet: "Formation"
     devise: "XAF"
     validite-jours: 30
