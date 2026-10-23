@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -86,32 +87,14 @@ public class DemandeDevisContinuesAdminService {
     public void repondre(Long demandeId, RepondreDemandeDTO dto) {
 
         DemandeDevisFormationContinues demande = trouver(demandeId);
+        verifierOuverte(demande);
 
-        if (demande.getStatut() == StatutDemande.FERMEE) {
-            throw new RuntimeException("Demande clôturée");
-        }
         if (dto.getMessage() == null || dto.getMessage().isBlank()) {
             throw new RuntimeException("Le message est obligatoire");
         }
 
-        DemandeDevisReponseContinues reponse = new DemandeDevisReponseContinues();
-        reponse.setDemande(demande);
-        reponse.setMessage(dto.getMessage());
-        reponse.setEnvoyePar("ADMIN");
-        reponse.setDateEnvoi(LocalDateTime.now());
-
-        if (dto.getPieceJointe() != null && !dto.getPieceJointe().isEmpty()) {
-            reponse.setPieceJointeUrl(
-                    fileStorageService.storeDevisContinuesAttachment(dto.getPieceJointe()));
-        }
-
-        reponseRepository.save(reponse);
-
-        if (demande.getStatut() == StatutDemande.PAS_ENCORE_TRAITEE) {
-            demande.setStatut(StatutDemande.EN_COURS);
-        }
-        demande.setDateTraitement(LocalDateTime.now());
-        repository.save(demande);
+        DemandeDevisReponseContinues reponse =
+                enregistrerReponse(demande, dto.getMessage(), dto.getPieceJointe());
 
         mailService.sendDevisResponse(
                 demande.getEmail(),
@@ -123,6 +106,9 @@ public class DemandeDevisContinuesAdminService {
 
     /* =========================
        📨 ENVOYER LE DEVIS (PDF en pièce jointe)
+       Le PDF est joint au mail directement depuis la mémoire
+       (mailService.sendDevis) : il ne dépend plus d'un fichier sur le disque.
+       Une copie est aussi enregistrée dans l'historique de la demande.
        ========================= */
     @Transactional
     public void envoyerDevis(Long demandeId, String message) {
@@ -133,18 +119,29 @@ public class DemandeDevisContinuesAdminService {
         if (devis == null) {
             throw new RuntimeException("Aucun devis validé pour cette demande");
         }
-        if (demande.getStatut() == StatutDemande.FERMEE) {
-            throw new RuntimeException("Demande clôturée");
-        }
+        verifierOuverte(demande);
 
         DevisContinuesService.DevisPdf pdf = devisService.pdf(demandeId);
 
-        RepondreDemandeDTO dto = new RepondreDemandeDTO();
-        dto.setMessage(message != null && !message.isBlank() ? message : messageParDefaut(demande, devis));
-        dto.setPieceJointe(new ByteArrayMultipartFile(
-                "pieceJointe", pdf.nomFichier(), "application/pdf", pdf.contenu()));
+        String texte = (message != null && !message.isBlank())
+                ? message
+                : messageParDefaut(demande, devis);
 
-        repondre(demandeId, dto);
+        /* 1. Historique : message + copie du PDF */
+        enregistrerReponse(
+                demande,
+                texte,
+                new ByteArrayMultipartFile("pieceJointe", pdf.nomFichier(), "application/pdf", pdf.contenu())
+        );
+
+        /* 2. Mail au client avec le PDF en pièce jointe */
+        mailService.sendDevis(
+                demande.getEmail(),
+                demande.getNomClient(),
+                devis.getNumero(),
+                texte,
+                pdf.contenu()
+        );
 
         devis.setDateEnvoi(LocalDateTime.now());
     }
@@ -197,6 +194,42 @@ public class DemandeDevisContinuesAdminService {
     private DemandeDevisFormationContinues trouver(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Demande introuvable"));
+    }
+
+    private void verifierOuverte(DemandeDevisFormationContinues demande) {
+        if (demande.getStatut() == StatutDemande.FERMEE) {
+            throw new RuntimeException("Demande clôturée");
+        }
+    }
+
+    /**
+     * Enregistre un message dans l'historique de la demande (+ PJ éventuelle)
+     * et passe la demande "En cours". N'envoie AUCUN mail.
+     */
+    private DemandeDevisReponseContinues enregistrerReponse(
+            DemandeDevisFormationContinues demande,
+            String message,
+            MultipartFile pieceJointe
+    ) {
+        DemandeDevisReponseContinues reponse = new DemandeDevisReponseContinues();
+        reponse.setDemande(demande);
+        reponse.setMessage(message);
+        reponse.setEnvoyePar("ADMIN");
+        reponse.setDateEnvoi(LocalDateTime.now());
+
+        if (pieceJointe != null && !pieceJointe.isEmpty()) {
+            reponse.setPieceJointeUrl(fileStorageService.storeDevisContinuesAttachment(pieceJointe));
+        }
+
+        reponseRepository.save(reponse);
+
+        if (demande.getStatut() == StatutDemande.PAS_ENCORE_TRAITEE) {
+            demande.setStatut(StatutDemande.EN_COURS);
+        }
+        demande.setDateTraitement(LocalDateTime.now());
+        repository.save(demande);
+
+        return reponse;
     }
 
     private String messageParDefaut(DemandeDevisFormationContinues d, DevisFormationContinues devis) {
