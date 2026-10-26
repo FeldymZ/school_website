@@ -3,6 +3,11 @@ package com.school.api.auth.entity;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Clés d'accès d'origine.
+ * Les modules ajoutés depuis le back office (table menu_modules)
+ * sont aussi acceptés grâce à MenuPermissionRegistry.
+ */
 public enum MenuPermission {
 
     // Formations
@@ -33,7 +38,9 @@ public enum MenuPermission {
     ADMINISTRATION_UTILISATEURS,
     ADMINISTRATION_AUDITS;
 
-    public static boolean isValid(String key) {
+    /** true si la clé fait partie de l'enum (clé d'origine) */
+    public static boolean isNative(String key) {
+        if (key == null) return false;
         try {
             MenuPermission.valueOf(key);
             return true;
@@ -42,9 +49,15 @@ public enum MenuPermission {
         }
     }
 
+    /** Clé d'origine OU clé d'un module créé dans le back office */
+    public static boolean isValid(String key) {
+        return isNative(key) || MenuPermissionRegistry.contient(key);
+    }
+
     public static Set<String> allKeys() {
         Set<String> keys = new HashSet<>();
         for (MenuPermission p : values()) keys.add(p.name());
+        keys.addAll(MenuPermissionRegistry.cles());
         return keys;
     }
 }
