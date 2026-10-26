@@ -42,11 +42,12 @@ public class MenuModuleInitializer implements ApplicationRunner {
     private static final List<Origine> MODULES_ORIGINE = List.of(
             // Formations
             new Origine("FORMATIONS_FORMATIONS_INITIALES", "Formations initiales", "/formations", "Formations", null, "graduation-cap", false),
-            new Origine("FORMATIONS_CONTINUES_CATEGORIES", "Catégories", "/categories", "Formations", "Formations continues", "book-open", false),
-            new Origine("FORMATIONS_CONTINUES_SOUS_CATEGORIES", "Sous-catégories", "/sous-categories", "Formations", "Formations continues", "book-open", false),
-            new Origine("FORMATIONS_CONTINUES_FORMATIONS", "Formations", "/formations-continues", "Formations", "Formations continues", "book-open", false),
-            new Origine("FORMATIONS_CONTINUES_DEVIS", "Devis", "/demandes-devis", "Formations", "Formations continues", "book-open", false),
-            new Origine(CLE_VALIDATEURS, "Validateurs des devis", "/demandes-devis/validateurs", "Formations", "Formations continues", "book-open", false),
+            // 🆕 Formations continues : chaque module est un lien séparé (pas de sous-menu)
+            new Origine("FORMATIONS_CONTINUES_CATEGORIES", "Catégories", "/categories", "Formations continues", null, "folder", false),
+            new Origine("FORMATIONS_CONTINUES_SOUS_CATEGORIES", "Sous-catégories", "/sous-categories", "Formations continues", null, "layers", false),
+            new Origine("FORMATIONS_CONTINUES_FORMATIONS", "Formations", "/formations-continues", "Formations continues", null, "book-open", false),
+            new Origine("FORMATIONS_CONTINUES_DEVIS", "Devis", "/demandes-devis", "Formations continues", null, "file-text", false),
+            new Origine(CLE_VALIDATEURS, "Validateurs des devis", "/demandes-devis/validateurs", "Formations continues", null, "award", false),
             // Préinscriptions
             new Origine("PREINSCRIPTIONS_DEMANDES", "Demandes", "/preinscriptions", "Préinscriptions", "Préinscriptions", "clipboard-list", false),
             new Origine("PREINSCRIPTIONS_PARAMETRES", "Paramètres", "/preinscriptions/configuration", "Préinscriptions", "Préinscriptions", "clipboard-list", false),
@@ -109,6 +110,8 @@ public class MenuModuleInitializer implements ApplicationRunner {
             log.info("🧩 {} module(s) d'origine ajouté(s) au menu", ajoutes);
         }
 
+        separerFormationsContinues();
+
         if (donnerAccesValidateurs) {
             int copies = entityManager.createNativeQuery("""
                     INSERT INTO user_menu_access (user_id, menu_key)
@@ -127,5 +130,38 @@ public class MenuModuleInitializer implements ApplicationRunner {
         }
 
         service.rafraichirRegistre();
+    }
+
+    /**
+     * 🆕 Mise à jour (une seule fois) : les 5 modules des formations continues
+     * étaient regroupés dans un sous-menu « Formations continues ».
+     * Ils deviennent des liens séparés dans une section « Formations continues ».
+     * Ne s'applique que si les 5 sont encore dans l'ancien sous-menu
+     * (vos changements faits ensuite dans la page « Modules » sont conservés).
+     */
+    private void separerFormationsContinues() {
+        java.util.Map<String, String> icones = java.util.Map.of(
+                "/categories", "folder",
+                "/sous-categories", "layers",
+                "/formations-continues", "book-open",
+                "/demandes-devis", "file-text",
+                CHEMIN_VALIDATEURS, "award"
+        );
+
+        List<MenuModule> anciens = repository.findAll().stream()
+                .filter(m -> icones.containsKey(m.getChemin()))
+                .filter(m -> Boolean.TRUE.equals(m.getSysteme()))
+                .filter(m -> "Formations continues".equals(m.getGroupe()) && "Formations".equals(m.getSection()))
+                .toList();
+
+        if (anciens.size() != icones.size()) return; // déjà fait, ou modifié à la main
+
+        anciens.forEach(m -> {
+            m.setSection("Formations continues");
+            m.setGroupe(null);
+            m.setIcone(icones.get(m.getChemin()));
+        });
+        repository.saveAll(anciens);
+        log.info("📂 Formations continues : {} modules séparés dans le menu", anciens.size());
     }
 }
