@@ -3,6 +3,8 @@ package com.school.api.auth.config;
 import com.school.api.auth.entity.MenuModule;
 import com.school.api.auth.repository.MenuModuleRepository;
 import com.school.api.auth.service.MenuModuleService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -25,6 +27,14 @@ public class MenuModuleInitializer implements ApplicationRunner {
     private final MenuModuleRepository repository;
     private final MenuModuleService service;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    /* 🆕 « Devis » et « Validateurs des devis » ont chacun leur accès */
+    private static final String CLE_DEVIS = "FORMATIONS_CONTINUES_DEVIS";
+    private static final String CLE_VALIDATEURS = "FORMATIONS_CONTINUES_VALIDATEURS";
+    private static final String CHEMIN_VALIDATEURS = "/demandes-devis/validateurs";
+
     private record Origine(String cle, String libelle, String chemin, String section,
                            String groupe, String icone, boolean superAdminSeulement) {
     }
@@ -36,7 +46,7 @@ public class MenuModuleInitializer implements ApplicationRunner {
             new Origine("FORMATIONS_CONTINUES_SOUS_CATEGORIES", "Sous-catégories", "/sous-categories", "Formations", "Formations continues", "book-open", false),
             new Origine("FORMATIONS_CONTINUES_FORMATIONS", "Formations", "/formations-continues", "Formations", "Formations continues", "book-open", false),
             new Origine("FORMATIONS_CONTINUES_DEVIS", "Devis", "/demandes-devis", "Formations", "Formations continues", "book-open", false),
-            new Origine("FORMATIONS_CONTINUES_DEVIS", "Validateurs des devis", "/demandes-devis/validateurs", "Formations", "Formations continues", "book-open", false),
+            new Origine(CLE_VALIDATEURS, "Validateurs des devis", "/demandes-devis/validateurs", "Formations", "Formations continues", "book-open", false),
             // Préinscriptions
             new Origine("PREINSCRIPTIONS_DEMANDES", "Demandes", "/preinscriptions", "Préinscriptions", "Préinscriptions", "clipboard-list", false),
             new Origine("PREINSCRIPTIONS_PARAMETRES", "Paramètres", "/preinscriptions/configuration", "Préinscriptions", "Préinscriptions", "clipboard-list", false),
@@ -64,6 +74,18 @@ public class MenuModuleInitializer implements ApplicationRunner {
         int ajoutes = 0;
         int ordre = 10;
 
+        /* 🆕 Séparation Devis / Validateurs (une seule fois) :
+           - le module « Validateurs des devis » déjà créé avec la clé Devis reçoit sa propre clé ;
+           - les ADMIN qui avaient « Devis » gardent l'accès aux validateurs. */
+        boolean donnerAccesValidateurs = !repository.existsByChemin(CHEMIN_VALIDATEURS);
+        for (MenuModule m : repository.findAll()) {
+            if (CHEMIN_VALIDATEURS.equals(m.getChemin()) && CLE_DEVIS.equals(m.getCle())) {
+                m.setCle(CLE_VALIDATEURS);
+                repository.save(m);
+                donnerAccesValidateurs = true;
+            }
+        }
+
         for (Origine o : MODULES_ORIGINE) {
             if (!repository.existsByChemin(o.chemin())) {
                 repository.save(MenuModule.builder()
@@ -85,6 +107,23 @@ public class MenuModuleInitializer implements ApplicationRunner {
 
         if (ajoutes > 0) {
             log.info("🧩 {} module(s) d'origine ajouté(s) au menu", ajoutes);
+        }
+
+        if (donnerAccesValidateurs) {
+            int copies = entityManager.createNativeQuery("""
+                    INSERT INTO user_menu_access (user_id, menu_key)
+                    SELECT a.user_id, :validateurs
+                    FROM user_menu_access a
+                    WHERE a.menu_key = :devis
+                      AND NOT EXISTS (
+                          SELECT 1 FROM user_menu_access b
+                          WHERE b.user_id = a.user_id AND b.menu_key = :validateurs
+                      )
+                    """)
+                    .setParameter("validateurs", CLE_VALIDATEURS)
+                    .setParameter("devis", CLE_DEVIS)
+                    .executeUpdate();
+            log.info("🔑 Accès « Validateurs des devis » donné à {} ADMIN qui avaient « Devis »", copies);
         }
 
         service.rafraichirRegistre();
