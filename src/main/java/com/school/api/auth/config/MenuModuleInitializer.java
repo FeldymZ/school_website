@@ -42,12 +42,12 @@ public class MenuModuleInitializer implements ApplicationRunner {
     private static final List<Origine> MODULES_ORIGINE = List.of(
             // Formations
             new Origine("FORMATIONS_FORMATIONS_INITIALES", "Formations initiales", "/formations", "Formations", null, "graduation-cap", false),
-            // 🆕 Formations continues : chaque module est un lien séparé (pas de sous-menu)
-            new Origine("FORMATIONS_CONTINUES_CATEGORIES", "Catégories", "/categories", "Formations continues", null, "folder", false),
-            new Origine("FORMATIONS_CONTINUES_SOUS_CATEGORIES", "Sous-catégories", "/sous-categories", "Formations continues", null, "layers", false),
-            new Origine("FORMATIONS_CONTINUES_FORMATIONS", "Formations", "/formations-continues", "Formations continues", null, "book-open", false),
-            new Origine("FORMATIONS_CONTINUES_DEVIS", "Devis", "/demandes-devis", "Formations continues", null, "file-text", false),
-            new Origine(CLE_VALIDATEURS, "Validateurs des devis", "/demandes-devis/validateurs", "Formations continues", null, "award", false),
+            new Origine("FORMATIONS_CONTINUES_CATEGORIES", "Catégories", "/categories", "Formations", "Formations continues", "book-open", false),
+            new Origine("FORMATIONS_CONTINUES_SOUS_CATEGORIES", "Sous-catégories", "/sous-categories", "Formations", "Formations continues", "book-open", false),
+            new Origine("FORMATIONS_CONTINUES_FORMATIONS", "Formations", "/formations-continues", "Formations", "Formations continues", "book-open", false),
+            new Origine("FORMATIONS_CONTINUES_DEVIS", "Devis", "/demandes-devis", "Formations", "Formations continues", "book-open", false),
+            // 🆕 Validateurs des devis : accès séparé de « Devis »
+            new Origine(CLE_VALIDATEURS, "Validateurs des devis", "/demandes-devis/validateurs", "Formations", "Formations continues", "book-open", false),
             // Préinscriptions
             new Origine("PREINSCRIPTIONS_DEMANDES", "Demandes", "/preinscriptions", "Préinscriptions", "Préinscriptions", "clipboard-list", false),
             new Origine("PREINSCRIPTIONS_PARAMETRES", "Paramètres", "/preinscriptions/configuration", "Préinscriptions", "Préinscriptions", "clipboard-list", false),
@@ -110,7 +110,7 @@ public class MenuModuleInitializer implements ApplicationRunner {
             log.info("🧩 {} module(s) d'origine ajouté(s) au menu", ajoutes);
         }
 
-        separerFormationsContinues();
+        regrouperFormationsContinues();
 
         if (donnerAccesValidateurs) {
             int copies = entityManager.createNativeQuery("""
@@ -133,14 +133,13 @@ public class MenuModuleInitializer implements ApplicationRunner {
     }
 
     /**
-     * 🆕 Mise à jour (une seule fois) : les 5 modules des formations continues
-     * étaient regroupés dans un sous-menu « Formations continues ».
-     * Ils deviennent des liens séparés dans une section « Formations continues ».
-     * Ne s'applique que si les 5 sont encore dans l'ancien sous-menu
-     * (vos changements faits ensuite dans la page « Modules » sont conservés).
+     * Remet les 5 modules des formations continues dans le sous-menu dépliable
+     * « Formations continues » (design d'origine de la barre de gauche),
+     * s'ils avaient été sortis en liens séparés par la version précédente.
+     * Chaque module garde sa propre case d'accès.
      */
-    private void separerFormationsContinues() {
-        java.util.Map<String, String> icones = java.util.Map.of(
+    private void regrouperFormationsContinues() {
+        java.util.Map<String, String> separes = java.util.Map.of(
                 "/categories", "folder",
                 "/sous-categories", "layers",
                 "/formations-continues", "book-open",
@@ -148,20 +147,21 @@ public class MenuModuleInitializer implements ApplicationRunner {
                 CHEMIN_VALIDATEURS, "award"
         );
 
-        List<MenuModule> anciens = repository.findAll().stream()
-                .filter(m -> icones.containsKey(m.getChemin()))
+        List<MenuModule> modules = repository.findAll().stream()
+                .filter(m -> separes.containsKey(m.getChemin()))
                 .filter(m -> Boolean.TRUE.equals(m.getSysteme()))
-                .filter(m -> "Formations continues".equals(m.getGroupe()) && "Formations".equals(m.getSection()))
+                .filter(m -> m.getGroupe() == null && "Formations continues".equals(m.getSection()))
+                .filter(m -> separes.get(m.getChemin()).equals(m.getIcone()))
                 .toList();
 
-        if (anciens.size() != icones.size()) return; // déjà fait, ou modifié à la main
+        if (modules.size() != separes.size()) return; // rien à faire
 
-        anciens.forEach(m -> {
-            m.setSection("Formations continues");
-            m.setGroupe(null);
-            m.setIcone(icones.get(m.getChemin()));
+        modules.forEach(m -> {
+            m.setSection("Formations");
+            m.setGroupe("Formations continues");
+            m.setIcone("book-open");
         });
-        repository.saveAll(anciens);
-        log.info("📂 Formations continues : {} modules séparés dans le menu", anciens.size());
+        repository.saveAll(modules);
+        log.info("📂 Formations continues : {} modules remis dans le sous-menu", modules.size());
     }
 }
