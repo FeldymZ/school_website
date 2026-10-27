@@ -1,22 +1,27 @@
 package com.school.api.formation.continues.service;
 
+import com.school.api.common.mail.MailService;
 import com.school.api.formation.continues.dto.CreateDemandeDevisContinuesDTO;
 import com.school.api.formation.continues.dto.CreateDemandeDevisGlobalDTO;
 import com.school.api.formation.continues.entity.*;
 import com.school.api.formation.continues.repository.DemandeDevisFormationContinuesRepository;
 import com.school.api.formation.continues.repository.FormationContinuesRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DemandeDevisContinuesPublicService {
 
     private final DemandeDevisFormationContinuesRepository demandeRepository;
     private final FormationContinuesRepository formationRepository;
+    private final MailService mailService;   // 🆕 mail de confirmation au client
 
     /* =========================
        DEMANDE CLASSIQUE
@@ -76,6 +81,14 @@ public class DemandeDevisContinuesPublicService {
         demande.setLignes(lignes);
 
         demandeRepository.save(demande);
+
+        /* 🆕 Mail de confirmation au client (template mail/devis-recu.html).
+           Envoyé en arrière-plan : une panne du serveur mail ne bloque pas la demande. */
+        try {
+            mailService.sendDemandeConfirmation(demande.getEmail(), demande.getNomClient());
+        } catch (Exception e) {
+            log.error("❌ Mail de confirmation de demande de devis non envoyé à {}", demande.getEmail(), e);
+        }
     }
 
     /* =========================
