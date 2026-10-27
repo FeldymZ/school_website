@@ -191,7 +191,7 @@ public class MailService {
   }
 
   /* =====================================================
-     🔹 CONFIRMATION DEMANDE (CLIENT)
+     🔹 CONFIRMATION DEMANDE DE DEVIS (CLIENT)
      ===================================================== */
   @Async
   public void sendDemandeConfirmation(
@@ -204,7 +204,7 @@ public class MailService {
       context.setVariable("name", clientName);
       context.setVariable("year", Year.now().getValue());
 
-      String html = templateEngine.process("mail/demande-recue", context);
+      String html = templateEngine.process("mail/devis-recu", context);   // ✅ avant : "mail/demande-recue"
 
       sendHtml(
               to,
