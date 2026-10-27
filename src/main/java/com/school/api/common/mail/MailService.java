@@ -450,4 +450,49 @@ public class MailService {
       log.error("❌ Erreur envoi attestation préinscription", e);
     }
   }
+
+
+  /* =====================================================
+   🔹 SESSION DE FORMATION — INSCRIPTION
+   type = "recue" | "confirmee" | "refusee"
+   ===================================================== */
+  @Async
+  public void sendInscriptionSession(
+          String type,
+          String to,
+          String nom,
+          String formation,
+          String dateDebut,
+          String dateFin,
+          String lieu,
+          String horaires,
+          String motif
+  ) {
+    try {
+      Context context = new Context();
+      context.setVariable("name",      nom);
+      context.setVariable("formation", formation);
+      context.setVariable("dateDebut", dateDebut);
+      context.setVariable("dateFin",   dateFin);
+      context.setVariable("lieu",      lieu);
+      context.setVariable("horaires",  horaires);
+      context.setVariable("motif",     motif);
+      context.setVariable("year",      Year.now().getValue());
+
+      String sujet = switch (type) {
+        case "confirmee" -> "Votre participation est confirmée – " + formation;
+        case "refusee"   -> "Votre demande de participation – " + formation;
+        default          -> "Nous avons bien reçu votre inscription – " + formation;
+      };
+
+      String html = templateEngine.process("mail/inscription-session-" + type, context);
+
+      sendHtml(to, sujet, html);
+
+      log.info("📅 Mail inscription session ({}) envoyé à {}", type, to);
+
+    } catch (Exception e) {
+      log.error("❌ Erreur mail inscription session ({})", type, e);
+    }
+  }
 }

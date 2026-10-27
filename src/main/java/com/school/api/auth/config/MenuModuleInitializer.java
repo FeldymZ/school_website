@@ -36,7 +36,11 @@ public class MenuModuleInitializer implements ApplicationRunner {
     private static final String CHEMIN_VALIDATEURS = "/demandes-devis/validateurs";
 
     private record Origine(String cle, String libelle, String chemin, String section,
-                           String groupe, String icone, boolean superAdminSeulement) {
+                           String groupe, String icone, boolean superAdminSeulement, Integer ordreFixe) {
+        Origine(String cle, String libelle, String chemin, String section,
+                String groupe, String icone, boolean superAdminSeulement) {
+            this(cle, libelle, chemin, section, groupe, icone, superAdminSeulement, null);
+        }
     }
 
     private static final List<Origine> MODULES_ORIGINE = List.of(
@@ -65,7 +69,10 @@ public class MenuModuleInitializer implements ApplicationRunner {
             // Administration
             new Origine("ADMINISTRATION_UTILISATEURS", "Utilisateurs", "/utilisateurs", "Administration", "Système", "settings", false),
             new Origine("ADMINISTRATION_AUDITS", "Audits", "/configuration", "Administration", "Système", "settings", false),
-            new Origine(null, "Modules", MenuModuleService.CHEMIN_MODULES, "Administration", "Système", "settings", true)
+            new Origine(null, "Modules", MenuModuleService.CHEMIN_MODULES, "Administration", "Système", "settings", true),
+            // 🆕 Session de formation (placé juste après les Formations continues)
+            new Origine("FORMATIONS_SESSIONS_AGENDA", "Agenda de formation", "/sessions-formation/agenda", "Formations", "Session de formation", "calendar", false, 62),
+            new Origine("FORMATIONS_SESSIONS_PARTICIPATIONS", "Demandes de participation", "/sessions-formation/participations", "Formations", "Session de formation", "calendar", false, 64)
     );
 
     @Override
@@ -96,14 +103,14 @@ public class MenuModuleInitializer implements ApplicationRunner {
                         .section(o.section())
                         .groupe(o.groupe())
                         .icone(o.icone())
-                        .ordre(ordre)
+                        .ordre(o.ordreFixe() != null ? o.ordreFixe() : ordre)
                         .actif(true)
                         .systeme(true)
                         .superAdminSeulement(o.superAdminSeulement())
                         .build());
                 ajoutes++;
             }
-            ordre += 10;
+            if (o.ordreFixe() == null) ordre += 10;
         }
 
         if (ajoutes > 0) {

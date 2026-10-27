@@ -16,7 +16,11 @@ public enum MenuPermission {
     FORMATIONS_CONTINUES_SOUS_CATEGORIES,
     FORMATIONS_CONTINUES_FORMATIONS,
     FORMATIONS_CONTINUES_DEVIS,
-    FORMATIONS_CONTINUES_VALIDATEURS,   // 🆕 « Validateurs des devis » (séparé de « Devis »)
+    FORMATIONS_CONTINUES_VALIDATEURS,   // « Validateurs des devis » (séparé de « Devis »)
+
+    // 🆕 Session de formation
+    FORMATIONS_SESSIONS_AGENDA,          // « Agenda de formation »
+    FORMATIONS_SESSIONS_PARTICIPATIONS,  // « Demandes de participation »
 
     // Préinscriptions
     PREINSCRIPTIONS_DEMANDES,

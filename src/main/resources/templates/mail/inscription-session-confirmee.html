@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Votre participation est confirmée</title>
+</head>
+
+<body style="margin:0; padding:0; background:#f4f6f8; font-family: Arial, Helvetica, sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="center" style="padding:40px 0;">
+
+            <table width="600" cellpadding="0" cellspacing="0"
+                   style="background:#ffffff; border-radius:10px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+
+                <tr>
+                    <td style="padding:20px 30px; border-bottom:3px solid #00AEEF;">
+                        <img
+                                src="https://api-test.esiitech-gabon.com/assets/logos/esiitech.png"
+                                alt="ESIITECH"
+                                height="50"
+                        >
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:30px; color:#333333;">
+
+                        <h2 style="color:#00AEEF;">
+                            Bonjour <span th:text="${name}">Nom</span>,
+                        </h2>
+
+                        <p style="font-size:15px; line-height:1.7;">
+                            Bonne nouvelle : votre <strong>participation</strong> à la session de
+                            <strong>formation continue</strong> ci-dessous est <strong style="color:#16a34a;">confirmée</strong>.
+                        </p>
+
+                        <table width="100%" cellpadding="0" cellspacing="0"
+                               style="margin:20px 0; background:#f0faff; border-left:4px solid #00AEEF; border-radius:6px;">
+                            <tr>
+                                <td style="padding:16px 20px; font-size:14px; line-height:1.8; color:#333333;">
+                                    <strong>Formation :</strong> <span th:text="${formation}">Formation</span><br>
+                                    <strong>Période :</strong> du <span th:text="${dateDebut}">01/01/2026</span>
+                                    au <span th:text="${dateFin}">05/01/2026</span><br>
+                                    <span th:if="${lieu}"><strong>Lieu :</strong> <span th:text="${lieu}">Lieu</span><br></span>
+                                    <span th:if="${horaires}"><strong>Horaires :</strong> <span th:text="${horaires}">Horaires</span></span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="font-size:15px; line-height:1.7;">
+                            Merci de vous présenter quelques minutes avant le début de la formation.
+                            Nous avons hâte de vous accueillir !
+                        </p>
+
+                        <p style="font-size:15px; line-height:1.7;">
+                            Pour toute question, vous pouvez répondre directement à ce message ou nous écrire à
+                            <a href="mailto:contact@esiitech-gabon.com" style="color:#00AEEF; text-decoration:none;">contact@esiitech-gabon.com</a>.
+                        </p>
+
+                        <p style="margin-top:30px;">
+                            Cordialement,<br>
+                            <strong>L’équipe ESIITECH</strong>
+                        </p>
+
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="background:#f4f6f8; padding:18px; text-align:center; font-size:12px; color:#777;">
+                        © <span th:text="${year}">2026</span> ESIITECH — Tous droits réservés
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
