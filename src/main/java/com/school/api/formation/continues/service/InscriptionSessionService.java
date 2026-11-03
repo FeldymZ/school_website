@@ -6,6 +6,7 @@ import com.school.api.formation.continues.dto.InscriptionSessionRequest;
 import com.school.api.formation.continues.entity.InscriptionSessionFormation;
 import com.school.api.formation.continues.entity.SessionFormationContinues;
 import com.school.api.formation.continues.repository.InscriptionSessionFormationRepository;
+import com.school.api.formation.continues.exception.SessionFormationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -38,7 +39,6 @@ public class InscriptionSessionService {
     private static final ZoneId LIBREVILLE = ZoneId.of("Africa/Libreville");
     private static final Pattern EMAIL = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$");
     private static final DateTimeFormatter DATE_FR = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.FRENCH);
-    private static final List<String> OCCUPE_UNE_PLACE = List.of(EN_ATTENTE, CONFIRMEE);
 
     private final InscriptionSessionFormationRepository repository;
     private final SessionFormationService sessionService;
@@ -53,36 +53,34 @@ public class InscriptionSessionService {
         SessionFormationContinues session = sessionService.trouver(sessionId);
 
         if (!Boolean.TRUE.equals(session.getActive()) || !session.getFormation().isEnabled()) {
-            throw new RuntimeException("Cette session n'est pas ouverte aux inscriptions");
+            throw new SessionFormationException("Cette session n'est pas ouverte aux inscriptions");
         }
         if (session.getDateDebut().isBefore(SessionFormationService.aujourdhui())) {
-            throw new RuntimeException("Les inscriptions à cette session sont closes");
+            throw new SessionFormationException("Les inscriptions à cette session sont closes");
         }
 
         /* ----- Contrôle des champs ----- */
         String nom = obligatoire(r.nom(), "le nom", 100);
         String prenom = obligatoire(r.prenom(), "le prénom", 100);
         String sexe = obligatoire(r.sexe(), "le sexe", 1).toUpperCase(Locale.ROOT);
-        if (!sexe.equals("M") && !sexe.equals("F")) throw new RuntimeException("Sexe invalide");
-        if (r.dateNaissance() == null) throw new RuntimeException("Indiquez la date de naissance");
+        if (!sexe.equals("M") && !sexe.equals("F")) throw new SessionFormationException("Sexe invalide");
+        if (r.dateNaissance() == null) throw new SessionFormationException("Indiquez la date de naissance");
         if (!r.dateNaissance().isBefore(LocalDate.now(LIBREVILLE).minusYears(10))) {
-            throw new RuntimeException("Date de naissance invalide");
+            throw new SessionFormationException("Date de naissance invalide");
         }
         String lieuNaissance = obligatoire(r.lieuNaissance(), "le lieu de naissance", 120);
         String email = obligatoire(r.email(), "l'adresse email", 150).toLowerCase(Locale.ROOT);
-        if (!EMAIL.matcher(email).matches()) throw new RuntimeException("Adresse email invalide");
+        if (!EMAIL.matcher(email).matches()) throw new SessionFormationException("Adresse email invalide");
         String telephone = obligatoire(r.telephone(), "le téléphone", 30);
         String lieuResidence = obligatoire(r.lieuResidence(), "le lieu de résidence", 150);
-        if (r.enActivite() == null) throw new RuntimeException("Indiquez si vous êtes en activité");
+        if (r.enActivite() == null) throw new SessionFormationException("Indiquez si vous êtes en activité");
         String profession = r.enActivite() ? obligatoire(r.profession(), "votre profession", 150) : null;
 
-        /* ----- Doublon et places ----- */
-        if (repository.existsBySession_IdAndEmailIgnoreCaseAndStatutIn(sessionId, email, OCCUPE_UNE_PLACE)) {
-            throw new RuntimeException("Vous êtes déjà inscrit(e) à cette session avec cette adresse email");
-        }
+        /* ----- Places : seules les participations confirmées comptent ----- */
+        /* (la même adresse email peut faire plusieurs demandes : le back office trie) */
         Integer restantes = sessionService.placesRestantes(session);
         if (restantes != null && restantes <= 0) {
-            throw new RuntimeException("Désolé, cette session est complète");
+            throw new SessionFormationException("Désolé, cette session est complète");
         }
 
         InscriptionSessionFormation i = InscriptionSessionFormation.builder()
@@ -142,12 +140,12 @@ public class InscriptionSessionService {
     @Transactional
     public InscriptionSessionDTO confirmer(Long id, String admin) {
         InscriptionSessionFormation i = trouver(id);
-        if (CONFIRMEE.equals(i.getStatut())) throw new RuntimeException("Cette participation est déjà confirmée");
+        if (CONFIRMEE.equals(i.getStatut())) throw new SessionFormationException("Cette participation est déjà confirmée");
 
-        /* Une demande refusée qu'on confirme reprend une place : il faut qu'il en reste */
-        if (REFUSEE.equals(i.getStatut())) {
-            Integer restantes = sessionService.placesRestantes(i.getSession());
-            if (restantes != null && restantes <= 0) throw new RuntimeException("La session est complète");
+        /* 🆕 Confirmer = prendre une place : il faut qu'il en reste */
+        Integer restantes = sessionService.placesRestantes(i.getSession());
+        if (restantes != null && restantes <= 0) {
+            throw new SessionFormationException("La session est complète : toutes les places sont déjà confirmées");
         }
 
         i.setStatut(CONFIRMEE);
@@ -163,10 +161,10 @@ public class InscriptionSessionService {
     @Transactional
     public InscriptionSessionDTO refuser(Long id, String motif, String admin) {
         InscriptionSessionFormation i = trouver(id);
-        if (REFUSEE.equals(i.getStatut())) throw new RuntimeException("Cette participation est déjà refusée");
+        if (REFUSEE.equals(i.getStatut())) throw new SessionFormationException("Cette participation est déjà refusée");
 
         String m = (motif == null || motif.isBlank()) ? null : motif.trim();
-        if (m != null && m.length() > 1000) throw new RuntimeException("Motif trop long (1000 caractères maximum)");
+        if (m != null && m.length() > 1000) throw new SessionFormationException("Motif trop long (1000 caractères maximum)");
 
         i.setStatut(REFUSEE);
         i.setMotifRefus(m);
@@ -188,13 +186,13 @@ public class InscriptionSessionService {
        ========================= */
 
     private InscriptionSessionFormation trouver(Long id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Demande introuvable"));
+        return repository.findById(id).orElseThrow(() -> new SessionFormationException("Demande introuvable"));
     }
 
     private static String obligatoire(String v, String quoi, int max) {
-        if (v == null || v.isBlank()) throw new RuntimeException("Indiquez " + quoi);
+        if (v == null || v.isBlank()) throw new SessionFormationException("Indiquez " + quoi);
         String t = v.trim();
-        if (t.length() > max) throw new RuntimeException("Trop long : " + quoi + " (" + max + " caractères maximum)");
+        if (t.length() > max) throw new SessionFormationException("Trop long : " + quoi + " (" + max + " caractères maximum)");
         return t;
     }
 

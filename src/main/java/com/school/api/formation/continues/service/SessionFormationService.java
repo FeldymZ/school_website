@@ -8,6 +8,7 @@ import com.school.api.formation.continues.mapper.FormationMapper;
 import com.school.api.formation.continues.repository.FormationContinuesRepository;
 import com.school.api.formation.continues.repository.InscriptionSessionFormationRepository;
 import com.school.api.formation.continues.repository.SessionFormationContinuesRepository;
+import com.school.api.formation.continues.exception.SessionFormationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +26,12 @@ import java.util.*;
 public class SessionFormationService {
 
     private static final ZoneId LIBREVILLE = ZoneId.of("Africa/Libreville");
-    private static final List<String> STATUTS_OCCUPANT_UNE_PLACE =
+    /* Inscrits = demandes en attente + confirmées (affichage) */
+    private static final List<String> STATUTS_INSCRITS =
             List.of(InscriptionSessionFormation.EN_ATTENTE, InscriptionSessionFormation.CONFIRMEE);
+    /* 🆕 Seules les participations CONFIRMÉES dans le back office prennent une place */
+    private static final List<String> STATUTS_OCCUPANT_UNE_PLACE =
+            List.of(InscriptionSessionFormation.CONFIRMEE);
 
     private final SessionFormationContinuesRepository sessionRepository;
     private final InscriptionSessionFormationRepository inscriptionRepository;
@@ -65,12 +70,12 @@ public class SessionFormationService {
         SessionFormationContinues s = trouver(id);
         appliquer(s, r);
 
-        /* On ne peut pas descendre sous le nombre de personnes déjà inscrites */
+        /* On ne peut pas descendre sous le nombre de participations déjà confirmées */
         if (s.getNombrePlaces() != null) {
             long occupees = inscriptionRepository.countBySession_IdAndStatutIn(s.getId(), STATUTS_OCCUPANT_UNE_PLACE);
             if (s.getNombrePlaces() < occupees) {
-                throw new RuntimeException("Il y a déjà " + occupees
-                        + " inscription(s) : le nombre de places ne peut pas être inférieur");
+                throw new SessionFormationException("Il y a déjà " + occupees
+                        + " participation(s) confirmée(s) : le nombre de places ne peut pas être inférieur");
             }
         }
         return toDTO(sessionRepository.save(s));
@@ -87,7 +92,7 @@ public class SessionFormationService {
     public void supprimer(Long id) {
         SessionFormationContinues s = trouver(id);
         if (inscriptionRepository.countBySession_Id(id) > 0) {
-            throw new RuntimeException(
+            throw new SessionFormationException(
                     "Cette session a des demandes de participation : masquez-la plutôt que de la supprimer");
         }
         sessionRepository.delete(s);
@@ -120,7 +125,7 @@ public class SessionFormationService {
     public FormationSessionsPublicDTO formationParSlug(String slug) {
         List<SessionFormationContinues> sessions = sessionRepository.findOuvertesParSlug(slug, aujourdhui());
         if (sessions.isEmpty()) {
-            throw new RuntimeException("Aucune session ouverte pour cette formation");
+            throw new SessionFormationException("Aucune session ouverte pour cette formation");
         }
         return new FormationSessionsPublicDTO(
                 formationMapper.toDTO(sessions.get(0).getFormation()),
@@ -133,7 +138,7 @@ public class SessionFormationService {
 
     SessionFormationContinues trouver(Long id) {
         return sessionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Session introuvable"));
+                .orElseThrow(() -> new SessionFormationException("Session introuvable"));
     }
 
     static LocalDate aujourdhui() {
@@ -148,13 +153,13 @@ public class SessionFormationService {
     }
 
     private void appliquer(SessionFormationContinues s, SessionFormationRequest r) {
-        if (r.formationId() == null) throw new RuntimeException("Choisissez la formation");
-        if (r.dateDebut() == null || r.dateFin() == null) throw new RuntimeException("Les dates de début et de fin sont obligatoires");
-        if (r.dateFin().isBefore(r.dateDebut())) throw new RuntimeException("La date de fin doit être après la date de début");
-        if (r.nombrePlaces() != null && r.nombrePlaces() < 1) throw new RuntimeException("Le nombre de places doit être d'au moins 1 (laissez vide pour illimité)");
+        if (r.formationId() == null) throw new SessionFormationException("Choisissez la formation");
+        if (r.dateDebut() == null || r.dateFin() == null) throw new SessionFormationException("Les dates de début et de fin sont obligatoires");
+        if (r.dateFin().isBefore(r.dateDebut())) throw new SessionFormationException("La date de fin doit être après la date de début");
+        if (r.nombrePlaces() != null && r.nombrePlaces() < 1) throw new SessionFormationException("Le nombre de places doit être d'au moins 1 (laissez vide pour illimité)");
 
         FormationContinues f = formationRepository.findById(r.formationId())
-                .orElseThrow(() -> new RuntimeException("Formation introuvable"));
+                .orElseThrow(() -> new SessionFormationException("Formation introuvable"));
 
         s.setFormation(f);
         s.setDateDebut(r.dateDebut());
@@ -168,13 +173,13 @@ public class SessionFormationService {
     private static String texte(String v, int max) {
         if (v == null || v.isBlank()) return null;
         String t = v.trim();
-        if (t.length() > max) throw new RuntimeException("Texte trop long (" + max + " caractères maximum)");
+        if (t.length() > max) throw new SessionFormationException("Texte trop long (" + max + " caractères maximum)");
         return t;
     }
 
     private SessionFormationDTO toDTO(SessionFormationContinues s) {
-        long inscrits = inscriptionRepository.countBySession_IdAndStatutIn(s.getId(), STATUTS_OCCUPANT_UNE_PLACE);
-        long confirmees = inscriptionRepository.countBySession_IdAndStatutIn(s.getId(), List.of(InscriptionSessionFormation.CONFIRMEE));
+        long inscrits = inscriptionRepository.countBySession_IdAndStatutIn(s.getId(), STATUTS_INSCRITS);
+        long confirmees = inscriptionRepository.countBySession_IdAndStatutIn(s.getId(), STATUTS_OCCUPANT_UNE_PLACE);
         LocalDate auj = aujourdhui();
         String etat = auj.isBefore(s.getDateDebut()) ? "A_VENIR" : auj.isAfter(s.getDateFin()) ? "TERMINEE" : "EN_COURS";
 
@@ -190,7 +195,7 @@ public class SessionFormationService {
                 s.getNombrePlaces(),
                 inscrits,
                 confirmees,
-                s.getNombrePlaces() == null ? null : (int) Math.max(0, s.getNombrePlaces() - inscrits),
+                s.getNombrePlaces() == null ? null : (int) Math.max(0, s.getNombrePlaces() - confirmees),
                 Boolean.TRUE.equals(s.getActive()),
                 etat
         );
