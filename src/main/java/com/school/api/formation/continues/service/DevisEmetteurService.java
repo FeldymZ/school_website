@@ -6,7 +6,10 @@ import com.school.api.formation.continues.dto.DevisEmetteurResponse;
 import com.school.api.formation.continues.entity.DevisEmetteur;
 import com.school.api.formation.continues.repository.DevisEmetteurRepository;
 import com.school.api.formation.continues.repository.DevisFormationContinuesRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 /** Gestion des validateurs de devis (nom, fonction, signature, cachet) */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DevisEmetteurService {
@@ -21,6 +25,9 @@ public class DevisEmetteurService {
     private final DevisEmetteurRepository emetteurRepo;
     private final DevisFormationContinuesRepository devisRepo;
     private final FileStorageService fileStorageService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /* ================= GET ALL ================= */
     @Transactional(readOnly = true)
@@ -86,23 +93,50 @@ public class DevisEmetteurService {
     }
 
     /* ================= DELETE ================= */
+    /**
+     * 🆕 Suppression possible même pour le validateur par défaut
+     * et même s'il est déjà utilisé dans des devis.
+     * Les devis gardent leur COPIE du nom, de la fonction, de la signature et du cachet :
+     * on retire seulement leur lien vers ce validateur.
+     */
     @Transactional
     public void delete(Long id) {
 
         DevisEmetteur em = trouver(id);
+        long nbDevis = devisRepo.countByEmetteur_Id(id);
 
-        if (em.isActif()) {
-            throw new IllegalStateException("Impossible de supprimer le validateur par défaut");
-        }
-        if (devisRepo.existsByEmetteur_Id(id)) {
-            throw new IllegalStateException("Validateur utilisé dans des devis : suppression impossible");
+        /* 1. Les devis déjà validés gardent leur copie : on retire seulement le lien */
+        if (nbDevis > 0) {
+            entityManager.createQuery(
+                            "update DevisFormationContinues d set d.emetteur = null where d.emetteur.id = :id")
+                    .setParameter("id", id)
+                    .executeUpdate();
         }
 
+        /* 2. Suppression du validateur (s'il était par défaut, il n'y a plus de validateur par défaut) */
         emetteurRepo.delete(em);
 
-        /* Jamais utilisé dans un devis : on peut supprimer ses fichiers */
-        fileStorageService.deleteQuietly(em.getSignatureUrl());
-        if (em.getCachetUrl() != null) fileStorageService.deleteQuietly(em.getCachetUrl());
+        /* 3. Fichiers : supprimés seulement si aucun devis ne s'en sert pour son PDF */
+        if (nbDevis == 0) {
+            fileStorageService.deleteQuietly(em.getSignatureUrl());
+            if (em.getCachetUrl() != null) fileStorageService.deleteQuietly(em.getCachetUrl());
+        }
+
+        log.info("🗑️ Validateur « {} » supprimé ({} devis détaché(s){})",
+                em.getNom(), nbDevis, em.isActif() ? ", était le validateur par défaut" : "");
+    }
+
+    /* ================= 🆕 RETIRER LE STATUT « PAR DÉFAUT » ================= */
+    /** Plus de validateur par défaut : il faudra choisir le validateur à chaque devis */
+    @Transactional
+    public void deactivate(Long id) {
+
+        DevisEmetteur em = trouver(id);
+
+        if (!em.isActif()) {
+            throw new IllegalStateException("Ce validateur n'est pas le validateur par défaut");
+        }
+        em.setActif(false);
     }
 
     /* ================= DÉFINIR PAR DÉFAUT ================= */

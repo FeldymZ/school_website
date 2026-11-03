@@ -59,7 +59,7 @@ public class DevisEmetteurController {
         service.update(id, nom, fonction, signature, cachet, supprimerCachet);
     }
 
-    /* ================= DELETE ================= */
+    /* ================= DELETE (même par défaut ou déjà utilisé dans des devis) ================= */
     @AuditLog(action = "SUPPRESSION_VALIDATEUR_DEVIS", target = "#id.toString()")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
@@ -72,5 +72,13 @@ public class DevisEmetteurController {
     @PreAuthorize("hasRole('SUPERADMIN')")
     public void activate(@PathVariable Long id) {
         service.activate(id);
+    }
+
+    /* ================= 🆕 RETIRER LE STATUT « PAR DÉFAUT » (SUPERADMIN) ================= */
+    @AuditLog(action = "DESACTIVATION_VALIDATEUR_DEVIS", target = "#id.toString()")
+    @PutMapping("/{id}/retirer-defaut")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public void deactivate(@PathVariable Long id) {
+        service.deactivate(id);
     }
 }
